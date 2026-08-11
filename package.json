@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://your-username.github.io/cricketvision",
+  "homepage": "https://Abhijithmohan10.github.io/cricketvision",
   "scripts": {
     "dev": "vite",
     "server": "node server.js",
