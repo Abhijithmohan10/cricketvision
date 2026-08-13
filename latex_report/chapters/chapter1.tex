@@ -1,0 +1,49 @@
+\chapter{Introduction}
+
+The modern professional cricket ecosystem relies heavily on data analytics, computer vision body tracking, and predictive simulation engines. Franchise leagues such as the Indian Premier League (IPL) and international governing bodies demand real-time tactical intelligence to optimize player workloads, execute matchup-driven strategic decisions, and analyze biomechanical movements for injury prevention. As the volume of data increases, relying on static spreadsheets or disconnected video player software can lead to fragmented insights and missed tactical opportunities.
+
+At present, teams commonly rely on a combination of basic sports portals, video software, spreadsheet logs, and manual notes to monitor player performance. Although these tools are useful for individual tasks such as checking historical scorecards, they do not provide a unified view of an athlete's physical fatigue, phase-specific performance metrics, and biomechanical posture. Performance records therefore become distributed across several tools, making it difficult to obtain a consolidated overview of current player form and workload.
+
+OfferTrail / CricketVision is proposed as an AI-powered cricket performance analytics and biomechanics platform designed to provide a centralized environment for sports intelligence. The system allows coaches, elite players, and performance analysts to securely authenticate themselves and manage squad rosters, phase-specific batting/bowling statistics (Powerplay, Middle, Death overs), 360-degree wagon wheel shot dispersion heatmaps, pose-estimation video analysis, and stochastic match simulations. The stored information can subsequently be accessed through the application's dashboard, providing a consolidated view of squad performance.
+
+The system is developed using modern web technologies and cloud/database services. The frontend is implemented using React, with React Router used for navigation and Tailwind CSS used for interface styling. Node.js and Express.js handle REST API services, while MongoDB and Mongoose ODM provide centralized storage for 100+ verified player records. The system is designed in a modular manner so that additional functionality can be incorporated as development progresses.
+
+The initial implementation concentrates on fundamental analytics functionality, including user registration and role-based authentication (Coach, Player, Analyst presets), protected access to dashboard portals, player database CRUD operations, and match simulation. The architecture also provides scope for extending the system with live WebSocket data streams, automated video keyframe extraction, and AI-driven match strategy assistants.
+
+\section{Scope}
+
+The scope of CricketVision is to provide a centralized digital environment for sports professionals to manage information related to player statistics, physical fatigue, and tactical strategies. The system focuses on reducing the need for maintaining player information across multiple independent tools and provides a structured method for recording and monitoring recruitment and match activities.
+
+The primary scope of the system includes secure user registration and role-based authentication. Each user is provided with an authenticated account (Head Coach, Elite Player, or Performance Analyst) through which personalized performance information can be maintained. Authentication allows data to be associated with appropriate roles, thereby separating user permissions.
+
+The squad and player management functionality forms the core of the system. Coaches can record and update information about player profiles, including batting style, bowling style, fatigue levels, clutch ratings, phase-wise statistics, and biomechanical summaries. Information is stored in MongoDB and associated with authenticated user accounts.
+
+The dashboard provides a centralized interface through which users can access the major functions of the system. As the system develops, the dashboard can be extended to provide a broader overview of squad progress, including fatigue alerts, upcoming match predictions, and phase-stage breakdown information.
+
+The architecture of CricketVision allows the scope of the system to be expanded beyond basic statistical tracking. Future development may include facilities for searching and filtering players, analyzing bowling action legality via pose estimation, generating automated match reports, and providing AI-assisted features such as match strategy recommendations and injury rehabilitation suggestions.
+
+The project is therefore intended not merely as a replacement for a static scorecard, but as a foundation for a comprehensive sports analytics platform. The current implementation establishes the core infrastructure required for such future extensions while keeping the initial system manageable within the scope of the mini project.
+
+\section{Relevance}
+
+The relevance of CricketVision arises from the increasingly fragmented nature of the modern sports analytics process. Teams interact with several data sources during a single season, while important tactical insights may be scattered across standalone tools. Managing this information manually can make it difficult for coaches to determine player workloads, identify phase weaknesses, and evaluate match-up dynamics.
+
+A centralized performance tracking system reduces this fragmentation by providing a single location for maintaining squad records. Instead of depending entirely on separate spreadsheets or manually searching through previous match videos, coaches and analysts can use the system to maintain structured information about their players.
+
+The system is also relevant from a software engineering perspective. CricketVision combines several commonly used concepts in modern web application development, including component-based frontend development, client-side routing, role-based authentication, document databases, protected resources, and modular system design. The project provides an opportunity to apply theoretical concepts from software engineering, database management, web development, and computer vision within a practical application.
+
+Another important aspect of the system is its potential for future integration with intelligent features. Match activities involve information that can be analyzed to provide useful insights to coaches. For example, player records could be used to generate win-probability curves, while pose estimation keypoints could be analyzed against ICC bowling action legality rules. Such features provide significant practical value in professional sports engineering.
+
+By combining a centralized player repository with a web-based interface and database services, CricketVision aims to improve the organization and accessibility of sports data while providing a foundation that can be extended as additional requirements are identified.
+
+\section{Organisation of the Report}
+
+This report is organized into four major chapters covering the introduction, system study, design, and implementation of the proposed system.
+
+\textbf{Chapter 1: Introduction} presents the background of the project and introduces CricketVision. It discusses the scope and relevance of the proposed system and establishes the motivation for developing a centralized sports analytics platform.
+
+\textbf{Chapter 2: System Study} analyses the existing approaches used for cricket performance tracking and identifies their limitations. It presents the proposed system and discusses the development methodology adopted for the project. The chapter also describes the software and hardware requirements of the system.
+
+\textbf{Chapter 3: Design} describes the design of CricketVision. It presents the system architecture, use case modeling, data flow diagrams, activity flows, database design, user interface design, and security design.
+
+\textbf{Chapter 4: Implementation} discusses the implementation of the proposed system using the selected technologies. It covers frontend implementation, authentication, dashboard portals, database integration, routing, and testing of implemented features.

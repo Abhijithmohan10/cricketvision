@@ -1,0 +1,160 @@
+\chapter{Implementation}
+
+The implementation phase converts the design of CricketVision into a functional web-based application. The system is implemented using a component-based frontend architecture, an Express.js backend REST API, and MongoDB database services. The implementation focuses on establishing core functionality for user authentication, protected navigation, dashboard access, squad roster management, match simulation, and biomechanics video analysis.
+
+The frontend is developed using React and Vite, with Tailwind CSS used for styling. Express.js REST APIs provide backend data operations, while MongoDB with Mongoose ODM is used for storing player records. React Router is used to manage navigation between different pages and restrict access to protected resources.
+
+\section{Development Environment}
+
+CricketVision is developed as a modern web application using a Node.js JavaScript environment. The project is organized into reusable components, pages, authentication context, and service modules.
+
+The major technologies used during implementation are:
+
+\begin{itemize}
+    \item \textbf{React:} Used to develop the component-based frontend.
+    \item \textbf{Vite:} Used as the frontend development and build tool.
+    \item \textbf{Tailwind CSS:} Used for styling the user interface.
+    \item \textbf{React Router:} Used for client-side routing.
+    \item \textbf{Node.js \& Express.js:} Used to build backend REST APIs.
+    \item \textbf{MongoDB \& Mongoose:} Used for persisting player documents.
+    \item \textbf{Git and GitHub:} Used for version control and source-code management.
+\end{itemize}
+
+\section{Frontend Implementation}
+
+The frontend of CricketVision is implemented using React. The application is divided into pages and reusable components to improve maintainability and separation of responsibilities.
+
+The major pages implemented in the system include:
+
+\begin{itemize}
+    \item Home / Landing Page
+    \item Login (\texttt{LoginView.jsx})
+    \item Squad Overview Dashboard (\texttt{DashboardView.jsx})
+    \item Player Analytics Portal (\texttt{PlayerAnalyticsView.jsx})
+    \item Player Personal Portal (\texttt{PlayerPortalView.jsx})
+    \item Match Simulator (\texttt{MatchSimulatorView.jsx})
+    \item Video Pose Analyzer (\texttt{VideoAnalyzerView.jsx})
+    \item Team XI Builder (\texttt{TeamBuilderView.jsx})
+\end{itemize}
+
+A simplified representation of the project structure is shown below:
+
+\begin{lstlisting}
+src/
+|
++-- components/
+|   +-- Navbar.jsx
+|   +-- DashboardView.jsx
+|   +-- PlayerAnalyticsView.jsx
+|   +-- PlayerPortalView.jsx
+|   +-- MatchSimulatorView.jsx
+|   +-- VideoAnalyzerView.jsx
+|   +-- PitchAndWagonWheel.jsx
+|   +-- DatabaseManagerModal.jsx
+|   +-- AICoachModal.jsx
+|
++-- context/
+|   +-- AuthContext.jsx
+|
++-- data/
+|   +-- cricketDatabase.js
+|
++-- App.jsx
++-- main.jsx
+\end{lstlisting}
+
+\section{Application Routing}
+
+React Router is used to provide navigation between different pages of CricketVision. Routes are defined for public pages as well as authenticated resources. The major routes are shown in Table 4.1.
+
+\begin{table}[H]
+\centering
+\caption{Application Routes}
+\label{tab:app_routes}
+\begin{tabular}{ll}
+\toprule
+\textbf{Route} & \textbf{Purpose} \\
+\midrule
+\texttt{/} & Public landing page and role selection \\
+\texttt{/login} & User login and preset persona selector \\
+\texttt{/dashboard} & Authenticated squad overview dashboard \\
+\texttt{/analytics} & Player analytics and Recharts radar charts \\
+\texttt{/simulator} & Stochastic match simulator engine \\
+\texttt{/video} & Pose-estimation biomechanics video analyzer \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Database / Backend Integration}
+
+Node.js and Express.js are integrated into CricketVision to provide RESTful backend API services connected to a local MongoDB instance. On server initialization, an auto-seeding script checks if player count is below 100 and populates 100+ verified player documents.
+
+\section{User Authentication}
+
+Role-based authentication is implemented to allow seamless switching between preset personas (\texttt{Rahul Dravid} - Coach, \texttt{Virat Kohli} - Player, \texttt{Alex Morgan} - Analyst) as well as registration of new accounts.
+
+\section{Protected Routes}
+
+Protected routes are implemented to restrict access to authenticated functionality. The route wrapper checks user session state before rendering protected dashboard components.
+
+\section{Dashboard Implementation}
+
+The dashboard provides the primary authenticated interface of CricketVision. It displays high-level squad metrics, player fatigue alerts, and quick actions for team builder XI optimization.
+
+\section{Application / Squad Management}
+
+Squad management represents central functionality in CricketVision. Coaches can view player profiles, update fatigue levels, and add new player entries with fields including:
+
+\begin{itemize}
+    \item Player Name
+    \item Country \& Playing Role
+    \item Batting \& Bowling Style
+    \item Fatigue Rating (0 to 100)
+    \item Clutch Rating
+\end{itemize}
+
+\section{Database Implementation}
+
+MongoDB persists player records. The database operations are encapsulated inside Express route controllers (\texttt{/api/players}, \texttt{/api/users/login}), preventing raw database calls inside React components.
+
+\section{Form Submission}
+
+Form submissions handle player additions and edits. React's \texttt{useState} hook maintains form inputs, which are submitted via HTTP POST/PUT requests to Express endpoints.
+
+\section{Error Handling}
+
+Asynchronous operations are handled using \texttt{async} and \texttt{await} with \texttt{try-catch} blocks. Errors are caught and presented as user-friendly alerts.
+
+\section{Security Implementation}
+
+Security is maintained through role permissions, schema validation, and password constraints, preventing unauthorized manipulation of player data.
+
+\section{Testing of Implemented Features}
+
+Testing was carried out to verify system functionality. The major test cases are shown in Table 4.2.
+
+\begin{table}[H]
+\centering
+\caption{Functional Test Cases}
+\label{tab:test_cases}
+\begin{tabular}{lll}
+\toprule
+\textbf{Test Case} & \textbf{Expected Result} & \textbf{Status} \\
+\midrule
+User registration & New account created successfully. & Pass \\
+Valid login & User authenticated and redirected to dashboard. & Pass \\
+Dashboard access & Authenticated user accesses squad metrics. & Pass \\
+Database Seeding & Auto-seeds 100+ players into MongoDB on launch. & Pass \\
+Match Simulation & Dynamic recalculation of win-probability curve. & Pass \\
+Pose Video Analyzer & Renders joint skeleton overlay and flex angles. & Pass \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Implementation Status}
+
+The current implementation establishes core infrastructure for CricketVision. User registration, authentication, dashboard portals, player analytics, match simulation, pose estimation, and database management have been implemented.
+
+\section{Summary}
+
+This chapter described the implementation of CricketVision. The frontend was built using React 18, Vite, and Tailwind CSS, while Express.js and MongoDB provided backend data persistence. The system provides a complete sports performance analytics solution ready for project evaluation.
