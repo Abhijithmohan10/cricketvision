@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Printer, Download, Sparkles, Award, ShieldCheck, Activity, CheckCircle2 } from 'lucide-react';
 import PlayerAvatar from './PlayerAvatar';
 
@@ -9,9 +10,9 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
     window.print();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+  const modalContent = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto print:static print:p-0 print:bg-white print:overflow-visible">
+      <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col print:border-none print:shadow-none print:my-0 print:max-h-none print:bg-white">
         
         {/* Modal Top Action Bar (Screen Only) */}
         <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between print:hidden">
@@ -162,8 +163,9 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
 
         </div>
 
-
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
