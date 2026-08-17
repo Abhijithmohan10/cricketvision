@@ -9,14 +9,13 @@ import {
   AlertTriangle, 
   Sparkles, 
   Activity, 
-  Eye, 
-  EyeOff, 
   Target, 
   Download,
-  FileVideo,
   Award,
   Zap,
-  UserCheck
+  UserCheck,
+  Cpu,
+  RefreshCw
 } from 'lucide-react';
 import { SAMPLE_VIDEOS } from '../data/sampleVideos';
 import { INITIAL_PLAYER_DATABASE } from '../data/cricketDatabase';
@@ -100,8 +99,13 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const [duration, setDuration] = useState(0);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   
-  // Batting Biomechanics Overlay Toggles
-  const [showSkeleton, setShowSkeleton] = useState(true);
+  // Interactive Analysis State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [scanStepText, setScanStepText] = useState('');
+
+  // Overlay Toggles (Skeleton stick figure completely removed)
   const [showBatTrack, setShowBatTrack] = useState(true);
   const [showAngles, setShowAngles] = useState(true);
   const [showStumps, setShowStumps] = useState(true);
@@ -124,10 +128,48 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
       setCustomVideoUrl(url);
       setCustomVideoName(file.name);
       setIsPlaying(false);
+      setHasAnalyzed(false); // Reset analysis state for new video
     }
   };
 
-  // Video Time Update & Batting Pose Overlay Renderer
+  // Trigger Interactive Video Analysis
+  const handleRunAnalysis = () => {
+    if (isAnalyzing) return;
+    
+    setIsAnalyzing(true);
+    setHasAnalyzed(false);
+    setAnalysisProgress(0);
+
+    // Auto-play video during analysis scan if video is loaded
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+
+    const steps = [
+      { pct: 15, msg: 'Initialising CV Neural Frame Processor...' },
+      { pct: 40, msg: 'Detecting Ball Trajectory & Velocity Vectors...' },
+      { pct: 70, msg: 'Measuring Downswing Bat Acceleration & Arc...' },
+      { pct: 90, msg: 'Calculating Head Balance & Shot Perfection Score...' },
+      { pct: 100, msg: 'Analysis Complete!' }
+    ];
+
+    let stepIdx = 0;
+    const interval = setInterval(() => {
+      if (stepIdx < steps.length) {
+        setAnalysisProgress(steps[stepIdx].pct);
+        setScanStepText(steps[stepIdx].msg);
+        stepIdx++;
+      } else {
+        clearInterval(interval);
+        setIsAnalyzing(false);
+        setHasAnalyzed(true);
+      }
+    }, 400);
+  };
+
+  // Video Time Update & Clean Canvas Overlay Renderer (NO Stick-Figure Skeleton)
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -146,7 +188,6 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
 
       // Playback progress factor (0 to 1)
       const progress = (video.currentTime || 0) / (video.duration || 1);
-      const cycle = Math.sin(progress * Math.PI * 2);
 
       // 1. Draw Stumps & Crease Box
       if (showStumps) {
@@ -159,7 +200,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.lineTo(creaseX, h * 0.90);
         ctx.stroke();
 
-        // Stumps (Behind Batter)
+        // Stumps
         const stumpX = w * 0.32;
         const stumpY = h * 0.45;
         const stumpH = h * 0.40;
@@ -171,14 +212,14 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.fillRect(stumpX - 10, stumpY - 3, 24, 3);
       }
 
-      // 2. Draw Bat Track & Ball Swing Arc
-      if (showBatTrack) {
+      // 2. Draw Ball Track & Impact (When Analyzed or Tracking Toggled)
+      if (showBatTrack && (hasAnalyzed || isAnalyzing)) {
         ctx.beginPath();
         ctx.strokeStyle = '#06b6d4'; // Cyan arc
         ctx.lineWidth = 3;
         ctx.setLineDash([5, 5]);
 
-        // Downswing trajectory from high backlift down to extra cover
+        // Downswing trajectory
         ctx.moveTo(w * 0.40, h * 0.28);
         ctx.quadraticCurveTo(w * 0.52, h * 0.65, w * 0.72, h * 0.78);
         ctx.stroke();
@@ -206,131 +247,56 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.fillText('SWEET SPOT IMPACT', ballX + 16, ballY + 4);
       }
 
-      // 3. Draw Realistic Cricket Batter Skeleton Pose
-      if (showSkeleton) {
-        // Batter Head (Positioned over front knee)
-        const headX = w * 0.50 + Math.sin(progress * 3) * 6;
-        const headY = h * 0.32;
-
-        // Shoulder joint
-        const shoulderL = { x: headX - 20, y: headY + 30 };
-        const shoulderR = { x: headX + 20, y: headY + 30 };
-
-        // Top Elbow & Wrist (High elbow backlift position)
-        const elbowTop = { x: headX - 35, y: headY + 20 - cycle * 8 };
-        const wristR = { x: headX + 10 + progress * 25, y: headY + 65 + cycle * 12 };
-
-        // Hips & Legs (Front foot stride forward)
-        const hipL = { x: headX - 12, y: headY + 100 };
-        const hipR = { x: headX + 12, y: headY + 100 };
-
-        const kneeFront = { x: headX + 35, y: headY + 155 }; // Flexed front knee
-        const ankleFront = { x: headX + 45, y: headY + 215 };
-
-        const kneeBack = { x: headX - 25, y: headY + 160 }; // Back leg
-        const ankleBack = { x: headX - 30, y: headY + 220 };
-
-        // Connect Pose Skeleton Lines
-        ctx.lineWidth = 4;
-
-        // Head (Pink circle with eye alignment line)
+      // 3. AI Scanning Beam Animation during Video Analysis
+      if (isAnalyzing) {
+        // Vertical Laser Scan Beam Line moving top to bottom
+        const scanY = h * ((Date.now() % 1500) / 1500);
         ctx.beginPath();
-        ctx.arc(headX, headY, 15, 0, Math.PI * 2);
-        ctx.strokeStyle = '#ec4899';
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#06b6d4';
+        ctx.shadowBlur = 15;
+        ctx.moveTo(0, scanY);
+        ctx.lineTo(w, scanY);
         ctx.stroke();
+        ctx.shadowBlur = 0; // Reset shadow
 
-        // Eye Alignment Vertical Plumb Line (Head over front foot)
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)';
+        // Scan Bounding Grid
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(w * 0.25, h * 0.2, w * 0.5, h * 0.65);
+
+        // Scanning Target Badge
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.9)';
+        ctx.font = 'bold 12px monospace';
+        ctx.fillText(`SCANNING VIDEO FRAMES (${analysisProgress}%)`, w * 0.30, scanY - 8);
+      }
+
+      // 4. Revealed Computer Vision HUD Callouts (After Analysis is Completed)
+      if (hasAnalyzed && showAngles) {
+        const boxX = w - 210;
+        const boxY = 15;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.90)';
+        ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]);
-        ctx.moveTo(headX, headY);
-        ctx.lineTo(headX, ankleFront.y);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Spine & Shoulders
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = '#06b6d4'; // Cyan torso
         ctx.beginPath();
-        ctx.moveTo(shoulderL.x, shoulderL.y);
-        ctx.lineTo(shoulderR.x, shoulderR.y);
-        ctx.lineTo(hipR.x, hipR.y);
-        ctx.lineTo(hipL.x, hipL.y);
-        ctx.closePath();
+        ctx.roundRect ? ctx.roundRect(boxX, boxY, 195, 82, 8) : ctx.rect(boxX, boxY, 195, 82);
+        ctx.fill();
         ctx.stroke();
 
-        // Top Arm (High Elbow)
-        ctx.beginPath();
-        ctx.strokeStyle = '#f59e0b'; // Amber arm
-        ctx.moveTo(shoulderR.x, shoulderR.y);
-        ctx.lineTo(elbowTop.x, elbowTop.y);
-        ctx.lineTo(wristR.x, wristR.y);
-        ctx.stroke();
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('CV AI VIDEO ANALYSIS COMPLETE', boxX + 10, boxY + 18);
 
-        // CRICKET BAT VECTOR BLADE
-        const batTipX = wristR.x + 35 + progress * 40;
-        const batTipY = wristR.y + 45 + progress * 20;
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(`⚡ BALL SPEED: ${currentShotPreset.ballSpeed}`, boxX + 10, boxY + 36);
 
-        ctx.beginPath();
-        ctx.strokeStyle = '#eab308'; // Golden Bat
-        ctx.lineWidth = 7;
-        ctx.moveTo(wristR.x, wristR.y);
-        ctx.lineTo(batTipX, batTipY);
-        ctx.stroke();
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillText(`🏏 BAT SPEED:  ${currentShotPreset.batSpeed}`, boxX + 10, boxY + 52);
 
-        // Bat Face Label
-        ctx.fillStyle = '#fef08a';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.fillText('CRICKET BAT', wristR.x + 10, wristR.y + 20);
-
-        // Legs (Front knee & back leg)
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.strokeStyle = '#10b981'; // Emerald legs
-        // Back leg
-        ctx.moveTo(hipL.x, hipL.y);
-        ctx.lineTo(kneeBack.x, kneeBack.y);
-        ctx.lineTo(ankleBack.x, ankleBack.y);
-        // Front Stride leg
-        ctx.moveTo(hipR.x, hipR.y);
-        ctx.lineTo(kneeFront.x, kneeFront.y);
-        ctx.lineTo(ankleFront.x, ankleFront.y);
-        ctx.stroke();
-
-        // 4. Angle Measurement Annotations & Real-Time Computer Vision Callouts
-        if (showAngles) {
-          ctx.fillStyle = '#ffffff';
-          ctx.font = '11px Outfit, sans-serif';
-          ctx.fillText(`Top Elbow: ${currentShotPreset.elbowAngle}`, elbowTop.x - 65, elbowTop.y);
-          ctx.fillText(`Front Knee Flex: 132°`, kneeFront.x + 10, kneeFront.y);
-          ctx.fillText(`Head Alignment: OK`, headX - 45, headY - 20);
-
-          // HUD Metrics Badge Overlay top-right of canvas
-          const boxX = w - 195;
-          const boxY = 15;
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-          ctx.strokeStyle = '#06b6d4';
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.roundRect ? ctx.roundRect(boxX, boxY, 180, 80, 8) : ctx.rect(boxX, boxY, 180, 80);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = '#38bdf8';
-          ctx.font = 'bold 10px monospace';
-          ctx.fillText('CV REAL-TIME ANALYSIS', boxX + 10, boxY + 18);
-
-          ctx.fillStyle = '#f59e0b';
-          ctx.font = '11px sans-serif';
-          ctx.fillText(`⚡ BALL SPEED: ${currentShotPreset.ballSpeed}`, boxX + 10, boxY + 36);
-
-          ctx.fillStyle = '#06b6d4';
-          ctx.fillText(`🏏 BAT SPEED:  ${currentShotPreset.batSpeed}`, boxX + 10, boxY + 52);
-
-          ctx.fillStyle = '#10b981';
-          ctx.fillText(`🎯 PERFECTION: ${currentShotPreset.shotPerfection}`, boxX + 10, boxY + 68);
-        }
+        ctx.fillStyle = '#10b981';
+        ctx.fillText(`🎯 PERFECTION: ${currentShotPreset.shotPerfection}`, boxX + 10, boxY + 68);
       }
     };
 
@@ -342,7 +308,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
     loop();
 
     return () => cancelAnimationFrame(animId);
-  }, [showSkeleton, showBatTrack, showAngles, showStumps, selectedShotType, currentShotPreset]);
+  }, [showBatTrack, showAngles, showStumps, selectedShotType, currentShotPreset, isAnalyzing, hasAnalyzed, analysisProgress]);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -364,6 +330,11 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   };
 
   const handleSaveReport = () => {
+    if (!hasAnalyzed) {
+      alert("Please run 'Analyze Video' first to calculate ball speed, bat speed, and shot perfection score!");
+      return;
+    }
+
     const reportData = {
       player: selectedPlayer,
       title: (customVideoName || selectedSample.title) + ` (${currentShotPreset.name})`,
@@ -404,7 +375,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
             </h1>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Calculates <strong>Ball Speed</strong>, <strong>Bat Speed</strong>, and <strong>Shot Perfection Score</strong> in real-time.
+            Click <strong>"Analyze Video"</strong> to extract Ball Speed, Bat Speed, and Shot Perfection Score using computer vision.
           </p>
         </div>
 
@@ -415,7 +386,10 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
             <UserCheck className="w-4 h-4 text-cyan-400 ml-1.5" />
             <select
               value={selectedPlayerId}
-              onChange={(e) => setSelectedPlayerId(e.target.value)}
+              onChange={(e) => {
+                setSelectedPlayerId(e.target.value);
+                setHasAnalyzed(false); // Reset analysis state for new player selection
+              }}
               className="bg-slate-950 text-white text-xs font-bold py-1 px-2 rounded-lg border border-slate-800 focus:outline-none focus:border-cyan-500"
             >
               {activePlayersList.map(p => (
@@ -433,10 +407,33 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs hover:opacity-95 transition-all shadow-lg shadow-cyan-500/20"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-200 font-bold text-xs transition-all"
           >
             <Upload className="w-4 h-4" />
-            <span>Upload Batting Video File</span>
+            <span>Upload Custom Video File</span>
+          </button>
+
+          {/* PRIMARY "ANALYZE VIDEO" BUTTON IN HEADER */}
+          <button
+            onClick={handleRunAnalysis}
+            disabled={isAnalyzing}
+            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all shadow-lg ${
+              isAnalyzing
+                ? 'bg-amber-500 text-slate-950 animate-pulse cursor-not-allowed'
+                : 'bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 text-slate-950 hover:opacity-95 shadow-cyan-500/25 scale-105'
+            }`}
+          >
+            {isAnalyzing ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Analyzing Video ({analysisProgress}%)...</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4 fill-slate-950" />
+                <span>ANALYZE VIDEO</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -451,7 +448,10 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
           {BATTING_SHOT_PRESETS.map((shot) => (
             <button
               key={shot.id}
-              onClick={() => setSelectedShotType(shot.id)}
+              onClick={() => {
+                setSelectedShotType(shot.id);
+                setHasAnalyzed(false); // Reset analysis state on preset change
+              }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                 selectedShotType === shot.id
                   ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md'
@@ -484,7 +484,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
                 loop
               />
 
-              {/* Canvas Overlay for Batting Pose Keypoints & Bat Vector */}
+              {/* Canvas Overlay for Computer Vision Scanning & Trajectory */}
               <canvas
                 ref={canvasRef}
                 className="analyzer-canvas"
@@ -501,6 +501,22 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
                   {customVideoName ? customVideoName : selectedSample.title}
                 </span>
               </div>
+
+              {/* Overlaid Scanning Progress Indicator */}
+              {isAnalyzing && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-2xl border border-cyan-500/50 flex flex-col items-center space-y-2 bg-slate-950/90 shadow-2xl animate-in fade-in">
+                  <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs font-mono-code">
+                    <Cpu className="w-4 h-4 animate-pulse text-cyan-400" />
+                    <span>{scanStepText}</span>
+                  </div>
+                  <div className="w-64 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 transition-all duration-300"
+                      style={{ width: `${analysisProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Video Control Bar */}
@@ -565,35 +581,33 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
                   </div>
                 </div>
 
-                {/* Batting Overlay Layer Toggles */}
-                <div className="flex items-center space-x-2 text-xs">
+                {/* SECONDARY "ANALYZE VIDEO" BUTTON IN CONTROL BAR */}
+                <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setShowSkeleton(!showSkeleton)}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all ${
-                      showSkeleton
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                        : 'bg-slate-950 text-slate-500 border-slate-800'
-                    }`}
+                    onClick={handleRunAnalysis}
+                    disabled={isAnalyzing}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 text-slate-950 font-black text-xs hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-cyan-500/20"
                   >
-                    {showSkeleton ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    <span>Skeleton</span>
+                    <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                    <span>{hasAnalyzed ? 'Re-Analyze Video' : 'Analyze Video'}</span>
                   </button>
 
+                  {/* Overlay Toggles */}
                   <button
                     onClick={() => setShowBatTrack(!showBatTrack)}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all ${
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs ${
                       showBatTrack
                         ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
                         : 'bg-slate-950 text-slate-500 border-slate-800'
                     }`}
                   >
                     <Target className="w-3.5 h-3.5" />
-                    <span>Swing Arc</span>
+                    <span>Ball Path Line</span>
                   </button>
 
                   <button
                     onClick={() => setShowAngles(!showAngles)}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all ${
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs ${
                       showAngles
                         ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
                         : 'bg-slate-950 text-slate-500 border-slate-800'
@@ -623,6 +637,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
                     setSelectedSample(sample);
                     setCustomVideoUrl(null);
                     setCustomVideoName(null);
+                    setHasAnalyzed(false); // Reset analysis state on sample change
                   }}
                   className={`p-3 rounded-xl cursor-pointer transition-all border ${
                     selectedSample.id === sample.id && !customVideoUrl
@@ -649,107 +664,163 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-5 h-5 text-cyan-400" />
                 <div>
-                  <h3 className="text-base font-extrabold font-heading text-white">Video Analysis Metrics</h3>
+                  <h3 className="text-base font-extrabold font-heading text-white">AI Biomechanics Diagnosis</h3>
                   <p className="text-[11px] text-slate-400">Target Player: <span className="text-cyan-400 font-bold">{selectedPlayer.name}</span></p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded">
-                LIVE CV METRICS
-              </span>
+
+              {/* Status Badge */}
+              {hasAnalyzed ? (
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded">
+                  ANALYSIS COMPLETE
+                </span>
+              ) : isAnalyzing ? (
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded animate-pulse">
+                  SCANNING FRAMES...
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 rounded">
+                  READY TO ANALYZE
+                </span>
+              )}
             </div>
 
-            {/* 3 PRIMARY REQUIRED METRICS SCORECARDS */}
-            <div className="space-y-3">
-              
-              {/* 1. BALL SPEED CARD */}
-              <div className="p-3.5 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between shadow-lg shadow-amber-500/5">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    <Zap className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-mono-code text-slate-400 tracking-wider">1. Ball Speed</p>
-                    <p className="text-xl font-black font-heading text-amber-400 mt-0.5">
-                      {currentShotPreset.ballSpeed}
-                    </p>
-                  </div>
+            {/* BEFORE ANALYSIS STATE PROMPT */}
+            {!hasAnalyzed && !isAnalyzing && (
+              <div className="p-5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
+                  <Zap className="w-6 h-6" />
                 </div>
-                <span className="text-[10px] font-bold font-mono-code px-2 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded">
-                  PITCH SPEED
-                </span>
-              </div>
-
-              {/* 2. BAT SPEED CARD */}
-              <div className="p-3.5 rounded-xl bg-slate-900 border border-cyan-500/30 flex items-center justify-between shadow-lg shadow-cyan-500/5">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                    <Activity className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-mono-code text-slate-400 tracking-wider">2. Bat Speed</p>
-                    <p className="text-xl font-black font-heading text-cyan-400 mt-0.5">
-                      {currentShotPreset.batSpeed}
-                    </p>
-                  </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-white">Video Analysis Pending</h4>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Click the <strong>"Analyze Video"</strong> button to process video frames and calculate Ball Speed, Bat Speed, and Shot Perfection Score.
+                  </p>
                 </div>
-                <span className="text-[10px] font-bold font-mono-code px-2 py-1 bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 rounded">
-                  DOWNSWIGN ARC
-                </span>
+                <button
+                  onClick={handleRunAnalysis}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 text-slate-950 font-black text-xs hover:opacity-95 transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2"
+                >
+                  <Zap className="w-4 h-4 fill-slate-950" />
+                  <span>ANALYZE VIDEO NOW</span>
+                </button>
               </div>
+            )}
 
-              {/* 3. SHOT PERFECTION SCORE CARD */}
-              <div className="p-3.5 rounded-xl bg-slate-900 border border-emerald-500/30 flex items-center justify-between shadow-lg shadow-emerald-500/5">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <Award className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-mono-code text-slate-400 tracking-wider">3. Shot Perfection</p>
-                    <p className="text-xl font-black font-heading text-emerald-400 mt-0.5">
-                      {currentShotPreset.shotPerfection} <span className="text-xs text-slate-400 font-normal">({currentShotPreset.balanceScore})</span>
-                    </p>
-                  </div>
+            {/* SCANNING STATE ANIMATION CARD */}
+            {isAnalyzing && (
+              <div className="p-6 rounded-xl bg-slate-900 border border-cyan-500/40 text-center space-y-4">
+                <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
+                <div>
+                  <p className="text-sm font-extrabold text-white">Extracting Computer Vision Keypoints...</p>
+                  <p className="text-xs text-cyan-400 font-mono-code mt-1">{scanStepText}</p>
                 </div>
-                <span className="text-[10px] font-bold font-mono-code px-2 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 rounded">
-                  ELITE EXECUTION
-                </span>
+                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                  <div className="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full transition-all duration-300" style={{ width: `${analysisProgress}%` }} />
+                </div>
               </div>
+            )}
 
-            </div>
+            {/* 3 PRIMARY METRICS SCORECARDS (REVEALED UPON ANALYSIS) */}
+            {hasAnalyzed && (
+              <div className="space-y-3 animate-in fade-in">
+                
+                {/* 1. BALL SPEED CARD */}
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between shadow-lg shadow-amber-500/5">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-mono-code text-slate-400 tracking-wider">1. Ball Speed</p>
+                      <p className="text-xl font-black font-heading text-amber-400 mt-0.5">
+                        {currentShotPreset.ballSpeed}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold font-mono-code px-2 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded">
+                    PITCH SPEED
+                  </span>
+                </div>
+
+                {/* 2. BAT SPEED CARD */}
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-cyan-500/30 flex items-center justify-between shadow-lg shadow-cyan-500/5">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-mono-code text-slate-400 tracking-wider">2. Bat Speed</p>
+                      <p className="text-xl font-black font-heading text-cyan-400 mt-0.5">
+                        {currentShotPreset.batSpeed}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold font-mono-code px-2 py-1 bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 rounded">
+                    DOWNSWING ARC
+                  </span>
+                </div>
+
+                {/* 3. SHOT PERFECTION SCORE CARD */}
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-emerald-500/30 flex items-center justify-between shadow-lg shadow-emerald-500/5">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-mono-code text-slate-400 tracking-wider">3. Shot Perfection</p>
+                      <p className="text-xl font-black font-heading text-emerald-400 mt-0.5">
+                        {currentShotPreset.shotPerfection} <span className="text-xs text-slate-400 font-normal">({currentShotPreset.balanceScore})</span>
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold font-mono-code px-2 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 rounded">
+                    ELITE EXECUTION
+                  </span>
+                </div>
+
+              </div>
+            )}
 
             {/* Secondary Angles & Balance */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase font-mono-code">Top Elbow Angle</span>
-                <p className="font-bold text-slate-200 mt-0.5">{currentShotPreset.elbowAngle}</p>
+            {hasAnalyzed && (
+              <div className="grid grid-cols-2 gap-3 text-xs animate-in fade-in">
+                <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 uppercase font-mono-code">Top Elbow Angle</span>
+                  <p className="font-bold text-slate-200 mt-0.5">{currentShotPreset.elbowAngle}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <span className="text-[10px] text-slate-400 uppercase font-mono-code">Downswing Arc</span>
+                  <p className="font-semibold text-slate-300 truncate mt-0.5">{currentShotPreset.downswingArc}</p>
+                </div>
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase font-mono-code">Downswing Arc</span>
-                <p className="font-semibold text-slate-300 truncate mt-0.5">{currentShotPreset.downswingArc}</p>
-              </div>
-            </div>
+            )}
 
             {/* Technique Flaw Detection */}
-            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
-              <div className="flex items-center space-x-2 text-amber-400 font-bold text-xs">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Technique Diagnosis</span>
+            {hasAnalyzed && (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1 animate-in fade-in">
+                <div className="flex items-center space-x-2 text-amber-400 font-bold text-xs">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Technique Diagnosis</span>
+                </div>
+                <p className="text-xs text-slate-200 leading-relaxed">
+                  {currentShotPreset.flaw}
+                </p>
               </div>
-              <p className="text-xs text-slate-200 leading-relaxed">
-                {currentShotPreset.flaw}
-              </p>
-            </div>
+            )}
 
             {/* Recommended Batting Drill */}
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
-              <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
-                <CheckCircle className="w-4 h-4" />
-                <span>Recommended Batting Drill</span>
+            {hasAnalyzed && (
+              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1 animate-in fade-in">
+                <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Recommended Batting Drill</span>
+                </div>
+                <p className="text-xs text-slate-200 leading-relaxed">
+                  {currentShotPreset.drill}
+                </p>
               </div>
-              <p className="text-xs text-slate-200 leading-relaxed">
-                {currentShotPreset.drill}
-              </p>
-            </div>
+            )}
 
             {saveSuccessMsg && (
               <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-xs font-bold text-emerald-300 text-center animate-in fade-in">
@@ -758,13 +829,15 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
             )}
 
             {/* Save Report Action */}
-            <button
-              onClick={handleSaveReport}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs hover:opacity-95 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-cyan-500/20"
-            >
-              <Download className="w-4 h-4" />
-              <span>Save Analysis Report to {selectedPlayer.name}'s Profile</span>
-            </button>
+            {hasAnalyzed && (
+              <button
+                onClick={handleSaveReport}
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs hover:opacity-95 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-cyan-500/20 animate-in fade-in"
+              >
+                <Download className="w-4 h-4" />
+                <span>Save Analysis Report to {selectedPlayer.name}'s Profile</span>
+              </button>
+            )}
 
           </div>
 
