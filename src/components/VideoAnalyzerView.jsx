@@ -105,10 +105,9 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [scanStepText, setScanStepText] = useState('');
 
-  // Overlay Toggles (Skeleton stick figure completely removed)
+  // Overlay Toggles (Skeleton stick figure & stumps completely removed)
   const [showBatTrack, setShowBatTrack] = useState(true);
   const [showAngles, setShowAngles] = useState(true);
-  const [showStumps, setShowStumps] = useState(true);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -189,28 +188,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
       // Playback progress factor (0 to 1)
       const progress = (video.currentTime || 0) / (video.duration || 1);
 
-      // 1. Draw Stumps & Crease Box
-      if (showStumps) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.lineWidth = 2;
-        // Crease line
-        const creaseX = w * 0.42;
-        ctx.beginPath();
-        ctx.moveTo(creaseX, h * 0.35);
-        ctx.lineTo(creaseX, h * 0.90);
-        ctx.stroke();
 
-        // Stumps
-        const stumpX = w * 0.32;
-        const stumpY = h * 0.45;
-        const stumpH = h * 0.40;
-        ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(stumpX - 8, stumpY, 4, stumpH);
-        ctx.fillRect(stumpX, stumpY, 4, stumpH);
-        ctx.fillRect(stumpX + 8, stumpY, 4, stumpH);
-        // Bails
-        ctx.fillRect(stumpX - 10, stumpY - 3, 24, 3);
-      }
 
       // 2. Draw Ball Track & Impact (When Analyzed or Tracking Toggled)
       if (showBatTrack && (hasAnalyzed || isAnalyzing)) {
@@ -308,7 +286,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
     loop();
 
     return () => cancelAnimationFrame(animId);
-  }, [showBatTrack, showAngles, showStumps, selectedShotType, currentShotPreset, isAnalyzing, hasAnalyzed, analysisProgress]);
+  }, [showBatTrack, showAngles, selectedShotType, currentShotPreset, isAnalyzing, hasAnalyzed, analysisProgress]);
 
   const togglePlay = () => {
     if (videoRef.current) {
