@@ -15,9 +15,10 @@ import {
   Zap,
   UserCheck,
   Cpu,
-  RefreshCw
+  RefreshCw,
+  FileVideo,
+  Plus
 } from 'lucide-react';
-import { SAMPLE_VIDEOS } from '../data/sampleVideos';
 import { INITIAL_PLAYER_DATABASE } from '../data/cricketDatabase';
 import PlayerAvatar from './PlayerAvatar';
 
@@ -89,7 +90,6 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const activePlayersList = Array.isArray(players) && players.length > 0 ? players : INITIAL_PLAYER_DATABASE;
   const [selectedPlayerId, setSelectedPlayerId] = useState(activePlayersList[0]?.id || 'virat-kohli');
 
-  const [selectedSample, setSelectedSample] = useState(SAMPLE_VIDEOS[0]);
   const [customVideoUrl, setCustomVideoUrl] = useState(null);
   const [customVideoName, setCustomVideoName] = useState(null);
   const [selectedShotType, setSelectedShotType] = useState('cover_drive');
@@ -105,7 +105,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [scanStepText, setScanStepText] = useState('');
 
-  // Overlay Toggles (Skeleton stick figure & stumps completely removed)
+  // Overlay Toggles
   const [showBatTrack, setShowBatTrack] = useState(true);
   const [showAngles, setShowAngles] = useState(true);
 
@@ -113,13 +113,11 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const activeVideoUrl = customVideoUrl || selectedSample.videoUrl;
-
   // Active Shot Preset & Selected Player
   const currentShotPreset = BATTING_SHOT_PRESETS.find(s => s.id === selectedShotType) || BATTING_SHOT_PRESETS[0];
   const selectedPlayer = activePlayersList.find(p => p.id === selectedPlayerId) || activePlayersList[0];
 
-  // Handle Batting Video Upload
+  // Handle Custom Video Upload
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -127,19 +125,24 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
       setCustomVideoUrl(url);
       setCustomVideoName(file.name);
       setIsPlaying(false);
-      setHasAnalyzed(false); // Reset analysis state for new video
+      setHasAnalyzed(false); // Reset analysis state for new custom video
     }
   };
 
   // Trigger Interactive Video Analysis
   const handleRunAnalysis = () => {
+    if (!customVideoUrl) {
+      fileInputRef.current?.click();
+      return;
+    }
+
     if (isAnalyzing) return;
     
     setIsAnalyzing(true);
     setHasAnalyzed(false);
     setAnalysisProgress(0);
 
-    // Auto-play video during analysis scan if video is loaded
+    // Auto-play video during analysis scan
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play();
@@ -168,11 +171,11 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
     }, 400);
   };
 
-  // Video Time Update & Clean Canvas Overlay Renderer (NO Stick-Figure Skeleton)
+  // Video Time Update & Clean Canvas Overlay Renderer
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+    if (!video || !canvas || !customVideoUrl) return;
 
     const ctx = canvas.getContext('2d');
 
@@ -188,9 +191,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
       // Playback progress factor (0 to 1)
       const progress = (video.currentTime || 0) / (video.duration || 1);
 
-
-
-      // 2. Draw Ball Track & Impact (When Analyzed or Tracking Toggled)
+      // 1. Draw Ball Track & Impact (When Analyzed or Tracking Toggled)
       if (showBatTrack && (hasAnalyzed || isAnalyzing)) {
         ctx.beginPath();
         ctx.strokeStyle = '#06b6d4'; // Cyan arc
@@ -225,9 +226,8 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.fillText('SWEET SPOT IMPACT', ballX + 16, ballY + 4);
       }
 
-      // 3. AI Scanning Beam Animation during Video Analysis
+      // 2. AI Scanning Beam Animation during Video Analysis
       if (isAnalyzing) {
-        // Vertical Laser Scan Beam Line moving top to bottom
         const scanY = h * ((Date.now() % 1500) / 1500);
         ctx.beginPath();
         ctx.strokeStyle = '#06b6d4';
@@ -250,7 +250,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.fillText(`SCANNING VIDEO FRAMES (${analysisProgress}%)`, w * 0.30, scanY - 8);
       }
 
-      // 4. Revealed Computer Vision HUD Callouts (After Analysis is Completed)
+      // 3. Revealed Computer Vision HUD Callouts (After Analysis is Completed)
       if (hasAnalyzed && showAngles) {
         const boxX = w - 210;
         const boxY = 15;
@@ -286,7 +286,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
     loop();
 
     return () => cancelAnimationFrame(animId);
-  }, [showBatTrack, showAngles, selectedShotType, currentShotPreset, isAnalyzing, hasAnalyzed, analysisProgress]);
+  }, [showBatTrack, showAngles, selectedShotType, currentShotPreset, isAnalyzing, hasAnalyzed, analysisProgress, customVideoUrl]);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -315,7 +315,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
 
     const reportData = {
       player: selectedPlayer,
-      title: (customVideoName || selectedSample.title) + ` (${currentShotPreset.name})`,
+      title: (customVideoName || 'Custom Video Analysis') + ` (${currentShotPreset.name})`,
       date: new Date().toLocaleDateString(),
       metrics: {
         ballSpeed: currentShotPreset.ballSpeed,
@@ -349,11 +349,11 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
               🏏 CRICKET COMPUTER VISION
             </span>
             <h1 className="text-2xl font-extrabold font-heading text-white">
-              Video Biomechanics & Shot Speed Analyzer
+              Custom Video Biomechanics & Speed Analyzer
             </h1>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Click <strong>"Analyze Video"</strong> to extract Ball Speed, Bat Speed, and Shot Perfection Score using computer vision.
+            Upload any cricket video file to calculate <strong>Ball Speed</strong>, <strong>Bat Speed</strong>, and <strong>Shot Perfection Score</strong>.
           </p>
         </div>
 
@@ -368,7 +368,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
                 setSelectedPlayerId(e.target.value);
                 setHasAnalyzed(false); // Reset analysis state for new player selection
               }}
-              className="bg-slate-950 text-white text-xs font-bold py-1 px-2 rounded-lg border border-slate-800 focus:outline-none focus:border-cyan-500"
+              className="bg-slate-950 text-white text-xs font-bold py-1 px-2 rounded-lg border border-slate-800 focus:outline-none focus:border-cyan-500 cursor-pointer"
             >
               {activePlayersList.map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.role})</option>
@@ -385,34 +385,36 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-200 font-bold text-xs transition-all"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs hover:opacity-95 transition-all shadow-lg shadow-cyan-500/20"
           >
             <Upload className="w-4 h-4" />
             <span>Upload Custom Video File</span>
           </button>
 
           {/* PRIMARY "ANALYZE VIDEO" BUTTON IN HEADER */}
-          <button
-            onClick={handleRunAnalysis}
-            disabled={isAnalyzing}
-            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all shadow-lg ${
-              isAnalyzing
-                ? 'bg-amber-500 text-slate-950 animate-pulse cursor-not-allowed'
-                : 'bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 text-slate-950 hover:opacity-95 shadow-cyan-500/25 scale-105'
-            }`}
-          >
-            {isAnalyzing ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Analyzing Video ({analysisProgress}%)...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4 fill-slate-950" />
-                <span>ANALYZE VIDEO</span>
-              </>
-            )}
-          </button>
+          {customVideoUrl && (
+            <button
+              onClick={handleRunAnalysis}
+              disabled={isAnalyzing}
+              className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-black text-xs transition-all shadow-lg ${
+                isAnalyzing
+                  ? 'bg-amber-500 text-slate-950 animate-pulse cursor-not-allowed'
+                  : 'bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 text-slate-950 hover:opacity-95 shadow-cyan-500/25 scale-105'
+              }`}
+            >
+              {isAnalyzing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Analyzing Video ({analysisProgress}%)...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 fill-slate-950" />
+                  <span>{hasAnalyzed ? 'RE-ANALYZE VIDEO' : 'ANALYZE VIDEO'}</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -442,192 +444,193 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         </div>
       </div>
 
-      {/* Main Grid: Video Player + Analytics Sidebar */}
+      {/* Main Grid: Custom Video Player + Analytics Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left 2 Cols: Video Player & Overlay Controls */}
+        {/* Left 2 Cols: Custom Video Player & Controls */}
         <div className="lg:col-span-2 space-y-4">
           
-          {/* Video Container with HTML5 Canvas Overlay */}
           <div className="glass-panel rounded-2xl overflow-hidden border border-slate-800 relative bg-slate-950">
             
-            <div className="relative aspect-video w-full flex items-center justify-center bg-black">
-              <video
-                ref={videoRef}
-                src={activeVideoUrl}
-                onTimeUpdate={() => videoRef.current && setCurrentTime(videoRef.current.currentTime)}
-                onLoadedMetadata={() => videoRef.current && setDuration(videoRef.current.duration)}
-                className="w-full h-full object-contain"
-                playsInline
-                loop
-              />
+            {customVideoUrl ? (
+              <div className="relative aspect-video w-full flex items-center justify-center bg-black">
+                <video
+                  ref={videoRef}
+                  src={customVideoUrl}
+                  onTimeUpdate={() => videoRef.current && setCurrentTime(videoRef.current.currentTime)}
+                  onLoadedMetadata={() => videoRef.current && setDuration(videoRef.current.duration)}
+                  className="w-full h-full object-contain"
+                  playsInline
+                  loop
+                />
 
-              {/* Canvas Overlay for Computer Vision Scanning & Trajectory */}
-              <canvas
-                ref={canvasRef}
-                className="analyzer-canvas"
-              />
+                {/* Canvas Overlay for Computer Vision Scanning & Trajectory */}
+                <canvas
+                  ref={canvasRef}
+                  className="analyzer-canvas"
+                />
 
-              {/* Active File / Shot Badge */}
-              <div className="absolute top-4 left-4 glass-panel px-3 py-1.5 rounded-lg border border-slate-800 text-xs flex items-center space-x-2">
-                <PlayerAvatar player={selectedPlayer} className="w-6 h-6" rounded="rounded-full" />
-                <span className="font-semibold text-white">
-                  {selectedPlayer.name}
-                </span>
-                <span className="text-slate-400">•</span>
-                <span className="text-cyan-400 font-mono-code">
-                  {customVideoName ? customVideoName : selectedSample.title}
-                </span>
-              </div>
-
-              {/* Overlaid Scanning Progress Indicator */}
-              {isAnalyzing && (
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-2xl border border-cyan-500/50 flex flex-col items-center space-y-2 bg-slate-950/90 shadow-2xl animate-in fade-in">
-                  <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs font-mono-code">
-                    <Cpu className="w-4 h-4 animate-pulse text-cyan-400" />
-                    <span>{scanStepText}</span>
-                  </div>
-                  <div className="w-64 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                    <div
-                      className="h-full bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 transition-all duration-300"
-                      style={{ width: `${analysisProgress}%` }}
-                    />
-                  </div>
+                {/* Active File / Shot Badge */}
+                <div className="absolute top-4 left-4 glass-panel px-3 py-1.5 rounded-lg border border-slate-800 text-xs flex items-center space-x-2">
+                  <PlayerAvatar player={selectedPlayer} className="w-6 h-6" rounded="rounded-full" />
+                  <span className="font-semibold text-white">
+                    {selectedPlayer.name}
+                  </span>
+                  <span className="text-slate-400">•</span>
+                  <span className="text-cyan-400 font-mono-code flex items-center space-x-1">
+                    <FileVideo className="w-3.5 h-3.5 inline mr-1" />
+                    <span>{customVideoName}</span>
+                  </span>
                 </div>
-              )}
-            </div>
+
+                {/* Overlaid Scanning Progress Indicator */}
+                {isAnalyzing && (
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-2xl border border-cyan-500/50 flex flex-col items-center space-y-2 bg-slate-950/90 shadow-2xl animate-in fade-in">
+                    <div className="flex items-center space-x-2 text-cyan-400 font-bold text-xs font-mono-code">
+                      <Cpu className="w-4 h-4 animate-pulse text-cyan-400" />
+                      <span>{scanStepText}</span>
+                    </div>
+                    <div className="w-64 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 transition-all duration-300"
+                        style={{ width: `${analysisProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* CUSTOM VIDEO UPLOAD DROPZONE WHEN NO VIDEO IS LOADED */
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="aspect-video w-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-slate-800 hover:border-cyan-500/50 bg-slate-950/60 hover:bg-slate-900/60 cursor-pointer transition-all space-y-4 group"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/10">
+                  <Upload className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-extrabold font-heading text-white group-hover:text-cyan-400 transition-colors">
+                    Upload Custom Cricket Video File
+                  </h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    Select any batting or bowling clip (.mp4, .webm, .mov) from your device to perform AI Computer Vision analysis.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 flex items-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Choose Video File</span>
+                </button>
+              </div>
+            )}
 
             {/* Video Control Bar */}
-            <div className="p-4 bg-slate-900/90 border-t border-slate-800 space-y-3">
-              
-              {/* Scrubbing Slider */}
-              <div className="flex items-center space-x-3">
-                <span className="text-[11px] font-mono-code text-slate-400">
-                  {currentTime.toFixed(1)}s
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max={duration || 10}
-                  step="0.05"
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                />
-                <span className="text-[11px] font-mono-code text-slate-400">
-                  {(duration || 0).toFixed(1)}s
-                </span>
-              </div>
-
-              {/* Playback Actions & Toggles */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            {customVideoUrl && (
+              <div className="p-4 bg-slate-900/90 border-t border-slate-800 space-y-3">
                 
-                {/* Play/Pause & Speed */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={togglePlay}
-                    className="p-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors shadow-md"
-                  >
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      if (videoRef.current) {
-                        videoRef.current.currentTime = 0;
-                        setCurrentTime(0);
-                      }
-                    }}
-                    className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-
-                  {/* Speed Selector */}
-                  <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
-                    {[0.25, 0.5, 1.0, 2.0].map((rate) => (
-                      <button
-                        key={rate}
-                        onClick={() => handleRateChange(rate)}
-                        className={`px-2 py-0.5 rounded font-mono-code ${
-                          playbackRate === rate ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {rate}x
-                      </button>
-                    ))}
-                  </div>
+                {/* Scrubbing Slider */}
+                <div className="flex items-center space-x-3">
+                  <span className="text-[11px] font-mono-code text-slate-400">
+                    {currentTime.toFixed(1)}s
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 10}
+                    step="0.05"
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                  />
+                  <span className="text-[11px] font-mono-code text-slate-400">
+                    {(duration || 0).toFixed(1)}s
+                  </span>
                 </div>
 
-                {/* SECONDARY "ANALYZE VIDEO" BUTTON IN CONTROL BAR */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleRunAnalysis}
-                    disabled={isAnalyzing}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 text-slate-950 font-black text-xs hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-cyan-500/20"
-                  >
-                    <Zap className="w-3.5 h-3.5 fill-slate-950" />
-                    <span>{hasAnalyzed ? 'Re-Analyze Video' : 'Analyze Video'}</span>
-                  </button>
+                {/* Playback Actions & Toggles */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  
+                  {/* Play/Pause & Speed */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={togglePlay}
+                      className="p-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-colors shadow-md"
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </button>
 
-                  {/* Overlay Toggles */}
-                  <button
-                    onClick={() => setShowBatTrack(!showBatTrack)}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs ${
-                      showBatTrack
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
-                        : 'bg-slate-950 text-slate-500 border-slate-800'
-                    }`}
-                  >
-                    <Target className="w-3.5 h-3.5" />
-                    <span>Ball Path Line</span>
-                  </button>
+                    <button
+                      onClick={() => {
+                        if (videoRef.current) {
+                          videoRef.current.currentTime = 0;
+                          setCurrentTime(0);
+                        }
+                      }}
+                      className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
 
-                  <button
-                    onClick={() => setShowAngles(!showAngles)}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs ${
-                      showAngles
-                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                        : 'bg-slate-950 text-slate-500 border-slate-800'
-                    }`}
-                  >
-                    <Sliders className="w-3.5 h-3.5" />
-                    <span>HUD Callouts</span>
-                  </button>
+                    {/* Speed Selector */}
+                    <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+                      {[0.25, 0.5, 1.0, 2.0].map((rate) => (
+                        <button
+                          key={rate}
+                          onClick={() => handleRateChange(rate)}
+                          className={`px-2 py-0.5 rounded font-mono-code ${
+                            playbackRate === rate ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {rate}x
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SECONDARY "ANALYZE VIDEO" BUTTON IN CONTROL BAR */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleRunAnalysis}
+                      disabled={isAnalyzing}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 text-slate-950 font-black text-xs hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-cyan-500/20"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                      <span>{hasAnalyzed ? 'Re-Analyze Video' : 'Analyze Video'}</span>
+                    </button>
+
+                    {/* Overlay Toggles */}
+                    <button
+                      onClick={() => setShowBatTrack(!showBatTrack)}
+                      className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs ${
+                        showBatTrack
+                          ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+                          : 'bg-slate-950 text-slate-500 border-slate-800'
+                      }`}
+                    >
+                      <Target className="w-3.5 h-3.5" />
+                      <span>Ball Path Line</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowAngles(!showAngles)}
+                      className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border transition-all text-xs ${
+                        showAngles
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          : 'bg-slate-950 text-slate-500 border-slate-800'
+                      }`}
+                    >
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>HUD Callouts</span>
+                    </button>
+                  </div>
+
                 </div>
 
               </div>
+            )}
 
-            </div>
-
-          </div>
-
-          {/* Sample Batting Clips Chooser */}
-          <div className="glass-panel p-4 rounded-xl border border-slate-800 space-y-3">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Or Select Pre-Loaded Highlight Clip
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {SAMPLE_VIDEOS.map((sample) => (
-                <div
-                  key={sample.id}
-                  onClick={() => {
-                    setSelectedSample(sample);
-                    setCustomVideoUrl(null);
-                    setCustomVideoName(null);
-                    setHasAnalyzed(false); // Reset analysis state on sample change
-                  }}
-                  className={`p-3 rounded-xl cursor-pointer transition-all border ${
-                    selectedSample.id === sample.id && !customVideoUrl
-                      ? 'bg-cyan-500/10 border-cyan-500/40 shadow-md'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <p className="text-xs font-bold text-white">{sample.title}</p>
-                  <p className="text-[10px] text-cyan-400 font-mono-code">{sample.category} • {sample.player}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
         </div>
@@ -667,12 +670,16 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
             {!hasAnalyzed && !isAnalyzing && (
               <div className="p-5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
-                  <Zap className="w-6 h-6" />
+                  <Upload className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-extrabold text-white">Video Analysis Pending</h4>
+                  <h4 className="text-sm font-extrabold text-white">
+                    {customVideoUrl ? 'Custom Video Loaded' : 'Upload Custom Video File'}
+                  </h4>
                   <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                    Click the <strong>"Analyze Video"</strong> button to process video frames and calculate Ball Speed, Bat Speed, and Shot Perfection Score.
+                    {customVideoUrl 
+                      ? 'Click "Analyze Video" to process custom video frames and calculate Ball Speed, Bat Speed & Shot Perfection Score.'
+                      : 'Please upload your custom video file to perform AI Computer Vision analysis.'}
                   </p>
                 </div>
                 <button
@@ -680,7 +687,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
                   className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-emerald-400 to-amber-400 text-slate-950 font-black text-xs hover:opacity-95 transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2"
                 >
                   <Zap className="w-4 h-4 fill-slate-950" />
-                  <span>ANALYZE VIDEO NOW</span>
+                  <span>{customVideoUrl ? 'ANALYZE CUSTOM VIDEO NOW' : 'SELECT & UPLOAD VIDEO FILE'}</span>
                 </button>
               </div>
             )}
