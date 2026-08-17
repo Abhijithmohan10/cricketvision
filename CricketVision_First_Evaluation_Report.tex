@@ -46,6 +46,12 @@
 {1em}
 {}
 
+\titleformat{\subsubsection}
+{\small\bfseries}
+{\thesubsubsection}
+{1em}
+{}
+
 \titlespacing*{\chapter}{0pt}{-20pt}{20pt}
 
 % ------------------------------------------------
@@ -165,6 +171,22 @@ Reg. No. KTE24MCA001
 \clearpage
 
 % =================================================
+% ABSTRACT
+% =================================================
+\addcontentsline{toc}{chapter}{Abstract}
+\chapter*{Abstract}
+\centering
+\begin{minipage}{0.9\textwidth}
+Modern professional cricket demands real-time tactical intelligence, quantitative analytics, and computer-vision-driven biomechanics tracking to optimize athlete performance, manage workload fatigue, and execute matchup-driven strategic decisions. Traditional sports analytics setups rely on fragmented tools—flat scorecards, isolated video players, manual spreadsheet logs, and qualitative fatigue tracking—leading to siloed insights, lack of predictive depth, and unmitigated athlete burnout risks.
+
+\textbf{CricketVision} is a full-stack, enterprise-grade sports analytics and biomechanics platform engineered specifically for head coaches, elite players, and performance analysts. Built on the MERN stack architecture (MongoDB, Express.js, React 18, and Node.js) with Vite and Tailwind CSS, CricketVision unifies document-based data persistence with interactive visual analytics. The platform features an auto-seeding database pre-populated with over 100 verified international and IPL player profiles. Key functional modules include phase-wise performance breakdowns (Powerplay, Middle Overs, Death Overs), interactive 360-degree SVG wagon wheel shot dispersion heatmaps, pitch length distribution plots, a stochastic ball-by-ball match simulation engine calculating dynamic win-probability curves, a pose-estimation video biomechanics analyzer measuring joint flex angles (elbow, shoulder, stride length) to audit bowling action legality, an AI Coach natural language strategy assistant, and a role-based authentication system with pre-configured persona presets.
+
+This report documents the first evaluation stage of CricketVision, presenting a comprehensive system study, Agile/Scrum development methodology, requirement analysis, architectural design, data flow diagrams (DFDs), database schemas, algorithmic formulations, and empirical testing results demonstrating system stability, real-time calculation responsiveness, and operational efficiency.
+\end{minipage}
+
+\clearpage
+
+% =================================================
 % MAIN REPORT
 % =================================================
 
@@ -177,12 +199,14 @@ Reg. No. KTE24MCA001
 % =================================================
 \chapter{Introduction}
 
-Modern professional cricket has evolved from a game driven purely by intuition into a data-intensive discipline governed by quantitative analytics, computer vision body-tracking, and predictive simulation models. Franchise leagues such as the Indian Premier League (IPL) and international governing bodies demand real-time tactical intelligence to optimize player workloads, execute matchup-driven strategic decisions, and analyze biomechanical movements for injury prevention.
+Modern professional cricket has evolved from a game driven purely by intuition and qualitative observation into a highly sophisticated, data-intensive discipline governed by quantitative modeling, computer vision body-tracking, and predictive simulation engines. Franchise leagues such as the Indian Premier League (IPL), Big Bash League (BBL), and international governing bodies like the International Cricket Council (ICC) increasingly rely on granular, real-time tactical intelligence to optimize player workloads, execute matchup-driven strategic decisions, and analyze biomechanical movements for injury prevention.
 
-\textbf{CricketVision} is a full-stack, enterprise-grade sports analytics platform engineered specifically for head coaches, elite players, and performance analysts. Built on the MERN stack architecture (MongoDB, Express.js, React 18, and Node.js), CricketVision integrates a pre-seeded database of over 100 verified international and IPL players with multi-tier analytics. The system delivers phase-wise statistical breakdowns (Powerplay, Middle Overs, Death Overs), interactive 360-degree wagon wheel shot dispersion heatmaps, pose-estimation video biomechanics analysis, an AI-powered strategy assistant, and a stochastic match simulation engine.
+\textbf{CricketVision} is a full-stack, enterprise-grade sports analytics and biomechanics platform engineered specifically for head coaches, elite professional players, and performance analysts. Built on the MERN stack architecture (MongoDB, Express.js, React 18, and Node.js) paired with Vite and Tailwind CSS, CricketVision integrates a pre-seeded database of over 100 verified international and IPL players with multi-tier visual analytics. The system delivers phase-wise statistical breakdowns (Powerplay, Middle Overs, Death Overs), interactive 360-degree SVG wagon wheel shot dispersion heatmaps, pitch length distribution plots, pose-estimation video biomechanics analysis, an AI-powered natural language strategy assistant, and a stochastic ball-by-ball match simulation engine.
+
+By establishing a unified, role-aware digital environment, CricketVision bridges the gap between raw statistical data collection and actionable tactical execution, enabling sports organizations to maximize winning probabilities while safeguarding athlete physical longevity.
 
 \section{Scope}
-The functional scope of CricketVision encompasses end-to-end performance evaluation, squad optimization, and match planning across three key user roles:
+The functional scope of CricketVision encompasses end-to-end performance evaluation, squad optimization, and match planning across three primary user roles:
 
 \begin{enumerate}
     \item \textbf{Head Coach \& Performance Director Scope:}
@@ -190,22 +214,22 @@ The functional scope of CricketVision encompasses end-to-end performance evaluat
         \item Centralized squad overview and management with live player fatigue monitoring.
         \item Team Builder XI optimizer to dynamically evaluate overall batting, bowling, and spin/pace balance scores.
         \item Interactive database manager with full MongoDB CRUD capabilities to insert, update, or prune player records.
-        \item Natural language AI Coach Strategy Assistant for tactical match planning and rehabilitation guidance.
+        \item Natural language AI Coach Strategy Assistant for tactical match planning, bowling rotation advice, and rehabilitation guidance.
     \end{itemize}
     
     \item \textbf{Elite Player Scope:}
     \begin{itemize}
-        \item Private, role-restricted dashboard providing personalized phase-wise stats (Powerplay SR, Death Overs Economy, etc.).
+        \item Private, role-restricted dashboard providing personalized phase-wise stats (Powerplay Strike Rate, Death Overs Economy Rate, Clutch Rating).
         \item Interactive 360-degree Wagon Wheel and pitch length distribution heatmaps for shot selection evaluation.
-        \item Tailored practice drill recommendations linked to weak performance areas or physical strain.
-        \item Video review portal for biomechanical self-correction.
+        \item Tailored practice drill recommendations linked to weak performance areas or physical strain indicators.
+        \item Video review portal for biomechanical self-correction and technical posture analysis.
     \end{itemize}
     
     \item \textbf{Performance Analyst Scope:}
     \begin{itemize}
         \item Interactive Ball-by-Ball Match Simulator featuring real-time win probability curves recalculated against pitch condition, weather metrics, and opposition bowling quality.
-        \item Next Match Predictor module evaluating player vs player head-to-head matchups and pitch conditions at major venues.
-        \item Pose-Estimation Video Analyzer engine extracting joint angles (elbow flex angle, shoulder tilt, stride length) to audit bowling action legality and technique.
+        \item Next Match Predictor module evaluating player vs player head-to-head matchups and pitch conditions at major international venues.
+        \item Pose-Estimation Video Analyzer engine extracting joint angles (elbow flex angle, shoulder tilt, stride length) to audit bowling action legality against ICC regulations.
         \item Multi-player Radar Chart visualizer comparing up to 6 core attributes (Power, Consistency, Spin, Pace, Fielding, Clutch).
     \end{itemize}
 \end{enumerate}
@@ -221,13 +245,40 @@ Traditional cricket evaluation suffers from fragmented tools—coaches rely on f
 
 CricketVision solves these challenges by unifying document-based data storage (MongoDB) with interactive data visualization libraries (Recharts, SVG rendering engines) and modern web technology. By introducing quantitative metrics such as the \textbf{Clutch Rating} and \textbf{Fatigue Level Index}, CricketVision enables teams to maximize win probabilities while protecting athlete physical longevity.
 
-\section{Organisation of the Report}
+From a software engineering perspective, CricketVision serves as a practical model for modern full-stack web application development, demonstrating role-based access control, reactive state management, asynchronous REST API integration, mathematical graphics rendering, and stochastic simulation modeling within a unified React/Node platform.
+
+\section{Problem Statement}
+In contemporary professional cricket management, decision-makers face severe operational inefficiencies caused by decentralized and static analytical tools. The specific problem components addressed by this project are:
+
+\begin{enumerate}
+    \item \textbf{Data Fragmentation and Information Silos:} Current analytics setups require sports staff to navigate between external scoring portals, offline Excel sheets, physical medical logs, and standalone media player applications. This fragmentation hampers rapid tactical decision-making during high-stakes matches.
+    \item \textbf{Absence of Contextual Phase-Wise Analytics:} Standard scorecards record aggregate runs, overs, and wickets without isolating performance across critical match phases (Powerplay overs 1–6, Middle overs 7–15, Death overs 16–20). As a result, strategic vulnerabilities during specific overs remain hidden.
+    \item \textbf{Inability to Perform Real-Time Match Simulation:} Existing platforms offer static historical lookup tables (e.g., Duckworth-Lewis-Stern tables) but lack dynamic stochastic simulation engines capable of recalculating win-probability curves in real time based on pitch friction, weather shifts, and live bowler-batter matchups.
+    \item \textbf{Lack of Integrated Markerless Biomechanics:} Biomechanical video analysis traditionally requires expensive motion-capture sensor suits or manual offline frame pausing. There is a lack of accessible, web-integrated pose-estimation tools capable of extracting joint angles (elbow flexion, shoulder inclination) to enforce ICC bowling action compliance.
+    \item \textbf{Unsystematic Workload and Fatigue Monitoring:} Player fatigue tracking is predominantly qualitative and subjective, resulting in unmonitored physical overload, increased risk of stress fractures, and unoptimized squad rotations.
+\end{enumerate}
+
+\section{Objectives}
+The primary objective of this project is to design, develop, and evaluate \textbf{CricketVision}—a centralized, full-stack web application for comprehensive cricket analytics, match simulation, and markerless pose biomechanics.
+
+The specific technical and operational objectives of the project are:
+
+\begin{enumerate}
+    \item \textbf{Develop a Scalable MERN Stack Infrastructure:} Construct a high-performance backend (Node.js, Express.js) connected to a MongoDB database pre-seeded with 100+ verified player documents, paired with a modern React 18 / Vite frontend.
+    \item \textbf{Implement Persona-Based Access Control:} Build a role-aware authentication engine supporting pre-configured persona presets (Head Coach, Elite Player, Performance Analyst) and customized permissions.
+    \item \textbf{Build Interactive Visual Analytics Engines:} Develop custom SVG mathematical rendering for 360-degree Wagon Wheel shot dispersion heatmaps and pitch length plots, alongside Recharts multi-attribute radar charts.
+    \item \textbf{Formulate a Stochastic Match Simulation Engine:} Implement a logistic regression win-probability model incorporating required run rate differentials, wicket reserves, pitch friction factors, and weather impact variables.
+    \item \textbf{Integrate Pose-Estimation Biomechanics Analyzer:} Construct an interactive canvas video review module that overlays pose tracking skeletons and computes joint flexion angles (elbow flex, shoulder tilt) to verify bowling action legality against ICC limits.
+    \item \textbf{Provide AI-Assisted Strategic Guidance:} Integrate an AI Coach natural language recommendation engine to assist coaches in team selection, workload management, and tactical match preparations.
+\end{enumerate}
+
+\section{Organization of the report}
 The remainder of this report is structured into the following chapters:
 
 \begin{itemize}
-    \item \textbf{Chapter 2: System Study} — Reviews existing traditional analytics setups, provides a detailed literature survey, details the proposed MERN-based solution, presents the Agile/Scrum methodology, and outlines hardware/software requirements.
-    \item \textbf{Chapter 3: Design} — Details the system architecture, block diagrams, Data Flow Diagrams (DFD Levels 0, 1, and 2), system execution flowcharts, Mongoose database schemas, and component design patterns.
-    \item \textbf{Chapter 4: Implementation} — Details backend REST APIs, algorithm formulations (Match Simulator, Wagon Wheel SVG transformation, Pose Estimation math), frontend React components, and empirical validation results.
+    \item \textbf{Chapter 2: System Study} — Conducts a detailed investigation of existing sports management tools, presents a comprehensive literature survey, details the proposed MERN-based CricketVision solution under an Agile/Scrum development methodology, and outlines software and hardware requirements.
+    \item \textbf{Chapter 3: Design} — Presents the architectural blueprint of CricketVision, including the 3-tier block diagram, Data Flow Diagrams (DFDs Level 0, 1, and 2), execution flowcharts, Mongoose database schemas for players and users, and user interface component specifications.
+    \item \textbf{Chapter 4: Implementation} — Documents the implementation of backend REST endpoints, algorithmic formulations (Match Simulator win probability, Wagon Wheel SVG transformation, Pose Angle biomechanics math), frontend React components, and empirical testing results.
 \end{itemize}
 
 \clearpage
@@ -237,12 +288,12 @@ The remainder of this report is structured into the following chapters:
 % =================================================
 \chapter{System Study}
 
-Evaluating modern sports technology requires analyzing existing analytical workflows and identifying systemic deficiencies. This section examines traditional scorecards and video tools, reviews academic research, details the proposed CricketVision solution under Agile methodology, and specifies hardware and software requirements.
+Evaluating modern sports technology requires analyzing existing analytical workflows and identifying systemic deficiencies. The system study phase establishes the rationale for CricketVision by examining legacy cricket tracking setups, reviewing academic research in sports science and computer vision, detailing the proposed MERN-based architecture under an Agile/Scrum development methodology, and specifying software and hardware requirements.
 
-\section{Existing System}
+\section{Existing system}
 
 \subsection{Overview and Limitations}
-Existing cricket management setups typically rely on commercial sports platforms (e.g., Cricinfo, Cricbuzz, simple Excel spreadsheets, and off-the-shelf video player tools). While these tools provide baseline scoring metrics, they exhibit severe operational constraints:
+Existing cricket management setups typically rely on commercial sports platforms (e.g., Cricinfo, Cricbuzz, simple Excel spreadsheets, and off-the-shelf media player software). While these tools provide baseline scoring metrics, they exhibit severe operational constraints when applied to elite franchise management:
 
 \begin{enumerate}
     \item \textbf{Static Historical Data:} Existing scorecards display aggregate runs and wickets but fail to segregate performance across distinct match phases (Powerplay overs 1–6, Middle overs 7–15, Death overs 16–20).
@@ -271,22 +322,22 @@ Role Access & Uniform View & Role-Based Auth (Coach, Player, Analyst) \\
 \end{table}
 
 \subsection{Literature Survey}
-Recent academic literature in sports analytics and computer vision emphasizes the transition toward automated, data-driven frameworks:
+Recent academic literature in sports analytics, computer vision, and predictive modeling emphasizes the transition toward automated, data-driven frameworks:
 
 \begin{enumerate}
     \item \textbf{Perera et al. (2018) - \textit{Sports Analytics in Cricket: A Survey}}:\\
-    Highlights that traditional aggregate metrics (e.g., batting average, bowling economy) fail to capture context-specific pressure situations. The authors advocate for phase-based efficiency ratings and clutch performance metrics.
+    Highlights that traditional aggregate metrics (e.g., batting average, bowling economy) fail to capture context-specific pressure situations. The authors advocate for phase-based efficiency ratings, venue-adjusted performance metrics, and clutch situational indices.
     
     \item \textbf{Moorthy \& DeSarbo (2020) - \textit{Predictive Modeling in Franchise Cricket}}:\\
-    Demonstrates that stochastic simulation models incorporating pitch condition, weather parameters, and bowler-batter matchups yield significantly higher predictive accuracy for match outcomes compared to static linear regression models.
+    Demonstrates that stochastic simulation models incorporating pitch condition, weather parameters, and bowler-batter matchups yield significantly higher predictive accuracy for match outcomes compared to static linear regression models or static lookup tables.
     
     \item \textbf{Cao et al. (2021) - \textit{Real-time Multi-Person 2D Pose Estimation using Part Affinity Fields}}:\\
-    Establishes the foundation for markerless biomechanics tracking in sports, proving that joint location coordinates derived from video frames can accurately measure body segment angles (such as elbow flex and shoulder inclination) without physical sensors.
+    Establishes the foundation for markerless biomechanics tracking in sports, proving that joint location coordinates derived from video frames can accurately measure body segment angles (such as elbow flex and shoulder inclination) without physical motion sensors.
 \end{enumerate}
 
-\section{Proposed System}
+\section{Proposed system}
 
-\subsection{Key Highlights and Improvements}
+\subsection{Key Highlights and Capabilities}
 The proposed \textbf{CricketVision} platform introduces a full-stack solution designed to address the limitations of existing tools:
 
 \begin{itemize}
@@ -299,12 +350,12 @@ The proposed \textbf{CricketVision} platform introduces a full-stack solution de
 \end{itemize}
 
 \subsection{Development Methodology (Agile / Scrum)}
-CricketVision was engineered following an \textbf{Agile/Scrum framework}, organized into distinct iterative Sprints.
+CricketVision was engineered following an \textbf{Agile/Scrum framework}, organized into distinct iterative Sprints to ensure continuous integration, rapid feedback, and progressive feature delivery.
 
 \subsubsection{Scrum Team Roles}
 \begin{itemize}
-    \item \textbf{Product Owner / Project Guide:} Academic Guide (Reviewer \& Approver)
-    \item \textbf{Scrum Master \& Lead Developer:} MCA Project Student (Full-Stack Engineering)
+    \item \textbf{Product Owner / Project Guide:} Academic Guide (Reviewer, Requirement Specification \& Feature Approval).
+    \item \textbf{Scrum Master \& Lead Developer:} MCA Project Student (Full-Stack Engineering, Database Architecture, UX Design).
 \end{itemize}
 
 \subsubsection{Story Point Estimation (Modified Fibonacci)}
@@ -324,26 +375,87 @@ CricketVision was engineered following an \textbf{Agile/Scrum framework}, organi
     \item \textbf{Sprint 4: Simulation, Video \& QA Integration (18/07/2026 – 22/07/2026):} Built \texttt{MatchSimulatorView.jsx}, \texttt{VideoAnalyzerView.jsx}, and \texttt{NextMatchPredictorView.jsx}. Integrated live database manager. (Points: 32/32)
 \end{itemize}
 
+\subsubsection{Version Control \& Git Commit History Log}
+CricketVision source code and project documentation are managed using Git version control and hosted on GitHub (\texttt{Abhijithmohan10/cricketvision}). Table \ref{tab:git_history} presents the recorded repository commit history leading up to the first evaluation phase:
+
+\begin{table}[H]
+\centering
+\caption{Git Version Control Commit Log (\texttt{Abhijithmohan10/cricketvision})}
+\label{tab:git_history}
+\begin{tabular}{llll}
+\toprule
+\textbf{Commit Hash} & \textbf{Date} & \textbf{Author} & \textbf{Commit Summary} \\
+\midrule
+\texttt{e6f29fa} & 13/08/2026 & Abhijith Mohan & Fix print preview blank page with React portal \& clean A4 CSS \\
+\texttt{bdf8ee8} & 13/08/2026 & Abhijith Mohan & Fix print preview layout to single page A4 \\
+\texttt{bc2e426} & 11/08/2026 & Abhijith Mohan & Initial commit \\
+\texttt{a1e1aed} & 11/08/2026 & Abhijith Mohan & Initial CricketVision static site build \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.2cm, auto,
+  block/.style={rectangle, draw=black, fill=gray!10, rounded corners, text width=4.5cm, align=center, minimum height=0.8cm},
+  arrow/.style={draw, ->, >=stealth}]
+  
+  \node [block] (backlog) {Product Backlog Formulation};
+  \node [block, below=of backlog] (planning) {Sprint Planning \& Story Points};
+  \node [block, below=of planning] (dev) {Iterative Development (React/Node)};
+  \node [block, below=of dev] (testing) {System Testing \& API Verification};
+  \node [block, below=of testing] (review) {Sprint Review \& Approval};
+  
+  \draw [arrow] (backlog) -- (planning);
+  \draw [arrow] (planning) -- (dev);
+  \draw [arrow] (dev) -- (testing);
+  \draw [arrow] (testing) -- (review);
+  \draw [arrow] (review.east) -- ++(1,0) |- (planning.east);
+\end{tikzpicture}
+\caption{Agile / Scrum Development Cycle}
+\label{fig:scrum_cycle}
+\end{figure}
+
 \section{Requirement Analysis}
 
-\subsection{Software Requirements (S/W)}
-\begin{itemize}
-    \item \textbf{Operating System:} Windows 10/11 (64-bit), macOS Monterey+, or Linux Ubuntu 22.04 LTS
-    \item \textbf{Runtime Environment:} Node.js (v18.x or higher), NPM (v9.x or higher)
-    \item \textbf{Database Management System:} MongoDB Community Server (v6.0+) with Mongoose ODM (v8.x)
-    \item \textbf{Backend Framework:} Express.js (v4.x), CORS Middleware (v2.8.5)
-    \item \textbf{Frontend Stack:} React 18, Vite 5, Tailwind CSS 3, Recharts 2, Lucide React Icons
-    \item \textbf{Testing \& Tools:} Postman v10.x, Curl CLI tool, Chrome DevTools
-\end{itemize}
+\subsection{S/W requirement}
+\begin{table}[H]
+\centering
+\caption{Software Requirements Specification}
+\label{tab:software_reqs}
+\begin{tabular}{ll}
+\toprule
+\textbf{Software / Technology} & \textbf{Specification / Purpose} \\
+\midrule
+Operating System & Windows 10/11 (64-bit), macOS Monterey+, Ubuntu 22.04 LTS \\
+Runtime Environment & Node.js (v18.x or higher), NPM (v9.x or higher) \\
+Database System & MongoDB Community Server (v6.0+) with Mongoose ODM (v8.x) \\
+Backend Framework & Express.js (v4.x), CORS Middleware (v2.8.5) \\
+Frontend Stack & React 18, Vite 5, Tailwind CSS 3, Recharts 2, Lucide Icons \\
+Client-Side Routing & React Router DOM (v6.x) \\
+Version Control & Git \& GitHub (\texttt{Abhijithmohan10/cricketvision}) \\
+Testing \& Inspection & Postman v10.x, Chrome Developer Tools, Curl CLI \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Hardware Requirements (H/W)}
-\begin{itemize}
-    \item \textbf{Processor:} Quad-Core Intel Core i5/i7 (8th Gen+), AMD Ryzen 5/7, or Apple Silicon M1/M2/M3
-    \item \textbf{System Memory (RAM):} 8 GB minimum (16 GB recommended for video canvas rendering and simulations)
-    \item \textbf{Storage Space:} 500 MB minimum free storage space on Solid State Drive (SSD)
-    \item \textbf{Display Output:} 1920x1080 Full HD resolution monitor
-    \item \textbf{Peripherals:} Standard Keyboard, Mouse / Touchpad, high-speed network connection
-\end{itemize}
+\subsection{H/W requirement}
+\begin{table}[H]
+\centering
+\caption{Hardware Requirements Specification}
+\label{tab:hardware_reqs}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Minimum / Recommended Requirement} \\
+\midrule
+Processor & Quad-Core Intel Core i5/i7 (8th Gen+), AMD Ryzen 5/7, Apple M1/M2/M3 \\
+System Memory (RAM) & 8 GB minimum (16 GB recommended for canvas video pose rendering) \\
+Storage & 500 MB free Solid State Drive (SSD) space \\
+Display & Full HD (1920x1080) resolution display monitor \\
+Peripherals & Standard Keyboard, Mouse / Trackpad, Network Interface Card \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \clearpage
 
@@ -352,15 +464,15 @@ CricketVision was engineered following an \textbf{Agile/Scrum framework}, organi
 % =================================================
 \chapter{Design}
 
-The design phase establishes the structural blueprint of CricketVision, encompassing system architecture, data flow diagrams (DFDs), execution flowcharts, Mongoose database schemas, and component interfaces.
+The design phase translates the functional requirements established during system study into a formal architectural and structural blueprint for CricketVision. This chapter details the system architecture, block diagrams, Data Flow Diagrams (DFDs Level 0, 1, and 2), execution flowcharts, Mongoose database schemas, and user interface component specifications.
 
 \section{System Architecture \& Block Diagram}
-CricketVision follows a modular 3-tier client-server architecture:
+CricketVision adheres to a modern, decoupled 3-tier client-server architecture:
 
 \begin{enumerate}
-    \item \textbf{Presentation Layer (Frontend):} Built using React 18 and Vite. Houses role-specific views (\texttt{DashboardView}, \texttt{PlayerPortalView}, \texttt{MatchSimulatorView}), visual charts, and modal interfaces.
-    \item \textbf{Application Layer (Backend):} Built using Node.js and Express.js REST APIs. Handles HTTP requests, CORS headers, user validation, simulation algorithms, and database controllers.
-    \item \textbf{Data Layer (Persistence):} Powered by MongoDB. Stores structured document collections for \texttt{players} and \texttt{users}.
+    \item \textbf{Presentation Layer (Frontend):} Built using React 18, Vite, and Tailwind CSS. Houses role-specific views (\texttt{DashboardView}, \texttt{PlayerPortalView}, \texttt{MatchSimulatorView}, \texttt{VideoAnalyzerView}), custom SVG Wagon Wheel visualizers, and interactive modals.
+    \item \textbf{Application Layer (Backend):} Built using Node.js and Express.js REST APIs. Manages HTTP request processing, CORS headers, user authentication controllers, stochastic simulation logic, and database operations.
+    \item \textbf{Data Layer (Persistence):} Powered by MongoDB and Mongoose ODM. Persists document collections for \texttt{players} (100+ pre-seeded records) and \texttt{users}.
 \end{enumerate}
 
 \begin{figure}[H]
@@ -378,14 +490,14 @@ CricketVision follows a modular 3-tier client-server architecture:
   \draw [arrow] (database) -- node[anchor=west] {Document Data Stream} (backend);
   \draw [arrow] (backend) -- node[anchor=west] {JSON Response Payload} (frontend);
 \end{tikzpicture}
-\caption{CricketVision 3-Tier System Architecture}
+\caption{CricketVision 3-Tier System Architecture Block Diagram}
 \label{fig:system_architecture}
 \end{figure}
 
 \section{Data Flow Diagrams (DFD)}
 
 \subsection{Level 0 DFD (Context Diagram)}
-The Context Diagram illustrates external user entities interacting with the core CricketVision system boundary.
+The Context Diagram illustrates external user entities (Head Coach, Elite Player, Sports Analyst) interacting with the core CricketVision system boundary.
 
 \begin{figure}[H]
 \centering
@@ -408,54 +520,129 @@ The Context Diagram illustrates external user entities interacting with the core
   \path [line] (analyst) edge[bend left=15] node[above] {\small Sim Params, Video} (system);
   \path [line] (system) edge[bend left=15] node[below] {\small Win Prob, Pose Angles} (analyst);
 \end{tikzpicture}
-\caption{Level 0 DFD (Context Diagram)}
+\caption{Level 0 Data Flow Diagram (Context Diagram)}
 \label{fig:dfd0}
 \end{figure}
 
-\section{Database Design \& Schemas}
-CricketVision uses MongoDB for flexible, high-performance document storage. The schema design consists of two main collections: \texttt{players} and \texttt{users}.
+\subsection{Level 1 DFD}
+Level 1 DFD decomposes the system into functional sub-processes: User Authentication (1.0), Squad Management (2.0), Match Simulation (3.0), and Biomechanics Pose Analysis (4.0).
 
-\subsection{Mongoose Player Schema Definition}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.8cm, auto,
+  entity/.style={rectangle, draw=black, fill=gray!15, thick, minimum width=2.2cm, minimum height=0.9cm, align=center},
+  process/.style={ellipse, draw=blue!80, fill=blue!10, thick, minimum size=2.2cm, align=center},
+  store/.style={rectangle, draw=black, fill=green!10, thick, minimum width=2.2cm, minimum height=0.9cm, align=center},
+  arrow/.style={draw, ->, >=stealth}]
+  
+  \node [entity] (user) {User};
+  \node [process, right=of user, yshift=2.5cm] (p1) {\textbf{1.0}\\Authenticate\\User};
+  \node [process, right=of user, yshift=0.8cm] (p2) {\textbf{2.0}\\Manage\\Squad Roster};
+  \node [process, right=of user, yshift=-0.8cm] (p3) {\textbf{3.0}\\Stochastic\\Simulation};
+  \node [process, right=of user, yshift=-2.5cm] (p4) {\textbf{4.0}\\Pose\\Biomechanics};
+  
+  \node [store, right=of p1] (d1) {D1\\Users DB};
+  \node [store, right=of p2] (d2) {D2\\Players DB};
+  
+  \draw [arrow] (user) -- (p1);
+  \draw [arrow] (user) -- (p2);
+  \draw [arrow] (user) -- (p3);
+  \draw [arrow] (user) -- (p4);
+  
+  \draw [arrow] (p1) -- (d1);
+  \draw [arrow] (p2) -- (d2);
+\end{tikzpicture}
+\caption{Level 1 Data Flow Diagram}
+\label{fig:dfd1}
+\end{figure}
+
+\section{Flowcharts \& Activity Diagrams}
+Figure \ref{fig:auth_flowchart} illustrates the user authentication and role validation flow.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.1cm, auto,
+  step/.style={rectangle, draw=black, fill=yellow!15, rounded corners, text width=4.5cm, align=center},
+  decision/.style={diamond, draw=red!80, fill=red!10, align=center, aspect=2},
+  circleend/.style={circle, draw=black, fill=black, inner sep=2pt},
+  arrow/.style={draw, ->, >=stealth}]
+  
+  \node [step] (s1) {Select Preset / Enter Credentials};
+  \node [step, below=of s1] (s2) {Submit Auth Request to Express API};
+  \node [step, below=of s2] (s3) {Verify Persona / User Record};
+  \node [decision, below=of s3] (dec) {Credentials Valid?};
+  \node [step, left=1.5cm of dec] (err) {Display Access Error Alert};
+  \node [step, below=of dec] (auth) {Establish User Session Context};
+  \node [step, below=of auth] (redir) {Redirect to Role Dashboard};
+  \node [circleend, below=of redir] (end) {};
+  
+  \draw [arrow] (s1) -- (s2);
+  \draw [arrow] (s2) -- (s3);
+  \draw [arrow] (s3) -- (dec);
+  \draw [arrow] (dec) -- node[above] {No} (err);
+  \draw [arrow] (err) |- (s1);
+  \draw [arrow] (dec) -- node[right] {Yes} (auth);
+  \draw [arrow] (auth) -- (redir);
+  \draw [arrow] (redir) -- (end);
+\end{tikzpicture}
+\caption{User Authentication \& Role Access Flowchart}
+\label{fig:auth_flowchart}
+\end{figure}
+
+\section{Database Design \& Schemas}
+CricketVision uses MongoDB for flexible document storage. The system features two core collections: \texttt{players} and \texttt{users}.
+
+\subsection{Mongoose Player Schema Specification}
 \begin{table}[H]
 \centering
-\caption{Mongoose Player Schema Specifications}
+\caption{Mongoose Player Schema Data Dictionary}
 \label{tab:player_schema}
 \begin{tabular}{llll}
 \toprule
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
 \midrule
-\texttt{id} & String & Required, Unique & Unique ID (e.g., \texttt{virat-kohli}) \\
-\texttt{name} & String & Required, Trimmed & Full display name \\
-\texttt{country} & String & Required & Country represented \\
-\texttt{role} & String & Enum & \texttt{Batter, Bowler, All-rounder, WK-Batter} \\
-\texttt{fatigueLevel} & Number & Min: 0, Max: 100 & Workload fatigue rating index \\
-\texttt{clutchRating} & Number & Min: 0, Max: 100 & Pressure situation rating index \\
+\texttt{id} & String & Required, Unique & Unique string ID (e.g., \texttt{virat-kohli}) \\
+\texttt{name} & String & Required, Trimmed & Full player display name \\
+\texttt{country} & String & Required & Represented nation/franchise \\
+\texttt{role} & String & Enum & Batter, Bowler, All-rounder, WK-Batter \\
+\texttt{fatigueLevel} & Number & Range: 0--100 & Physical workload fatigue index \\
+\texttt{clutchRating} & Number & Range: 0--100 & High-pressure scenario index \\
 \texttt{skillRadar} & Object & Nested Object & Holds 6 radar attribute metrics \\
-\texttt{phaseStats} & Object & Nested Object & Powerplay, Middle, and Death stats \\
+\texttt{phaseStats} & Object & Nested Object & Powerplay, Middle, Death stats \\
 \texttt{biomechanicsSummary}& Object & Nested Object & Joint angles: flexAngle, shoulderTilt \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Mongoose User Schema Definition}
+\subsection{Mongoose User Schema Specification}
 \begin{table}[H]
 \centering
-\caption{Mongoose User Schema Specifications}
+\caption{Mongoose User Schema Data Dictionary}
 \label{tab:user_schema}
 \begin{tabular}{llll}
 \toprule
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
 \midrule
-\texttt{id} & String & Required, Unique & Unique user ID (e.g., \texttt{coach-1}) \\
+\texttt{id} & String & Required, Unique & User identifier string \\
 \texttt{name} & String & Min length: 2 & User's full name \\
-\texttt{email} & String & Required, Unique & Account email address \\
+\texttt{email} & String & Required, Unique & Account login email \\
 \texttt{password} & String & Min length: 6 & Account access password \\
-\texttt{role} & String & Enum & \texttt{coach, player, user} \\
+\texttt{role} & String & Enum & coach, player, user \\
 \texttt{playerId} & String & Optional (FK Ref) & Associated player profile ID \\
-\texttt{permissions} & [String] & Array & Specific access rights array \\
+\texttt{permissions} & [String] & Array & Granular privilege rights array \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\section{User Interface \& Form Design}
+The frontend interface is organized into distinct functional view components:
+\begin{itemize}
+    \item \textbf{Landing \& Preset Login Selector (\texttt{LoginView.jsx}):} Enables one-click persona switching (\texttt{Rahul Dravid}, \texttt{Virat Kohli}, \texttt{Alex Morgan}).
+    \item \textbf{Squad Dashboard (\texttt{DashboardView.jsx}):} Displays squad KPIs, fatigue alerts, and player roster.
+    \item \textbf{Player Analytics Portal (\texttt{PlayerAnalyticsView.jsx}):} Renders 360-degree SVG wagon wheel heatmaps and Recharts radar charts.
+    \item \textbf{Match Simulator (\texttt{MatchSimulatorView.jsx}):} Renders interactive win-probability curves and ball-by-ball scenario controls.
+    \item \textbf{Video Pose Analyzer (\texttt{VideoAnalyzerView.jsx}):} Provides canvas skeleton overlays measuring joint flexion angles.
+\end{itemize}
 
 \clearpage
 
@@ -464,15 +651,40 @@ CricketVision uses MongoDB for flexible, high-performance document storage. The 
 % =================================================
 \chapter{Implementation}
 
-This chapter details the technical implementation of CricketVision across backend REST endpoints, mathematical algorithms, and frontend React components.
+This chapter documents the technical implementation of CricketVision across environment setup, Express backend REST endpoints, mathematical algorithms, frontend React components, and empirical software testing results.
 
-\section{Environment \& Project Setup}
-The application structure is initialized using Node.js and Vite React with Express backend services.
+\section{Development Environment \& Technologies}
+CricketVision was developed within a Node.js JavaScript environment using Vite for fast HMR compilation and Tailwind CSS for utility-first styling.
 
-\section{Backend \& Database Implementation}
-The Express server (\texttt{server.js}) initializes Mongoose models, provides REST CRUD routes, and auto-seeds default player data into local MongoDB instances.
+\begin{itemize}
+    \item \textbf{Frontend Stack:} React 18, Vite 5, Tailwind CSS 3, Recharts 2, Lucide React Icons.
+    \item \textbf{Backend Stack:} Node.js v18+, Express.js 4.x, CORS Middleware, Body-Parser.
+    \item \textbf{Database Persistence:} MongoDB 6.0+ Community Server connected via Mongoose 8.x ODM.
+    \item \textbf{Database Auto-Seeding Engine:} On server initialization, \texttt{server.js} verifies document count and automatically seeds 104 verified international and IPL player profiles if the collection contains fewer than 100 documents.
+\end{itemize}
 
-\section{Algorithms \& Computational Logic}
+\section{Backend \& REST API Implementation}
+The Express server exposes modular REST API endpoints for player database operations and simulation queries:
+
+\begin{table}[H]
+\centering
+\caption{CricketVision REST API Endpoints Specification}
+\label{tab:api_endpoints}
+\begin{tabular}{lll}
+\toprule
+\textbf{HTTP Method} & \textbf{Endpoint Route} & \textbf{Description / Operation} \\
+\midrule
+\texttt{GET} & \texttt{/api/players} & Fetch all 100+ player documents from MongoDB \\
+\texttt{GET} & \texttt{/api/players/:id} & Retrieve detailed single player profile \\
+\texttt{POST} & \texttt{/api/players} & Create new player document with full stats \\
+\texttt{PUT} & \texttt{/api/players/:id} & Update player stats, fatigue, or joint angles \\
+\texttt{DELETE} & \texttt{/api/players/:id} & Prune player document from active roster \\
+\texttt{POST} & \texttt{/api/users/login} & Authenticate user / persona preset session \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Algorithmic Logic \& Mathematical Formulation}
 
 \subsection{Match Simulator \& Win-Probability Formula}
 The stochastic simulation engine calculates the win probability $P_{\text{win}}$ after each over using a logistic regression curve:
@@ -503,17 +715,40 @@ Elbow flexion angle $\theta_{\text{elbow}}$ is derived from joint keypoint vecto
 \theta_{\text{elbow}} = \arccos\left( \frac{\vec{BA} \cdot \vec{BC}}{\|\vec{BA}\| \|\vec{BC}\|} \right) \times \left(\frac{180}{\pi}\right)
 \end{equation}
 
+\section{Frontend React Components Implementation}
+The React application architecture is structured cleanly into components and views:
+\begin{itemize}
+    \item \texttt{App.jsx}: Root layout router rendering top Navigation bar and active view container.
+    \item \texttt{DashboardView.jsx}: Renders squad KPIs, fatigue alerts, and player roster cards.
+    \item \texttt{PlayerAnalyticsView.jsx}: Visualizes Recharts radar metrics and phase breakdowns.
+    \item \texttt{PitchAndWagonWheel.jsx}: Renders 360-degree SVG wagon wheel heatmaps.
+    \item \texttt{MatchSimulatorView.jsx}: Renders real-time win probability curves and controls.
+    \item \texttt{VideoAnalyzerView.jsx}: Renders pose skeleton overlays and joint flexion telemetry.
+\end{itemize}
+
 \section{System Testing \& Verification}
-Empirical verification confirmed system stability and data integrity:
+System testing verified functional correctness, data integrity, and API responsiveness across key modules.
 
-\begin{enumerate}
-    \item \textbf{MongoDB Database Seeding Test:} Verified auto-seeding of 104 player documents into MongoDB on launch. (\textbf{PASSED})
-    \item \textbf{REST API Endpoint Verification:} Tested GET, POST, PUT, DELETE routes via Postman. (\textbf{PASSED})
-    \item \textbf{Role-Based Auth Test:} Verified role permissions for Coach, Player, and Analyst profiles. (\textbf{PASSED})
-    \item \textbf{Match Simulator \& Pose Engine Test:} Confirmed dynamic recalculation of win-probability curves without UI latency. (\textbf{PASSED})
-\end{enumerate}
+\begin{table}[H]
+\centering
+\caption{System Unit and Integration Test Results}
+\label{tab:test_results}
+\begin{tabular}{lll}
+\toprule
+\textbf{Test Case / Operation} & \textbf{Expected Outcome} & \textbf{Status} \\
+\midrule
+Database Auto-Seeding & Populates 104 player documents into MongoDB on boot & \textbf{PASS} \\
+REST API CRUD Endpoints & Executes GET, POST, PUT, DELETE without error & \textbf{PASS} \\
+Persona Auth Preset & Switches between Coach, Player, Analyst roles correctly & \textbf{PASS} \\
+Wagon Wheel SVG Render & Correctly maps polar coordinates into SVG canvas & \textbf{PASS} \\
+Stochastic Match Simulator & Computes win probability curves dynamically & \textbf{PASS} \\
+Pose Video Analyzer & Calculates joint flex angles against ICC 15° limit & \textbf{PASS} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\clearpage
+\section{Summary}
+This chapter detailed the implementation and empirical verification of CricketVision. The system successfully implements all core REST APIs, visual graphics engines, simulation logic, and pose biomechanics tracking required for first evaluation approval.
 
 % =================================================
 % REFERENCES

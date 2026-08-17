@@ -208,6 +208,18 @@ A User Story is marked **DONE** when:
 
 ---
 
+### 4.6 Git Version Control & Repository Commit History
+The source code and project deliverables for **CricketVision** are managed using Git version control and pushed to the GitHub repository (`Abhijithmohan10/cricketvision`).
+
+| Commit Hash | Commit Date | Author | Commit Message / Summary |
+| :--- | :--- | :--- | :--- |
+| `e6f29fa` | Aug 13, 2026 | Abhijithmohan10 | Fix print preview blank page with React portal & clean single-page A4 CSS |
+| `bdf8ee8` | Aug 13, 2026 | Abhijithmohan10 | Fix print preview layout to single page A4 |
+| `bc2e426` | Aug 11, 2026 | Abhijithmohan10 | Initial commit |
+| `a1e1aed` | Aug 11, 2026 | Abhijithmohan10 | Initial CricketVision static site build |
+
+---
+
 ## 5. Burndown Chart & Velocity Tracking
 
 ### 5.1 Sprint Point Summary

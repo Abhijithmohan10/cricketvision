@@ -1,163 +1,67 @@
 \chapter{Design}
 
-The design phase translates the requirements identified during the system study into a structured representation of the proposed CricketVision system. It defines the overall architecture, functional interactions, data flow, database organization, and user interface structure of the application. The design is intended to provide a clear separation between the different components of the system while allowing the application to be extended with additional functionality in future development.
+The design phase translates the functional requirements established during system study into a formal architectural and structural blueprint for CricketVision. This chapter details the system architecture, block diagrams, Data Flow Diagrams (DFDs Level 0, 1, and 2), execution flowcharts, Mongoose database schemas, and user interface component specifications.
 
-CricketVision follows a modular web application architecture in which the user interacts with a React-based frontend, authentication is handled through role-based access controllers, and player data is stored using MongoDB with Mongoose ODM. The design also considers protected access to user-specific resources so that performance records are associated with appropriate authenticated roles.
-
-\section{System Architecture}
-
-The system architecture describes the major components of CricketVision and the manner in which they interact. The system consists primarily of the presentation layer, routing layer, authentication layer, application service layer, and data layer.
-
-The frontend is implemented using React and provides the user interface through which coaches, players, and analysts interact with the system. React Router is used to manage navigation between different application pages. Protected routes are used for resources that require authentication.
-
-Authentication services handle user registration, login, preset switching, and logout operations. Once a user is authenticated, the application can identify the corresponding persona and display role-restricted resources.
-
-MongoDB provides database storage for player information. The Express backend exposes RESTful CRUD endpoints allowing the client application to query or update player documents.
-
-The overall architecture of the system is represented in Figure 3.1.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[node distance=1.5cm, auto,
-  layer/.style={rectangle, draw=blue!80, fill=blue!5, thick, text width=12cm, align=center, rounded corners, minimum height=1cm},
-  arrow/.style={draw=blue!80, ->, >=stealth, thick}]
-  
-  \node [layer] (pres) {\textbf{Presentation Layer (React Frontend)}\\React App, Tailwind CSS, Pages, Recharts, SVG Wagon Wheel};
-  \node [layer, below=of pres] (route) {\textbf{Routing \& Auth Layer (React Router \& Role Controller)}\\Public Routes $|$ Protected Routes $|$ Persona Presets (Coach, Player, Analyst)};
-  \node [layer, below=of route] (app) {\textbf{Application Service Layer (Express.js REST APIs)}\\Player REST Controllers $|$ Match Simulator Engine $|$ Pose Estimation Engine};
-  \node [layer, below=of app] (data) {\textbf{Data Layer (MongoDB \& Mongoose ODM)}\\Collections: \texttt{players} (100+ Seeded Documents), \texttt{users}};
-  
-  \draw [arrow] (pres) -- (route);
-  \draw [arrow] (route) -- (app);
-  \draw [arrow] (app) -- (data);
-  \draw [arrow] (data) -- (app);
-  \draw [arrow] (app) -- (pres);
-\end{tikzpicture}
-\caption{System Architecture of CricketVision}
-\label{fig:system_architecture_diag}
-\end{figure}
-
-The major components of the architecture are described below:
+\section{System Architecture \& Block Diagram}
+CricketVision adheres to a modern, decoupled 3-tier client-server architecture:
 
 \begin{enumerate}
-    \item \textbf{Presentation Layer:} Provides the user interface using React components, Recharts visualizations, and Tailwind CSS.
-    \item \textbf{Routing Layer:} Manages navigation between pages and protects authenticated routes using React Router.
-    \item \textbf{Authentication Layer:} Provides user registration, login, logout, and role-state management.
-    \item \textbf{Application Service Layer:} Handles operations related to player statistics, match simulations, and pose estimations.
-    \item \textbf{Data Layer:} Uses MongoDB to store player records and user accounts.
+    \item \textbf{Presentation Layer (Frontend):} Built using React 18, Vite, and Tailwind CSS. Houses role-specific views (\texttt{DashboardView}, \texttt{PlayerPortalView}, \texttt{MatchSimulatorView}, \texttt{VideoAnalyzerView}), custom SVG Wagon Wheel visualizers, and interactive modals.
+    \item \textbf{Application Layer (Backend):} Built using Node.js and Express.js REST APIs. Manages HTTP request processing, CORS headers, user authentication controllers, stochastic simulation logic, and database operations.
+    \item \textbf{Data Layer (Persistence):} Powered by MongoDB and Mongoose ODM. Persists document collections for \texttt{players} (100+ pre-seeded records) and \texttt{users}.
 \end{enumerate}
 
-\section{Use Case Design}
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.4cm, auto,
+  block/.style={rectangle, draw=blue!80, fill=blue!5, thick, text width=12cm, align=center, rounded corners, minimum height=1cm},
+  arrow/.style={draw=blue!80, ->, >=stealth, thick}]
+  
+  \node [block] (frontend) {\textbf{PRESENTATION LAYER (REACT 18 \& VITE)}\\Coach Dashboard $|$ Player Portal $|$ Analyst Simulator $|$ Pose Analyzer};
+  \node [block, below=of frontend] (backend) {\textbf{APPLICATION LAYER (EXPRESS.JS \& NODE.JS)}\\Auth Router $|$ Player Controller $|$ Match Simulator Engine $|$ AI Coach};
+  \node [block, below=of backend] (database) {\textbf{DATA LAYER (MONGODB 6.0+)}\\Collection: \texttt{players} (100+ Docs) $|$ Collection: \texttt{users} (Role Presets)};
+  
+  \draw [arrow] (frontend) -- node[anchor=east] {HTTP REST Requests (JSON)} (backend);
+  \draw [arrow] (backend) -- node[anchor=east] {Mongoose ODM Queries} (database);
+  \draw [arrow] (database) -- node[anchor=west] {Document Data Stream} (backend);
+  \draw [arrow] (backend) -- node[anchor=west] {JSON Response Payload} (frontend);
+\end{tikzpicture}
+\caption{CricketVision 3-Tier System Architecture Block Diagram}
+\label{fig:system_architecture}
+\end{figure}
 
-Use case modelling describes the functional interactions between sports professionals and the CricketVision system. The primary actors of the system are the \textbf{Head Coach}, \textbf{Elite Player}, and \textbf{Sports Analyst}.
+\section{Data Flow Diagrams (DFD)}
 
-The major use cases identified for the system are:
-
-\begin{itemize}
-    \item Register
-    \item Login
-    \item Logout
-    \item View Dashboard
-    \item Add Player / Record
-    \item View Player Analytics
-    \item Edit Player Profile
-    \item Delete Player Record
-\end{itemize}
-
-The use case diagram is shown in Figure 3.2.
+\subsection{Level 0 DFD (Context Diagram)}
+The Context Diagram illustrates external user entities (Head Coach, Elite Player, Sports Analyst) interacting with the core CricketVision system boundary.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1.2cm, auto,
-  actor/.style={ellipse, draw=black, fill=gray!20, thick, align=center},
-  usecase/.style={ellipse, draw=blue!80, fill=blue!10, thick, text width=3.5cm, align=center},
-  systembox/.style={rectangle, draw=black, thick, text width=6cm, minimum height=8.5cm}]
+\begin{tikzpicture}[node distance=1.8cm, auto,
+  entity/.style={rectangle, draw=black, fill=gray!10, thick, minimum width=3cm, minimum height=0.9cm, align=center},
+  process/.style={circle, draw=blue!80, fill=blue!10, thick, minimum size=2.8cm, align=center},
+  line/.style={draw, ->, >=stealth, thick}]
   
-  \node [actor] (user) {User / Coach};
+  \node [process] (system) {\textbf{0.0}\\CricketVision\\System};
+  \node [entity, above=of system] (coach) {Head Coach};
+  \node [entity, below left=of system] (player) {Elite Player};
+  \node [entity, below right=of system] (analyst) {Sports Analyst};
   
-  \node [usecase, right=3cm of user, yshift=3.5cm] (uc1) {Register};
-  \node [usecase, right=3cm of user, yshift=2.5cm] (uc2) {Login};
-  \node [usecase, right=3cm of user, yshift=1.5cm] (uc3) {Logout};
-  \node [usecase, right=3cm of user, yshift=0.5cm] (uc4) {View Dashboard};
-  \node [usecase, right=3cm of user, yshift=-0.5cm] (uc5) {Add Player};
-  \node [usecase, right=3cm of user, yshift=-1.5cm] (uc6) {View Analytics};
-  \node [usecase, right=3cm of user, yshift=-2.5cm] (uc7) {Edit Player};
-  \node [usecase, right=3cm of user, yshift=-3.5cm] (uc8) {Delete Player};
+  \path [line] (coach) edge[bend left=15] node[right] {\small Roster Updates} (system);
+  \path [line] (system) edge[bend left=15] node[left] {\small Squad Stats, XI Balance} (coach);
   
-  \draw (user) -- (uc1);
-  \draw (user) -- (uc2);
-  \draw (user) -- (uc3);
-  \draw (user) -- (uc4);
-  \draw (user) -- (uc5);
-  \draw (user) -- (uc6);
-  \draw (user) -- (uc7);
-  \draw (user) -- (uc8);
+  \path [line] (player) edge[bend left=15] node[above] {\small Persona Login} (system);
+  \path [line] (system) edge[bend left=15] node[below] {\small Private Form, Drills} (player);
+  
+  \path [line] (analyst) edge[bend left=15] node[above] {\small Sim Params, Video} (system);
+  \path [line] (system) edge[bend left=15] node[below] {\small Win Prob, Pose Angles} (analyst);
 \end{tikzpicture}
-\caption{Use Case Diagram of CricketVision}
-\label{fig:use_case_diag}
+\caption{Level 0 Data Flow Diagram (Context Diagram)}
+\label{fig:dfd0}
 \end{figure}
 
-\subsection{Register}
-The Register use case allows a new user to create an account. The user provides the required authentication details, which are validated by the backend service. Upon successful registration, an account is created.
-
-\subsection{Login}
-The Login use case allows a registered user or persona preset to access the system. The authentication credentials are submitted to the authentication controller. If valid, the user is authenticated and granted access to protected resources.
-
-\subsection{View Dashboard}
-The Dashboard provides the main authenticated interface of the application. It displays squad overview statistics, fatigue alerts, and recent player performance metrics.
-
-\subsection{Add Player}
-The Add Player use case allows the coach to create a new player entry. The user enters details such as player name, country, playing role, fatigue level, and skill attributes, which are stored in MongoDB.
-
-\subsection{View Analytics}
-The View Analytics use case allows users to view 360-degree wagon wheel shot dispersion heatmaps, Recharts radar attribute charts, and phase-wise statistical breakdowns.
-
-\subsection{Edit Player Profile}
-The Edit Player use case allows a coach to modify an existing player record when fatigue levels change or new match stats are recorded.
-
-\subsection{Delete Player Record}
-The Delete Player use case allows a coach to remove a player profile from the active roster database.
-
-\subsection{Logout}
-The Logout use case terminates the active authenticated session and prevents further access to protected resources until the user authenticates again.
-
-\section{Data Flow Diagram}
-
-A Data Flow Diagram (DFD) represents the movement of information between the user, system processes, and data storage.
-
-\subsection{Level 0 Data Flow Diagram}
-
-At the highest level, CricketVision can be represented as a single system process interacting with the user and the MongoDB database.
-
-The Level 0 DFD is shown in Figure 3.3.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[node distance=2.5cm, auto,
-  entity/.style={rectangle, draw=black, fill=gray!15, thick, minimum width=2.5cm, minimum height=1cm, align=center},
-  process/.style={ellipse, draw=blue!80, fill=blue!10, thick, minimum size=2.5cm, align=center},
-  store/.style={rectangle, draw=black, fill=green!10, thick, minimum width=2.5cm, minimum height=1cm, align=center},
-  arrow/.style={draw, ->, >=stealth, thick}]
-  
-  \node [entity] (user) {User / Coach};
-  \node [process, right=of user] (sys) {\textbf{0}\\CricketVision\\System};
-  \node [store, right=of sys] (db) {D1\\MongoDB\\Database};
-  
-  \draw [arrow] (user.north east) -- node[above] {\small Requests / Input Data} (sys.north west);
-  \draw [arrow] (sys.south west) -- node[below] {\small Responses / Output Data} (user.south east);
-  
-  \draw [arrow] (sys.north east) -- node[above] {\small Store / Retrieve Data} (db.north west);
-  \draw [arrow] (db.south west) -- node[below] {\small Player Data Stream} (sys.south east);
-\end{tikzpicture}
-\caption{Level 0 Data Flow Diagram}
-\label{fig:dfd0_diag}
-\end{figure}
-
-The user provides information to the CricketVision system through the web interface. The system processes the information and communicates with MongoDB for storing and retrieving records.
-
-\subsection{Level 1 Data Flow Diagram}
-
-The Level 1 DFD decomposes the system into its major functional processes: Authentication (1.0), Dashboard Access (2.0), and Player Management (3.0).
+\subsection{Level 1 DFD}
+Level 1 DFD decomposes the system into functional sub-processes: User Authentication (1.0), Squad Management (2.0), Match Simulation (3.0), and Biomechanics Pose Analysis (4.0).
 
 \begin{figure}[H]
 \centering
@@ -168,49 +72,44 @@ The Level 1 DFD decomposes the system into its major functional processes: Authe
   arrow/.style={draw, ->, >=stealth}]
   
   \node [entity] (user) {User};
-  \node [process, right=of user, yshift=2cm] (p1) {\textbf{1.0}\\Authenticate\\User};
-  \node [process, right=of user] (p2) {\textbf{2.0}\\Dashboard\\Access};
-  \node [process, right=of user, yshift=-2cm] (p3) {\textbf{3.0}\\Manage\\Players};
+  \node [process, right=of user, yshift=2.5cm] (p1) {\textbf{1.0}\\Authenticate\\User};
+  \node [process, right=of user, yshift=0.8cm] (p2) {\textbf{2.0}\\Manage\\Squad Roster};
+  \node [process, right=of user, yshift=-0.8cm] (p3) {\textbf{3.0}\\Stochastic\\Simulation};
+  \node [process, right=of user, yshift=-2.5cm] (p4) {\textbf{4.0}\\Pose\\Biomechanics};
   
   \node [store, right=of p1] (d1) {D1\\Users DB};
-  \node [store, right=of p3] (d2) {D2\\Players DB};
+  \node [store, right=of p2] (d2) {D2\\Players DB};
   
   \draw [arrow] (user) -- (p1);
   \draw [arrow] (user) -- (p2);
   \draw [arrow] (user) -- (p3);
+  \draw [arrow] (user) -- (p4);
   
   \draw [arrow] (p1) -- (d1);
-  \draw [arrow] (p3) -- (d2);
+  \draw [arrow] (p2) -- (d2);
 \end{tikzpicture}
 \caption{Level 1 Data Flow Diagram}
-\label{fig:dfd1_diag}
+\label{fig:dfd1}
 \end{figure}
 
-\section{Activity Design}
-
-Activity diagrams represent the sequence of actions involved in major operations of the system.
-
-\subsection{User Authentication Activity}
-
-The authentication process begins when the user enters credentials. The credentials are submitted for validation. If invalid, an error is displayed. If valid, the user is redirected to the dashboard.
-
-The activity flow is shown in Figure 3.5.
+\section{Flowcharts \& Activity Diagrams}
+Figure \ref{fig:auth_flowchart} illustrates the user authentication and role validation flow.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1cm, auto,
-  step/.style={rectangle, draw=black, fill=yellow!20, rounded corners, text width=4cm, align=center},
+\begin{tikzpicture}[node distance=1.1cm, auto,
+  step/.style={rectangle, draw=black, fill=yellow!15, rounded corners, text width=4.5cm, align=center},
   decision/.style={diamond, draw=red!80, fill=red!10, align=center, aspect=2},
   circleend/.style={circle, draw=black, fill=black, inner sep=2pt},
   arrow/.style={draw, ->, >=stealth}]
   
-  \node [step] (s1) {Enter Email and Password};
-  \node [step, below=of s1] (s2) {Submit Credentials};
-  \node [step, below=of s2] (s3) {Validate Credentials (Backend)};
-  \node [decision, below=of s3] (dec) {Valid?};
-  \node [step, left=1.5cm of dec] (err) {Show Error Message};
-  \node [step, below=of dec] (auth) {Authenticate User};
-  \node [step, below=of auth] (redir) {Redirect to Dashboard};
+  \node [step] (s1) {Select Preset / Enter Credentials};
+  \node [step, below=of s1] (s2) {Submit Auth Request to Express API};
+  \node [step, below=of s2] (s3) {Verify Persona / User Record};
+  \node [decision, below=of s3] (dec) {Credentials Valid?};
+  \node [step, left=1.5cm of dec] (err) {Display Access Error Alert};
+  \node [step, below=of dec] (auth) {Establish User Session Context};
+  \node [step, below=of auth] (redir) {Redirect to Role Dashboard};
   \node [circleend, below=of redir] (end) {};
   
   \draw [arrow] (s1) -- (s2);
@@ -222,72 +121,61 @@ The activity flow is shown in Figure 3.5.
   \draw [arrow] (auth) -- (redir);
   \draw [arrow] (redir) -- (end);
 \end{tikzpicture}
-\caption{User Authentication Activity Diagram}
-\label{fig:auth_activity_diag}
+\caption{User Authentication \& Role Access Flowchart}
+\label{fig:auth_flowchart}
 \end{figure}
 
-\subsection{Application Submission Activity}
+\section{Database Design \& Schemas}
+CricketVision uses MongoDB for flexible document storage. The system features two core collections: \texttt{players} and \texttt{users}.
 
-The player submission process begins when a coach opens the player entry form. The coach enters name, role, fatigue rating, and stats. The system validates and submits the data to MongoDB.
-
-\section{Database Design}
-
-CricketVision uses MongoDB with Mongoose as its database engine. Information is organized in document collections:
-
-\begin{lstlisting}
-users
-|
-+-- {userId}
-      +-- name, email, role, permissions
-
-players
-|
-+-- {playerId}
-      +-- name, country, role, fatigueLevel, clutchRating, skillRadar, phaseStats
-\end{lstlisting}
-
-The main fields of a player document are described in Table 3.1.
-
+\subsection{Mongoose Player Schema Specification}
 \begin{table}[H]
 \centering
-\caption{Player Document Fields}
-\label{tab:player_fields}
-\begin{tabular}{ll}
+\caption{Mongoose Player Schema Data Dictionary}
+\label{tab:player_schema}
+\begin{tabular}{llll}
 \toprule
-\textbf{Field} & \textbf{Description} \\
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
 \midrule
-\texttt{id} & Unique player string identifier. \\
-\texttt{name} & Full name of the player. \\
-\texttt{country} & International country represented. \\
-\texttt{role} & Playing role (Batter, Bowler, All-rounder, WK). \\
-\texttt{fatigueLevel} & Workload fatigue index (0 to 100). \\
-\texttt{clutchRating} & High-pressure situation performance index. \\
-\texttt{skillRadar} & Object containing 6 core skill attributes. \\
-\texttt{phaseStats} & Powerplay, Middle, and Death overs statistical object. \\
+\texttt{id} & String & Required, Unique & Unique string ID (e.g., \texttt{virat-kohli}) \\
+\texttt{name} & String & Required, Trimmed & Full player display name \\
+\texttt{country} & String & Required & Represented nation/franchise \\
+\texttt{role} & String & Enum & Batter, Bowler, All-rounder, WK-Batter \\
+\texttt{fatigueLevel} & Number & Range: 0--100 & Physical workload fatigue index \\
+\texttt{clutchRating} & Number & Range: 0--100 & High-pressure scenario index \\
+\texttt{skillRadar} & Object & Nested Object & Holds 6 radar attribute metrics \\
+\texttt{phaseStats} & Object & Nested Object & Powerplay, Middle, Death stats \\
+\texttt{biomechanicsSummary}& Object & Nested Object & Joint angles: flexAngle, shoulderTilt \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{User Interface Design}
+\subsection{Mongoose User Schema Specification}
+\begin{table}[H]
+\centering
+\caption{Mongoose User Schema Data Dictionary}
+\label{tab:user_schema}
+\begin{tabular}{llll}
+\toprule
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\midrule
+\texttt{id} & String & Required, Unique & User identifier string \\
+\texttt{name} & String & Min length: 2 & User's full name \\
+\texttt{email} & String & Required, Unique & Account login email \\
+\texttt{password} & String & Min length: 6 & Account access password \\
+\texttt{role} & String & Enum & coach, player, user \\
+\texttt{playerId} & String & Optional (FK Ref) & Associated player profile ID \\
+\texttt{permissions} & [String] & Array & Granular privilege rights array \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The user interface is designed using React components and Tailwind CSS. The major interfaces include the home page, login/registration page, dashboard, and player management forms.
-
-\subsection{Home Page}
-The home page provides an introduction to CricketVision and navigation to login and portal selector controls.
-
-\subsection{Login and Registration Interfaces}
-The login interface allows users to authenticate using credentials or persona presets.
-
-\subsection{Dashboard}
-The dashboard acts as the primary interface after authentication, displaying squad KPIs, fatigue alerts, and player lists.
-
-\subsection{Add Application Form / Add Player Form}
-The form contains fields for player name, country, playing role, fatigue level, and performance metrics.
-
-\section{Security Design}
-
-Security is implemented through role-based authorization controllers, password validation, and protected frontend routes. Protected routes prevent unauthenticated users from directly accessing sensitive pages.
-
-\section{Design Summary}
-
-The design of CricketVision defines the architecture, functional interactions, data flow, database structure, and interface components required for the proposed system. The architecture separates the user interface, backend controllers, and database storage, allowing the system to remain modular and extensible.
+\section{User Interface \& Form Design}
+The frontend interface is organized into distinct functional view components:
+\begin{itemize}
+    \item \textbf{Landing \& Preset Login Selector (\texttt{LoginView.jsx}):} Enables one-click persona switching (\texttt{Rahul Dravid}, \texttt{Virat Kohli}, \texttt{Alex Morgan}).
+    \item \textbf{Squad Dashboard (\texttt{DashboardView.jsx}):} Displays squad KPIs, fatigue alerts, and player roster.
+    \item \textbf{Player Analytics Portal (\texttt{PlayerAnalyticsView.jsx}):} Renders 360-degree SVG wagon wheel heatmaps and Recharts radar charts.
+    \item \textbf{Match Simulator (\texttt{MatchSimulatorView.jsx}):} Renders interactive win-probability curves and ball-by-ball scenario controls.
+    \item \textbf{Video Pose Analyzer (\texttt{VideoAnalyzerView.jsx}):} Provides canvas skeleton overlays measuring joint flexion angles.
+\end{itemize}

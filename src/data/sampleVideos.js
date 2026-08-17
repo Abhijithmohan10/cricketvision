@@ -2,6 +2,29 @@
 
 export const SAMPLE_VIDEOS = [
   {
+    id: "kohli-cover-drive-cummins",
+    title: "VIRAT KOHLI Cover Drive off Pat Cummins",
+    category: "Featured Audio/Video Highlight",
+    player: "Virat Kohli vs Pat Cummins (Star Sports)",
+    description: "Stunning front-foot boundary through extra cover off Pat Cummins 144 km/h delivery. High elbow elevation, perfection in stride transfer.",
+    videoUrl: "/media/virat_kohli_cover_drive_cummins.mp3",
+    thumbnail: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=400&q=80",
+    metrics: {
+      batSpeed: "142.8 km/h",
+      impactPoint: "Directly under chin & nose (+0.5cm optimal alignment)",
+      elbowElevation: "86.5° (Elite Master Class Range 85°-90°)",
+      footStrideLength: "82 cm",
+      balanceScore: "99 / 100",
+      detectedFlaw: "Perfection achieved - Zero head tilt during impact moment.",
+      recommendedDrill: "Pace acceleration drill off 140+ km/h throwdowns"
+    },
+    poseKeypoints: [
+      { time: 0.5, head: { x: 50, y: 25 }, shoulderRight: { x: 45, y: 38 }, elbowRight: { x: 38, y: 46 }, wristRight: { x: 40, y: 60 }, kneeLeft: { x: 55, y: 72 }, ankleLeft: { x: 58, y: 88 } },
+      { time: 1.2, head: { x: 52, y: 28 }, shoulderRight: { x: 48, y: 40 }, elbowRight: { x: 42, y: 42 }, wristRight: { x: 49, y: 55 }, kneeLeft: { x: 60, y: 74 }, ankleLeft: { x: 62, y: 90 } },
+      { time: 2.0, head: { x: 54, y: 30 }, shoulderRight: { x: 52, y: 42 }, elbowRight: { x: 58, y: 36 }, wristRight: { x: 62, y: 48 }, kneeLeft: { x: 65, y: 75 }, ankleLeft: { x: 67, y: 90 } }
+    ]
+  },
+  {
     id: "cover-drive-kohli",
     title: "Classic High-Elbow Cover Drive",
     category: "Batting Technique",

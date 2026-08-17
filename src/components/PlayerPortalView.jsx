@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import PitchAndWagonWheel from './PitchAndWagonWheel';
+import MatchReportModal from './MatchReportModal';
+import { getCompletePlayerProfile } from '../data/cricketDatabase';
 
 export default function PlayerPortalView({ players = [] }) {
   const { currentUser, isCoach, isPlayer, switchPlayerAccount } = useAuth();
@@ -33,6 +35,7 @@ export default function PlayerPortalView({ players = [] }) {
   const defaultPlayerId = currentUser?.playerId || players[0]?.id || 'virat-kohli';
   const [selectedPlayerId, setSelectedPlayerId] = useState(defaultPlayerId);
   const [portalTab, setPortalTab] = useState('overview'); // overview, biomechanics, drills, wagon, matchup
+  const [isReportOpen, setIsReportOpen] = useState(false);
   
   // Auto-sync selected player when logged in user changes
   React.useEffect(() => {
@@ -61,7 +64,8 @@ export default function PlayerPortalView({ players = [] }) {
   const [uploadedVideoSuccess, setUploadedVideoSuccess] = useState(false);
 
   // Active Player Data
-  const player = players.find(p => p.id === selectedPlayerId) || players[0] || {
+  const rawPlayerObj = players.find(p => p.id === selectedPlayerId) || players[0];
+  const player = getCompletePlayerProfile(rawPlayerObj) || rawPlayerObj || {
     id: 'virat-kohli',
     name: 'Virat Kohli',
     role: 'Top-Order Batter',
@@ -155,14 +159,22 @@ export default function PlayerPortalView({ players = [] }) {
         </div>
 
         {/* Right: Quick Action Controls */}
-        <div className="flex items-center space-x-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={() => setIsReportOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-cyan-500/20"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Export Official AI Scouting Report for {player.name}</span>
+          </button>
+
           {isCoach && (
             <button
               onClick={() => setShowCoachNoteModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-cyan-500/20"
+              className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 hover:text-white font-bold text-xs transition-all flex items-center space-x-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Coach Note for {player.name}</span>
+              <span>Add Coach Note</span>
             </button>
           )}
         </div>
@@ -444,62 +456,125 @@ export default function PlayerPortalView({ players = [] }) {
             {/* 3 Biomechanics Reports Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold font-mono-code text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                    FRONT FOOT DRIVE
-                  </span>
-                  <span className="text-xs font-bold font-mono-code text-emerald-400">96 / 100</span>
-                </div>
+              {player.isBowler ? (
+                <>
+                  <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold font-mono-code text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                        BOWLING RELEASE SLOT
+                      </span>
+                      <span className="text-xs font-bold font-mono-code text-emerald-400">98 / 100</span>
+                    </div>
 
-                <h3 className="text-sm font-bold text-white">Cover Drive Weight Swivel</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Bat speed recorded at <strong>138.4 km/h</strong>. Knee angle bend score of 124° provides maximum power transfer.
-                </p>
+                    <h3 className="text-sm font-bold text-white">{player.isSpin ? 'Spin Release Revolution' : 'Fast Bowling Arm Slot'}</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Delivery release ball speed recorded at <strong>145.4 km/h</strong>. High arm extension provides maximum seam angle stability.
+                    </p>
 
-                <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
-                  <p>• Eye-Line Contact Point: 0.12s early</p>
-                  <p>• High Elbow Alignment: 94%</p>
-                </div>
-              </div>
+                    <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
+                      <p>• Release Point Angle: 178.4°</p>
+                      <p>• Seam Position Control: 96%</p>
+                    </div>
+                  </div>
 
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold font-mono-code text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                    SHORT PITCH PULL
-                  </span>
-                  <span className="text-xs font-bold font-mono-code text-amber-400">91 / 100</span>
-                </div>
+                  <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold font-mono-code text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                        YORKER ACCURACY
+                      </span>
+                      <span className="text-xs font-bold font-mono-code text-amber-400">95 / 100</span>
+                    </div>
 
-                <h3 className="text-sm font-bold text-white">Pull Shot Hip Rotation</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Bat speed recorded at <strong>144.1 km/h</strong>. Back foot pivot speed increased by 4.2% since last fixture.
-                </p>
+                    <h3 className="text-sm font-bold text-white">Death Yorker Crease Target</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Pitching accuracy index 95%. Front foot stride alignment maintains consistent line over off-stump base.
+                    </p>
 
-                <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
-                  <p>• Eye-Level Height: 1.48m</p>
-                  <p>• Power Transfer Efficiency: 92%</p>
-                </div>
-              </div>
+                    <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
+                      <p>• Yorker Length Precision: 94%</p>
+                      <p>• Boundary Avoidance: 89%</p>
+                    </div>
+                  </div>
 
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold font-mono-code text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    DEFENSIVE STANCE
-                  </span>
-                  <span className="text-xs font-bold font-mono-code text-emerald-400">98 / 100</span>
-                </div>
+                  <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold font-mono-code text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        SLOWER BALL DISGUISE
+                      </span>
+                      <span className="text-xs font-bold font-mono-code text-emerald-400">97 / 100</span>
+                    </div>
 
-                <h3 className="text-sm font-bold text-white">Forward Defense Alignment</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Soft hands cushion index 98%. Head position strictly over the ball line with zero lateral drift.
-                </p>
+                    <h3 className="text-sm font-bold text-white">Variation Disguise Arc</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Arm speed disguise matching stock ball at 98%. Off-cutter / knuckles dip late inside the crease line.
+                    </p>
 
-                <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
-                  <p>• Head Position Balance: 100%</p>
-                  <p>• Edge Avoidance Index: High</p>
-                </div>
-              </div>
+                    <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
+                      <p>• Velocity Differential: -24 km/h</p>
+                      <p>• Batter Deception Score: High</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold font-mono-code text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                        FRONT FOOT DRIVE
+                      </span>
+                      <span className="text-xs font-bold font-mono-code text-emerald-400">96 / 100</span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-white">Cover Drive Weight Swivel</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Bat speed recorded at <strong>142.8 km/h</strong>. Knee angle bend score of 124° provides maximum power transfer.
+                    </p>
+
+                    <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
+                      <p>• Eye-Line Contact Point: 0.12s early</p>
+                      <p>• High Elbow Alignment: 94%</p>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold font-mono-code text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                        SHORT PITCH PULL
+                      </span>
+                      <span className="text-xs font-bold font-mono-code text-amber-400">91 / 100</span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-white">Pull Shot Hip Rotation</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Bat speed recorded at <strong>145.2 km/h</strong>. Back foot pivot speed increased by 4.2% since last fixture.
+                    </p>
+
+                    <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
+                      <p>• Eye-Level Height: 1.48m</p>
+                      <p>• Power Transfer Efficiency: 92%</p>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold font-mono-code text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                        DEFENSIVE STANCE
+                      </span>
+                      <span className="text-xs font-bold font-mono-code text-emerald-400">98 / 100</span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-white">Forward Defense Alignment</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Soft hands cushion index 98%. Head position strictly over the ball line with zero lateral drift.
+                    </p>
+
+                    <div className="pt-2 border-t border-slate-800/80 space-y-1 text-[11px] text-slate-400 font-mono-code">
+                      <p>• Head Position Balance: 100%</p>
+                      <p>• Edge Avoidance Index: High</p>
+                    </div>
+                  </div>
+                </>
+              )}
 
             </div>
 
@@ -700,6 +775,13 @@ export default function PlayerPortalView({ players = [] }) {
           </div>
         </div>
       )}
+
+      {/* Match Report Modal */}
+      <MatchReportModal
+        player={player}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
 
     </div>
   );

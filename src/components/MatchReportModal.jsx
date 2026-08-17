@@ -1,10 +1,13 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X, Printer, Download, Sparkles, Award, ShieldCheck, Activity, CheckCircle2 } from 'lucide-react';
+import { X, Printer, Sparkles, Activity, CheckCircle2, Zap, Award, Target } from 'lucide-react';
 import PlayerAvatar from './PlayerAvatar';
+import { getCompletePlayerProfile } from '../data/cricketDatabase';
 
 export default function MatchReportModal({ player, isOpen, onClose }) {
   if (!isOpen || !player) return null;
+
+  const fullPlayer = getCompletePlayerProfile(player);
 
   const handlePrint = () => {
     window.print();
@@ -20,7 +23,7 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
             <span className="px-2.5 py-0.5 text-xs font-bold font-mono-code bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded">
               OFFICIAL AI SCOUTING REPORT
             </span>
-            <h2 className="text-sm font-bold text-white">CricketVision AI Report Export</h2>
+            <h2 className="text-sm font-bold text-white">CricketVision AI Report: {fullPlayer.name}</h2>
           </div>
 
           <div className="flex items-center space-x-3">
@@ -47,19 +50,22 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
           {/* Header Banner */}
           <div className="flex items-center justify-between border-b border-slate-800 print:border-black pb-4">
             <div className="flex items-center space-x-4">
-              <PlayerAvatar player={player} className="w-16 h-16 print:w-14 print:h-14" rounded="rounded-2xl" />
+              <PlayerAvatar player={fullPlayer} className="w-16 h-16 print:w-14 print:h-14" rounded="rounded-2xl" />
               <div>
                 <div className="flex items-center space-x-2">
-                  <h1 className="text-xl font-black font-heading text-white print:text-black print:text-lg">{player.name}</h1>
+                  <h1 className="text-xl font-black font-heading text-white print:text-black print:text-lg">{fullPlayer.name}</h1>
                   <span className="px-2 py-0.5 text-xs font-bold font-mono-code bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded print:border-black print:text-black">
-                    #{player.jerseyNumber || 10}
+                    #{fullPlayer.jerseyNumber || 10}
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold font-mono-code bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded print:border-black print:text-black">
+                    {fullPlayer.role}
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 print:text-gray-700 mt-0.5">
-                  {player.role} • {player.country} • IPL: {player.iplTeam}
+                  {fullPlayer.country} • IPL: {fullPlayer.iplTeam}
                 </p>
                 <p className="text-[11px] font-mono-code text-cyan-400 print:text-blue-700 mt-0.5">
-                  Batting: {player.battingStyle} | Bowling: {player.bowlingStyle}
+                  Batting: {fullPlayer.battingStyle} | Bowling: {fullPlayer.bowlingStyle}
                 </p>
               </div>
             </div>
@@ -73,62 +79,156 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
                 Date: {new Date().toLocaleDateString()}
               </p>
               <span className="inline-block mt-1 px-2.5 py-0.5 text-[10px] font-mono-code font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded print:border-black print:text-black">
-                CONFIDENCE: 96%
+                CONFIDENCE: 98%
               </span>
             </div>
           </div>
 
-          {/* Key Metrics Row */}
+          {/* Role-Specific Key Metrics Row */}
           <div className="grid grid-cols-4 gap-3 text-center print:gap-2">
+            
             <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
-              <p className="text-[10px] text-slate-400 print:text-gray-700">Clutch Rating</p>
-              <p className="text-base font-bold text-amber-400 print:text-black">★ {player.clutchRating}</p>
+              <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Clutch Rating</p>
+              <p className="text-base font-bold text-amber-400 print:text-black">★ {fullPlayer.clutchRating}</p>
             </div>
-            <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
-              <p className="text-[10px] text-slate-400 print:text-gray-700">IPL Runs / Wkts</p>
-              <p className="text-base font-bold text-cyan-400 print:text-black">{player.iplStats?.runs || player.iplStats?.wickets || 1200}</p>
+
+            {/* Bowler specific vs Batter specific vs All-Rounder cards */}
+            {fullPlayer.isBowler ? (
+              <>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">IPL Wickets</p>
+                  <p className="text-base font-bold text-emerald-400 print:text-black">{fullPlayer.iplStats.wickets}</p>
+                </div>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Economy Rate</p>
+                  <p className="text-base font-bold text-cyan-400 print:text-black">{fullPlayer.iplStats.econ}</p>
+                </div>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Best Bowling</p>
+                  <p className="text-base font-bold text-amber-400 print:text-black">{fullPlayer.iplStats.bb}</p>
+                </div>
+              </>
+            ) : fullPlayer.isAllRounder ? (
+              <>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">IPL Runs</p>
+                  <p className="text-base font-bold text-cyan-400 print:text-black">{fullPlayer.iplStats.runs}</p>
+                </div>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">IPL Wickets</p>
+                  <p className="text-base font-bold text-emerald-400 print:text-black">{fullPlayer.iplStats.wickets}</p>
+                </div>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Strike Rate / Econ</p>
+                  <p className="text-base font-bold text-amber-400 print:text-black">{fullPlayer.iplStats.sr} / {fullPlayer.iplStats.econ}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">IPL Runs</p>
+                  <p className="text-base font-bold text-cyan-400 print:text-black">{fullPlayer.iplStats.runs}</p>
+                </div>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Batting Average</p>
+                  <p className="text-base font-bold text-emerald-400 print:text-black">{fullPlayer.iplStats.avg}</p>
+                </div>
+                <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
+                  <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Strike Rate</p>
+                  <p className="text-base font-bold text-amber-400 print:text-black">{fullPlayer.iplStats.sr}</p>
+                </div>
+              </>
+            )}
+
+          </div>
+
+          {/* COMPUTER VISION VIDEO METRICS CARD SUMMARY (Ball Speed, Bat Speed, Shot Perfection) */}
+          <div className="p-3.5 bg-slate-900/90 border border-cyan-500/30 print:bg-gray-50 print:border-black rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-white print:text-black uppercase font-mono-code flex items-center space-x-2">
+                <Zap className="w-3.5 h-3.5 text-amber-400 print:text-black" />
+                <span>Computer Vision Video Analysis Metrics</span>
+              </h3>
+              <span className="text-[10px] font-bold font-mono-code text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 print:border-black print:text-black">
+                REAL-TIME EXTRACTION
+              </span>
             </div>
-            <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
-              <p className="text-[10px] text-slate-400 print:text-gray-700">Average</p>
-              <p className="text-base font-bold text-emerald-400 print:text-black">{player.iplStats?.avg || 32.5}</p>
-            </div>
-            <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
-              <p className="text-[10px] text-slate-400 print:text-gray-700">Fatigue Index</p>
-              <p className="text-base font-bold text-emerald-400 print:text-black">{player.fatigueLevel || 20}% (Low)</p>
+
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-2 bg-slate-950 border border-slate-800 print:bg-white print:border-black rounded-lg">
+                <p className="text-[10px] text-slate-400 print:text-gray-700 font-mono-code">1. BALL SPEED</p>
+                <p className="text-sm font-black text-amber-400 print:text-black mt-0.5">
+                  {fullPlayer.videoMetrics?.ballSpeed || '145.4 km/h'}
+                </p>
+              </div>
+
+              <div className="p-2 bg-slate-950 border border-slate-800 print:bg-white print:border-black rounded-lg">
+                <p className="text-[10px] text-slate-400 print:text-gray-700 font-mono-code">2. BAT SPEED</p>
+                <p className="text-sm font-black text-cyan-400 print:text-black mt-0.5">
+                  {fullPlayer.videoMetrics?.batSpeed || '142.8 km/h'}
+                </p>
+              </div>
+
+              <div className="p-2 bg-slate-950 border border-slate-800 print:bg-white print:border-black rounded-lg">
+                <p className="text-[10px] text-slate-400 print:text-gray-700 font-mono-code">3. SHOT PERFECTION</p>
+                <p className="text-sm font-black text-emerald-400 print:text-black mt-0.5">
+                  {fullPlayer.videoMetrics?.shotPerfection || '96%'}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Biomechanical Skills Radar Breakdown */}
+          {/* Multidimensional Technical Breakdown */}
           <div className="p-3 bg-slate-900/60 border border-slate-800 print:bg-gray-50 print:border-black rounded-xl space-y-2">
             <h3 className="text-xs font-bold text-white print:text-black uppercase font-mono-code flex items-center space-x-2">
               <Activity className="w-3.5 h-3.5 text-cyan-400 print:text-black" />
-              <span>Multidimensional Biomechanical Breakdown</span>
+              <span>Multidimensional Biomechanical & Technical Radar</span>
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-              <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
-                <span className="text-slate-400 print:text-gray-700">Power Hitting:</span>
-                <span className="font-bold text-cyan-400 print:text-black ml-1.5">{player.skillRadar?.powerHitting || 85}/100</span>
-              </div>
-              <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
-                <span className="text-slate-400 print:text-gray-700">Spin Technique:</span>
-                <span className="font-bold text-cyan-400 print:text-black ml-1.5">{player.skillRadar?.spinTechnique || 88}/100</span>
-              </div>
-              <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
-                <span className="text-slate-400 print:text-gray-700">Pace Mastery:</span>
-                <span className="font-bold text-cyan-400 print:text-black ml-1.5">{player.skillRadar?.paceMastery || 90}/100</span>
-              </div>
-              <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
-                <span className="text-slate-400 print:text-gray-700">Death Execution:</span>
-                <span className="font-bold text-cyan-400 print:text-black ml-1.5">{player.skillRadar?.deathExecution || 86}/100</span>
-              </div>
+              {fullPlayer.isBowler ? (
+                <>
+                  <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                    <span className="text-slate-400 print:text-gray-700">Seam/Spin Release:</span>
+                    <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.seamOrSpinControl}/100</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                    <span className="text-slate-400 print:text-gray-700">Length Precision:</span>
+                    <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.bowlingPrecision}/100</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                    <span className="text-slate-400 print:text-gray-700">Death Yorker Pct:</span>
+                    <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.deathExecution}/100</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                    <span className="text-slate-400 print:text-gray-700">Power Hitting:</span>
+                    <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.powerHitting}/100</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                    <span className="text-slate-400 print:text-gray-700">Spin Technique:</span>
+                    <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.spinTechnique}/100</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                    <span className="text-slate-400 print:text-gray-700">Pace Mastery:</span>
+                    <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.paceMastery}/100</span>
+                  </div>
+                </>
+              )}
+
               <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
                 <span className="text-slate-400 print:text-gray-700">Fielding Rating:</span>
-                <span className="font-bold text-cyan-400 print:text-black ml-1.5">{player.skillRadar?.fielding || 92}/100</span>
+                <span className="font-bold text-cyan-400 print:text-black ml-1.5">{fullPlayer.skillRadar.fielding}/100</span>
               </div>
               <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
                 <span className="text-slate-400 print:text-gray-700">Injury Status:</span>
-                <span className="font-bold text-emerald-400 print:text-black ml-1.5">{player.injuryStatus || 'Fit'}</span>
+                <span className="font-bold text-emerald-400 print:text-black ml-1.5">{fullPlayer.injuryStatus || 'Fit'}</span>
+              </div>
+              <div className="p-1.5 bg-slate-900 border border-slate-800 print:bg-white print:border-black rounded">
+                <span className="text-slate-400 print:text-gray-700">Fatigue Index:</span>
+                <span className="font-bold text-emerald-400 print:text-black ml-1.5">{fullPlayer.fatigueLevel || 14}%</span>
               </div>
             </div>
           </div>
@@ -137,28 +237,22 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
           <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 print:bg-gray-100 print:border-black rounded-xl space-y-1.5">
             <h3 className="text-xs font-bold text-cyan-400 print:text-black flex items-center space-x-2">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400 print:text-black" />
-              <span>AI Tactical Coach Match Recommendations</span>
+              <span>AI Tactical Coach Match Recommendations for {fullPlayer.name}</span>
             </h3>
             <ul className="space-y-1 text-xs text-slate-300 print:text-gray-800">
-              <li className="flex items-start space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 print:text-black shrink-0 mt-0.5" />
-                <span>
-                  <strong>Powerplay Strategy:</strong> Target length overs 1-6 with aggressive wrist rotation. Projected Strike Rate: {player.phaseStats?.powerplay?.strikeRate || 140}.
-                </span>
-              </li>
-              <li className="flex items-start space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 print:text-black shrink-0 mt-0.5" />
-                <span>
-                  <strong>Death Overs Execution:</strong> Death overs boundary probability is {player.phaseStats?.deathOvers?.boundaryPct || '26.5%'}.
-                </span>
-              </li>
+              {fullPlayer.tacticalRecommendations.map((rec, idx) => (
+                <li key={idx} className="flex items-start space-x-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 print:text-black shrink-0 mt-0.5" />
+                  <span>{rec}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Footer Signoff */}
           <div className="pt-2 border-t border-slate-800 print:border-black flex items-center justify-between text-[10px] text-slate-400 print:text-gray-600 font-mono-code">
             <span>Generated by CricketVision AI Performance System</span>
-            <span>Document Signature: CV-AI-{player.id.toUpperCase()}-2026</span>
+            <span>Document Signature: CV-AI-{(fullPlayer.id || 'PLAYER').toUpperCase()}-2026</span>
           </div>
 
         </div>

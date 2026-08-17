@@ -35,7 +35,7 @@ import PlayerAvatar from './PlayerAvatar';
 import { FileText } from 'lucide-react';
 
 
-import { INITIAL_PLAYER_DATABASE } from '../data/cricketDatabase.js';
+import { INITIAL_PLAYER_DATABASE, getCompletePlayerProfile } from '../data/cricketDatabase.js';
 
 class AnalyticsErrorBoundary extends React.Component {
   constructor(props) {
@@ -79,7 +79,8 @@ export default function PlayerAnalyticsView({ players = [], searchQuery = '', on
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [allRounderStatMode, setAllRounderStatMode] = useState('both'); // 'both', 'batting', 'bowling'
 
-  const selectedPlayer = activePlayers.find(p => p.id === selectedPlayerId) || activePlayers[0];
+  const rawSelected = activePlayers.find(p => p.id === selectedPlayerId) || activePlayers[0];
+  const selectedPlayer = getCompletePlayerProfile(rawSelected) || rawSelected;
 
   // Keep selectedPlayerId valid if players list changes
   React.useEffect(() => {

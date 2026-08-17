@@ -94,13 +94,29 @@ function MainApp() {
   };
 
 
+  const handleSaveAnalysisReport = (reportData) => {
+    if (!reportData || !reportData.player) return;
+    const targetId = reportData.player.id;
+    const updated = players.map(p => {
+      if (p.id === targetId) {
+        return {
+          ...p,
+          videoMetrics: reportData.metrics,
+          lastAnalysisDate: reportData.date
+        };
+      }
+      return p;
+    });
+    handleSavePlayers(updated);
+  };
+
   // Render appropriate view based on activeTab
   const renderActiveView = () => {
     switch (activeTab) {
       case 'next_match_predictor':
         return <NextMatchPredictorView players={players} />;
       case 'video_analyzer':
-        return <VideoAnalyzerView />;
+        return <VideoAnalyzerView players={players} onSaveAnalysisReport={handleSaveAnalysisReport} />;
       case 'database':
         return <PlayerAnalyticsView players={players} searchQuery={searchQuery} />;
       case 'simulator':

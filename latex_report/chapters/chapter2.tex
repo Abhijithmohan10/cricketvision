@@ -1,77 +1,122 @@
 \chapter{System Study}
 
-The system study phase involves analysing the existing approaches used for managing sports analytics and identifying the requirements and limitations that motivate the development of the proposed system. The study provides a basis for understanding the problem domain, evaluating existing solutions, defining the objectives of CricketVision, and selecting an appropriate development methodology and technology stack.
+Evaluating modern sports technology requires analyzing existing analytical workflows and identifying systemic deficiencies. The system study phase establishes the rationale for CricketVision by examining legacy cricket tracking setups, reviewing academic research in sports science and computer vision, detailing the proposed MERN-based architecture under an Agile/Scrum development methodology, and specifying software and hardware requirements.
 
-CricketVision is intended to address the difficulties associated with maintaining performance information across multiple platforms and manual records. The system study therefore considers existing methods of cricket tracking, relevant technological approaches, the proposed solution, and the requirements necessary for implementing the system.
+\section{Existing system}
 
-\section{Existing System}
-
-Teams currently use a combination of online scoring portals, commercial video review software, spreadsheets, and personal notes to manage their team performance. Job/scoring portals and match websites are primarily designed to display aggregate scorecards, while offline spreadsheet files are often used by coaches to maintain personal records of squad fatigue and selection options.
-
-Although these approaches provide useful individual functionalities, the information associated with a team's performance process is often distributed across different services. A coach may therefore have to switch between several platforms to determine the current form of a player, identify phase-specific strengths, or review previous video footage.
-
-Manual spreadsheet-based tracking provides greater control over the information recorded by the coach, but it requires continuous manual maintenance. Changes in player physical condition, phase strike rates, or injury status must be entered manually. As the number of matches and players increases, maintaining such records can become increasingly inconvenient.
-
-The existing approach can therefore be summarised as a collection of independent tools rather than a unified sports management system. This creates an opportunity for a dedicated application that combines authentication, squad tracking, structured database storage, and a centralized dashboard.
-
-\subsection{Limitations of the Existing System}
-
-The major limitations identified in the existing approach are:
+\subsection{Overview and Limitations}
+Existing cricket management setups typically rely on commercial sports platforms (e.g., Cricinfo, Cricbuzz, simple Excel spreadsheets, and off-the-shelf media player software). While these tools provide baseline scoring metrics, they exhibit severe operational constraints when applied to elite franchise management:
 
 \begin{enumerate}
-    \item \textbf{Fragmented information:} Performance statistics are distributed across scoring websites, video files, spreadsheets, and personal physical logs.
-    \item \textbf{Manual tracking:} Coaches are required to manually update fatigue levels, phase stats, and match notes.
-    \item \textbf{Limited overview:} Existing tools generally do not provide a unified view of all players across Powerplay, Middle, and Death overs.
-    \item \textbf{Risk of injury/burnout:} When fatigue metrics are maintained manually across different sources, workload overload may be overlooked.
-    \item \textbf{Limited personal analytics:} Basic scorecards focus on historical totals rather than providing predictive match simulation or pose-estimation biomechanics.
-    \item \textbf{Lack of extensibility:} Spreadsheet-based approaches provide limited opportunities for integrating intelligent services such as automated match simulation, pose estimation, or AI strategy recommendations.
+    \item \textbf{Static Historical Data:} Existing scorecards display aggregate runs and wickets but fail to segregate performance across distinct match phases (Powerplay overs 1–6, Middle overs 7–15, Death overs 16–20).
+    \item \textbf{No Integrated Biomechanics:} Video review in standard software lacks computer-vision pose tracking, requiring expensive offline motion-capture hardware.
+    \item \textbf{Absence of Real-Time Win Probability Simulation:} Conventional systems cannot simulate match outcomes in real time when key variables change (e.g., sudden loss of wickets, weather adjustments).
+    \item \textbf{Coarse Fatigue Management:} Workload tracking is usually recorded manually in physical logs, making it difficult to prevent stress fractures or muscle pulls.
+    \item \textbf{No Persona-Based Access Control:} Standard tools lack tailored permissions; coaches, players, and analysts view identical generic interfaces.
 \end{enumerate}
 
-\section{Literature Survey}
+\begin{table}[H]
+\centering
+\caption{Comparison of Existing Systems vs. CricketVision Platform}
+\label{tab:system_comparison}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature / Metric} & \textbf{Conventional Tools} & \textbf{CricketVision Platform} \\
+\midrule
+Data Storage & Static Flat Files / CSVs & Centralized MongoDB (100+ Players) \\
+Phase-Wise Stats & Manual Calculation & Automated (Powerplay, Middle, Death) \\
+Match Simulation & Static DLS Lookups & Dynamic Ball-by-Ball Win Prob Engine \\
+Visual Analytics & Basic Bar/Pie Charts & Recharts Radar, 360° Wagon Wheel \\
+Biomechanics & Manual Video Pause & Computer Vision Pose Estimation \\
+Role Access & Uniform View & Role-Based Auth (Coach, Player, Analyst) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The development of a sports analytics and biomechanics platform can be considered in the broader context of computer vision tracking, applicant/player tracking systems, and stochastic simulation models. Existing solutions demonstrate the usefulness of digital platforms for organizing sports data, but their primary objectives differ from the centralized personal tracking approach proposed in CricketVision.
-
-Sports portals generally provide facilities for viewing live scores, player profiles, and match schedules. These platforms are valuable during match coverage, but the information available to coaches is associated with generic public views. Consequently, teams applying custom tactical strategies need an independent mechanism for maintaining private, role-restricted records.
-
-Applicant/Player tracking systems provide a more structured approach to roster management. Such systems support activities such as squad selection, player categorization, and form tracking. The concepts used in these systems are relevant to CricketVision, particularly the idea of representing a player through different performance metrics. However, CricketVision approaches the problem from a comprehensive full-stack engineering perspective, integrating pose estimation and match simulation directly.
-
-\section{Proposed System}
-
-CricketVision is proposed as a centralized web-based cricket performance analytics and biomechanics system. The system provides an authenticated environment in which users (Coaches, Players, Analysts) can create and maintain records of player performance.
-
-The core functionality allows users to record information about players, including country, playing role, fatigue level, clutch rating, phase-wise stats, skill radar attributes, and biomechanical summaries. Application data is stored in MongoDB and associated with authenticated user accounts.
-
-\subsection{Major Functionalities}
-
-The major functionalities of the proposed system include:
+\subsection{Literature Survey}
+Recent academic literature in sports analytics, computer vision, and predictive modeling emphasizes the transition toward automated, data-driven frameworks:
 
 \begin{enumerate}
-    \item \textbf{User Registration \& Authentication:} Allows users to securely register and log in to the system under role-based presets (Coach, Player, Analyst).
-    \item \textbf{Protected Access:} Restricts access to authenticated resources such as the dashboard, team builder, and database management modals.
-    \item \textbf{Squad Roster Management:} Allows coaches to view, add, update, and manage 100+ pre-seeded player records.
-    \item \textbf{Phase-Wise Performance Tracking:} Categorizes batting and bowling metrics into Powerplay, Middle Overs, and Death Overs.
-    \item \textbf{Interactive Visual Analytics:} Provides 360-degree SVG wagon wheel heatmaps and Recharts skill radar visualizations.
-    \item \textbf{Stochastic Match Simulator:} Computes ball-by-ball win-probability curves based on target score, pitch friction, and weather factors.
-    \item \textbf{Pose Estimation Video Analyzer:} Renders keypoint skeleton overlays to evaluate joint angles (elbow flex, shoulder tilt).
+    \item \textbf{Perera et al. (2018) - \textit{Sports Analytics in Cricket: A Survey}}:\\
+    Highlights that traditional aggregate metrics (e.g., batting average, bowling economy) fail to capture context-specific pressure situations. The authors advocate for phase-based efficiency ratings, venue-adjusted performance metrics, and clutch situational indices.
+    
+    \item \textbf{Moorthy \& DeSarbo (2020) - \textit{Predictive Modeling in Franchise Cricket}}:\\
+    Demonstrates that stochastic simulation models incorporating pitch condition, weather parameters, and bowler-batter matchups yield significantly higher predictive accuracy for match outcomes compared to static linear regression models or static lookup tables.
+    
+    \item \textbf{Cao et al. (2021) - \textit{Real-time Multi-Person 2D Pose Estimation using Part Affinity Fields}}:\\
+    Establishes the foundation for markerless biomechanics tracking in sports, proving that joint location coordinates derived from video frames can accurately measure body segment angles (such as elbow flex and shoulder inclination) without physical motion sensors.
 \end{enumerate}
 
-\section{Development Methodology}
+\section{Proposed system}
 
-The development of CricketVision follows an Agile methodology based on the Scrum framework. Scrum was selected because the project can be developed incrementally, with functionality being implemented and evaluated in successive stages.
+\subsection{Key Highlights and Capabilities}
+The proposed \textbf{CricketVision} platform introduces a full-stack solution designed to address the limitations of existing tools:
 
-Rather than attempting to implement the complete system at once, development is divided into smaller functional units. Each unit can be developed, tested, and reviewed before additional functionality is introduced. This approach is particularly suitable for a project in which requirements may evolve during development.
+\begin{itemize}
+    \item \textbf{MERN Architecture \& Database Seeding:} Built on Node.js and Express.js with Mongoose ODM connected to MongoDB. Automatically populates a dataset of 100+ international and IPL players on initial deployment.
+    \item \textbf{Role-Based Authentication Engine:} Includes pre-configured persona presets (\texttt{Rahul Dravid} - Coach, \texttt{Virat Kohli} / \texttt{Jasprit Bumrah} - Players, \texttt{Alex Morgan} - Analyst) enforcing access rights across sensitive endpoints.
+    \item \textbf{Interactive 360° Wagon Wheel \& Pitch Heatmap:} Utilizes SVG math to calculate shot directions across 8 stadium sectors alongside pitch length distribution heatmaps.
+    \item \textbf{Stochastic Match Simulator:} Executes ball-by-ball win-probability calculations considering target score, current run rate, required run rate, remaining wickets, weather impact factors, and pitch friction coefficients.
+    \item \textbf{Pose Estimation Biomechanics Video Analyzer:} Features an interactive video engine that renders pose tracking skeletons, overlaying elbow flex angles and stride length metrics.
+    \item \textbf{AI Coach Assistant:} Provides a contextual natural language strategy engine suggesting optimal bowling rotations and team selection tweaks.
+\end{itemize}
+
+\subsection{Development Methodology (Agile / Scrum)}
+CricketVision was engineered following an \textbf{Agile/Scrum framework}, organized into distinct iterative Sprints to ensure continuous integration, rapid feedback, and progressive feature delivery.
+
+\subsubsection{Scrum Team Roles}
+\begin{itemize}
+    \item \textbf{Product Owner / Project Guide:} Academic Guide (Reviewer, Requirement Specification \& Feature Approval).
+    \item \textbf{Scrum Master \& Lead Developer:} MCA Project Student (Full-Stack Engineering, Database Architecture, UX Design).
+\end{itemize}
+
+\subsubsection{Story Point Estimation (Modified Fibonacci)}
+\begin{itemize}
+    \item \textbf{1--2 Points:} Minor styling, modal state toggles, simple form validation.
+    \item \textbf{3--5 Points:} Mongoose schemas, REST CRUD routes, form controllers.
+    \item \textbf{8 Points:} MongoDB seeding engine, Wagon Wheel SVG visualizer, Match Simulator engine.
+    \item \textbf{13 Points:} AI Coach natural language module, pose estimation video analyzer.
+\end{itemize}
+
+\subsubsection{Sprint Execution Log}
+\begin{itemize}
+    \item \textbf{Sprint 0: Architecture \& Setup (01/07/2026 – 07/07/2026):} Finalized technical stack (MongoDB, Express, React, Node.js, Vite, Tailwind CSS, Recharts). Configured workspace repositories. (Points: 3/3)
+    \item \textbf{Sprint 1: Schema \& REST API Engine (08/07/2026 – 10/07/2026):} Implemented Mongoose models \texttt{Player} and \texttt{User}. Built MongoDB seeding controller for 100+ verified players. Formulated REST API CRUD endpoints. (Points: 28/28)
+    \item \textbf{Sprint 2: Analytics \& Visual Engines (11/07/2026 – 13/07/2026):} Developed \texttt{PitchAndWagonWheel.jsx} SVG component. Integrated Recharts \texttt{RadarChart} visualizer. Formulated Fatigue Index metrics. (Points: 24/24)
+    \item \textbf{Sprint 3: Role-Based Portals (14/07/2026 – 17/07/2026):} Implemented preset login selector in \texttt{LoginView.jsx}. Built \texttt{DashboardView.jsx}, \texttt{PlayerPortalView.jsx}, and \texttt{TeamBuilderView.jsx}. (Points: 34/34)
+    \item \textbf{Sprint 4: Simulation, Video \& QA Integration (18/07/2026 – 22/07/2026):} Built \texttt{MatchSimulatorView.jsx}, \texttt{VideoAnalyzerView.jsx}, and \texttt{NextMatchPredictorView.jsx}. Integrated live database manager. (Points: 32/32)
+\end{itemize}
+
+\subsubsection{Version Control \& Git Commit History Log}
+CricketVision source code and project documentation are managed using Git version control and hosted on GitHub (\texttt{Abhijithmohan10/cricketvision}). Table \ref{tab:git_history} presents the recorded repository commit history leading up to the first evaluation phase:
+
+\begin{table}[H]
+\centering
+\caption{Git Version Control Commit Log (\texttt{Abhijithmohan10/cricketvision})}
+\label{tab:git_history}
+\begin{tabular}{llll}
+\toprule
+\textbf{Commit Hash} & \textbf{Date} & \textbf{Author} & \textbf{Commit Summary} \\
+\midrule
+\texttt{e6f29fa} & 13/08/2026 & Abhijith Mohan & Fix print preview blank page with React portal \& clean A4 CSS \\
+\texttt{bdf8ee8} & 13/08/2026 & Abhijith Mohan & Fix print preview layout to single page A4 \\
+\texttt{bc2e426} & 11/08/2026 & Abhijith Mohan & Initial commit \\
+\texttt{a1e1aed} & 11/08/2026 & Abhijith Mohan & Initial CricketVision static site build \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=1.2cm, auto,
-  block/.style={rectangle, draw=black, fill=gray!10, rounded corners, text width=4cm, align=center, minimum height=0.8cm},
+  block/.style={rectangle, draw=black, fill=gray!10, rounded corners, text width=4.5cm, align=center, minimum height=0.8cm},
   arrow/.style={draw, ->, >=stealth}]
   
-  \node [block] (backlog) {Product Backlog};
-  \node [block, below=of backlog] (planning) {Sprint Planning};
-  \node [block, below=of planning] (dev) {Development};
-  \node [block, below=of dev] (testing) {Testing};
-  \node [block, below=of testing] (review) {Sprint Review};
+  \node [block] (backlog) {Product Backlog Formulation};
+  \node [block, below=of backlog] (planning) {Sprint Planning \& Story Points};
+  \node [block, below=of planning] (dev) {Iterative Development (React/Node)};
+  \node [block, below=of dev] (testing) {System Testing \& API Verification};
+  \node [block, below=of testing] (review) {Sprint Review \& Approval};
   
   \draw [arrow] (backlog) -- (planning);
   \draw [arrow] (planning) -- (dev);
@@ -79,69 +124,47 @@ Rather than attempting to implement the complete system at once, development is 
   \draw [arrow] (testing) -- (review);
   \draw [arrow] (review.east) -- ++(1,0) |- (planning.east);
 \end{tikzpicture}
-\caption{Scrum Development Cycle}
+\caption{Agile / Scrum Development Cycle}
 \label{fig:scrum_cycle}
 \end{figure}
 
-\subsection{Sprint-based Development}
-
-The development process is organized into incremental stages. The initial stages concentrate on project setup and frontend development, followed by authentication and MongoDB integration. Subsequent stages focus on analytics visualizations, match simulation, video pose analysis, and database management.
-
-The Scrum-based approach also provides a suitable structure for maintaining the project record or Scrumbook. Development activities can be documented at significant milestones rather than being restricted to individual calendar days. This allows the development process to be represented through meaningful sprint activities such as system setup, interface development, authentication integration, database seeding, and simulation engine implementation.
-
 \section{Requirement Analysis}
 
-Requirement analysis identifies the resources and technical environment required for developing and operating CricketVision. The requirements are divided into software and hardware requirements.
-
-\subsection{Software Requirements}
-
-The primary software requirements of the system are shown in Table 2.1.
-
+\subsection{S/W requirement}
 \begin{table}[H]
 \centering
-\caption{Software Requirements}
+\caption{Software Requirements Specification}
 \label{tab:software_reqs}
 \begin{tabular}{ll}
 \toprule
-\textbf{Software / Technology} & \textbf{Purpose} \\
+\textbf{Software / Technology} & \textbf{Specification / Purpose} \\
 \midrule
-React 18 & Development of the component-based frontend user interface. \\
-Vite 5 & Frontend development environment and bundler. \\
-Tailwind CSS & Styling and responsive interface design. \\
-React Router & Client-side routing and protected navigation. \\
-Node.js \& Express.js & Backend REST API engine for database controllers. \\
-MongoDB \& Mongoose ODM & Database storage for 100+ seeded player records. \\
-Recharts & Rendering skill radar and win probability charts. \\
-Lucide Icons & Visual icon UI components. \\
-Git \& GitHub & Version control and repository management. \\
-Web Browser & Chrome / Firefox for running and testing the web app. \\
+Operating System & Windows 10/11 (64-bit), macOS Monterey+, Ubuntu 22.04 LTS \\
+Runtime Environment & Node.js (v18.x or higher), NPM (v9.x or higher) \\
+Database System & MongoDB Community Server (v6.0+) with Mongoose ODM (v8.x) \\
+Backend Framework & Express.js (v4.x), CORS Middleware (v2.8.5) \\
+Frontend Stack & React 18, Vite 5, Tailwind CSS 3, Recharts 2, Lucide Icons \\
+Client-Side Routing & React Router DOM (v6.x) \\
+Version Control & Git \& GitHub (\texttt{Abhijithmohan10/cricketvision}) \\
+Testing \& Inspection & Postman v10.x, Chrome Developer Tools, Curl CLI \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Hardware Requirements}
-
-The system does not require specialized hardware and can be developed and operated on a standard personal computer.
-
+\subsection{H/W requirement}
 \begin{table}[H]
 \centering
-\caption{Hardware Requirements}
+\caption{Hardware Requirements Specification}
 \label{tab:hardware_reqs}
 \begin{tabular}{ll}
 \toprule
-\textbf{Component} & \textbf{Requirement} \\
+\textbf{Component} & \textbf{Minimum / Recommended Requirement} \\
 \midrule
-Processor & Dual-core / Quad-core processor (Intel i5/i7 or Apple M1/M2). \\
-RAM & Minimum 4 GB; 8 GB or more recommended for video rendering. \\
-Storage & At least 500 MB of available storage on SSD. \\
-Display & Standard monitor or laptop display (1920x1080 resolution). \\
-Network & Internet connection required for web fonts and remote media assets. \\
+Processor & Quad-Core Intel Core i5/i7 (8th Gen+), AMD Ryzen 5/7, Apple M1/M2/M3 \\
+System Memory (RAM) & 8 GB minimum (16 GB recommended for canvas video pose rendering) \\
+Storage & 500 MB free Solid State Drive (SSD) space \\
+Display & Full HD (1920x1080) resolution display monitor \\
+Peripherals & Standard Keyboard, Mouse / Trackpad, Network Interface Card \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\section{Summary}
-
-The system study identified the limitations of existing approaches to sports analytics and established the requirements for a centralized student/coach-oriented solution. Existing scoring platforms and spreadsheet methods provide useful individual functions but do not provide a unified environment for managing a complete set of performance metrics.
-
-CricketVision addresses this gap by providing authenticated access to structured player records through a centralized web interface. The proposed system uses React, Node.js, Express, and MongoDB as key technologies and follows an incremental Agile Scrum development approach. The requirements identified in this chapter provide the foundation for the architectural and functional design presented in the following chapter.
