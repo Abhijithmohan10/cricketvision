@@ -193,17 +193,6 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
 
       // 1. Draw Ball Track & Impact (When Analyzed or Tracking Toggled)
       if (showBatTrack && (hasAnalyzed || isAnalyzing)) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#06b6d4'; // Cyan arc
-        ctx.lineWidth = 3;
-        ctx.setLineDash([5, 5]);
-
-        // Downswing trajectory
-        ctx.moveTo(w * 0.40, h * 0.28);
-        ctx.quadraticCurveTo(w * 0.52, h * 0.65, w * 0.72, h * 0.78);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
         // Ball Impact Point Indicator
         const ballX = w * (0.40 + progress * 0.32);
         const ballY = h * (0.28 + Math.pow(progress, 0.8) * 0.50);
