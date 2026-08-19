@@ -165,7 +165,7 @@ export default function PlayerPortalView({ players = [] }) {
             className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-cyan-500/20"
           >
             <FileText className="w-4 h-4" />
-            <span>Export Official AI Scouting Report for {player.name}</span>
+            <span>Export Official  Scouting Report for {player.name}</span>
           </button>
 
           {isCoach && (
@@ -449,7 +449,7 @@ export default function PlayerPortalView({ players = [] }) {
             {uploadedVideoSuccess && (
               <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center space-x-2 animate-in fade-in">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Video uploaded successfully! AI keypoint extraction and high-elbow biomechanics score calculated.</span>
+                <span>Video uploaded successfully!.</span>
               </div>
             )}
 
