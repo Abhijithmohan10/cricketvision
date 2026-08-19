@@ -159,9 +159,8 @@ function MainApp() {
 
       {/* Footer */}
       <footer className="glass-panel border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 mt-12">
-       <center></center> <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono-code">
-          <p>© 2026 CricketVision AI • </p></center>
-         
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center font-mono-code">
+          <p>© 2026 CricketVision AI • Performance Analysis &amp; Team Intelligence System</p>
         </div>
       </footer>
 
