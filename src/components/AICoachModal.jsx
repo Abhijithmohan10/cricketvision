@@ -6,7 +6,7 @@ export default function AICoachModal({ isOpen, onClose }) {
     {
       id: 1,
       sender: 'ai',
-      text: "Hello! I am your AI Tactical Cricket Assistant. I can analyze IPL & International stats, generate matchup blueprints, recommend bowling changes, and create custom drill plans. How can I assist your team today?"
+      text: "Hello! I am your AI Tactical Cricket Assistant."
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -38,7 +38,7 @@ export default function AICoachModal({ isOpen, onClose }) {
 
   const exportReport = () => {
     const reportText = messages.map(m => `[${m.sender.toUpperCase()}]: ${m.text}`).join('\n\n');
-    const blob = new Blob([`CRICKETVISION AI TACTICAL REPORT\nGenerated: ${new Date().toLocaleString()}\n\n` + reportText], { type: 'text/plain' });
+    const blob = new Blob([`CRICKETVISION TACTICAL REPORT\nGenerated: ${new Date().toLocaleString()}\n\n` + reportText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
