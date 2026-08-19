@@ -21,7 +21,7 @@ export const DEFAULT_USERS = {
     title: "Star Batter (#18)",
     email: "virat@cricketvision.ai",
     avatar: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=400&q=80",
-    badge: "🏏 Player Portal (User-wise Data)",
+    badge: "🏏 Player Portal ",
     permissions: ["personal_stats", "personal_video_analysis", "drill_recommendations", "match_simulator"]
   },
   player_bumrah: {
@@ -31,7 +31,7 @@ export const DEFAULT_USERS = {
     title: "Fast Bowler (#93)",
     email: "bumrah@cricketvision.ai",
     avatar: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=400&q=80",
-    badge: "🏏 Player Portal (User-wise Data)",
+    badge: "🏏 Player Portal ",
     permissions: ["personal_stats", "personal_video_analysis", "drill_recommendations"]
   },
   player_rohit: {
@@ -41,7 +41,7 @@ export const DEFAULT_USERS = {
     title: "Opening Batter (#45)",
     email: "rohit@cricketvision.ai",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-    badge: "🏏 Player Portal (User-wise Data)",
+    badge: "🏏 Player Portal ",
     permissions: ["personal_stats", "personal_video_analysis", "drill_recommendations"]
   },
   user: {

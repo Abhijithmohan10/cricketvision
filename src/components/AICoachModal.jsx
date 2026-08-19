@@ -58,9 +58,9 @@ export default function AICoachModal({ isOpen, onClose }) {
             </div>
             <div>
               <h2 className="text-base font-extrabold font-heading text-white">
-                CricketVision AI Tactical Coach
+                 AI Tactical Coach
               </h2>
-              <p className="text-[10px] text-cyan-400 font-mono-code">INSTANT MATCH STRATEGY ENGINE</p>
+              
             </div>
           </div>
 

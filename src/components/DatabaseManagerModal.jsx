@@ -504,7 +504,7 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
               className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/20 hover:opacity-90 transition-all flex items-center justify-center space-x-1.5"
             >
               <Save className="w-4 h-4" />
-              <span>Save AI-Enriched Player to Database</span>
+              <span>Save  Player</span>
             </button>
           </form>
         )}

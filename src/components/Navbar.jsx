@@ -87,9 +87,7 @@ export default function Navbar({
                   <span>{isMongoConnected ? '🍃 MongoDB' : '⚡ Local'}</span>
                 </span>
               </div>
-              <p className="text-[9px] text-slate-400 -mt-0.5 hidden sm:block">
-                User-Wise Access Interface Active
-              </p>
+             
             </div>
           </div>
 
@@ -211,7 +209,7 @@ export default function Navbar({
                       >
                         <div className="flex items-center space-x-2">
                           <span>👑</span>
-                          <span>Head Coach (Full Squad Access)</span>
+                          <span>Head Coach</span>
                         </div>
                       </button>
 
@@ -221,7 +219,7 @@ export default function Navbar({
                       >
                         <div className="flex items-center space-x-2">
                           <span>📊</span>
-                          <span>Analyst User (Public Data)</span>
+                          <span>Analyst User</span>
                         </div>
                       </button>
                     </div>
