@@ -98,14 +98,12 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
-  
-  // Interactive Analysis State
+
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [scanStepText, setScanStepText] = useState('');
 
-  // Overlay Toggles
   const [showBatTrack, setShowBatTrack] = useState(true);
   const [showAngles, setShowAngles] = useState(true);
 
@@ -113,11 +111,9 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Active Shot Preset & Selected Player
   const currentShotPreset = BATTING_SHOT_PRESETS.find(s => s.id === selectedShotType) || BATTING_SHOT_PRESETS[0];
   const selectedPlayer = activePlayersList.find(p => p.id === selectedPlayerId) || activePlayersList[0];
 
-  // Handle Custom Video Upload
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -125,11 +121,10 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
       setCustomVideoUrl(url);
       setCustomVideoName(file.name);
       setIsPlaying(false);
-      setHasAnalyzed(false); // Reset analysis state for new custom video
+      setHasAnalyzed(false);
     }
   };
 
-  // Trigger Interactive Video Analysis
   const handleRunAnalysis = () => {
     if (!customVideoUrl) {
       fileInputRef.current?.click();
@@ -142,7 +137,6 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
     setHasAnalyzed(false);
     setAnalysisProgress(0);
 
-    // Auto-play video during analysis scan
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play();
@@ -171,7 +165,6 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
     }, 400);
   };
 
-  // Video Time Update & Clean Canvas Overlay Renderer
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -188,16 +181,12 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
 
       ctx.clearRect(0, 0, w, h);
 
-      // Playback progress factor (0 to 1)
       const progress = (video.currentTime || 0) / (video.duration || 1);
 
-      // 1. Draw Ball Track & Impact (When Analyzed or Tracking Toggled)
       if (showBatTrack && (hasAnalyzed || isAnalyzing)) {
-        // Ball Impact Point Indicator
         const ballX = w * (0.40 + progress * 0.32);
         const ballY = h * (0.28 + Math.pow(progress, 0.8) * 0.50);
 
-        // Impact Burst
         ctx.beginPath();
         ctx.fillStyle = '#38bdf8';
         ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
@@ -209,13 +198,11 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.arc(ballX, ballY, 14, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Label Impact
         ctx.fillStyle = '#38bdf8';
         ctx.font = 'bold 11px Outfit, sans-serif';
         ctx.fillText('SWEET SPOT IMPACT', ballX + 16, ballY + 4);
       }
 
-      // 2. AI Scanning Beam Animation during Video Analysis
       if (isAnalyzing) {
         const scanY = h * ((Date.now() % 1500) / 1500);
         ctx.beginPath();
@@ -226,20 +213,17 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
         ctx.moveTo(0, scanY);
         ctx.lineTo(w, scanY);
         ctx.stroke();
-        ctx.shadowBlur = 0; // Reset shadow
+        ctx.shadowBlur = 0;
 
-        // Scan Bounding Grid
         ctx.strokeStyle = 'rgba(6, 182, 212, 0.3)';
         ctx.lineWidth = 1;
         ctx.strokeRect(w * 0.25, h * 0.2, w * 0.5, h * 0.65);
 
-        // Scanning Target Badge
         ctx.fillStyle = 'rgba(6, 182, 212, 0.9)';
         ctx.font = 'bold 12px monospace';
         ctx.fillText(`SCANNING VIDEO FRAMES (${analysisProgress}%)`, w * 0.30, scanY - 8);
       }
 
-      // 3. Revealed Computer Vision HUD Callouts (After Analysis is Completed)
       if (hasAnalyzed && showAngles) {
         const boxX = w - 210;
         const boxY = 15;

@@ -36,8 +36,8 @@ export default function Navbar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity, coachOnly: false },
     { id: 'player_portal', label: 'My Player Portal', icon: UserCheck, highlight: true, playerOnly: false },
-    { id: 'next_match_predictor', label: 'Next Match Predictor', icon: Sparkles, badge: 'ML' },
-    { id: 'video_analyzer', label: 'AI Video Upload', icon: Video, badge: 'AI' },
+    { id: 'next_match_predictor', label: 'Next Match Predictor', icon: Sparkles },
+    { id: 'video_analyzer', label: 'AI Video Upload', icon: Video },
     { id: 'database', label: 'IPL & Intl Database', icon: Database },
     { id: 'simulator', label: 'Match Simulator', icon: Cpu },
     { id: 'team_builder', label: 'Playing XI Builder', icon: Users, coachOnly: true },
