@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 const AUTH_STORAGE_KEY = 'cricketvision_auth_user_v1';
+const TOKEN_STORAGE_KEY = 'cricketvision_auth_token_v1';
 
 export const DEFAULT_USERS = {
   coach: {
@@ -21,7 +22,7 @@ export const DEFAULT_USERS = {
     title: "Star Batter (#18)",
     email: "virat@cricketvision.ai",
     avatar: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=400&q=80",
-    badge: "🏏 Player Portal ",
+    badge: "🏏 Player Portal",
     permissions: ["personal_stats", "personal_video_analysis", "drill_recommendations", "match_simulator"]
   },
   player_bumrah: {
@@ -31,7 +32,7 @@ export const DEFAULT_USERS = {
     title: "Fast Bowler (#93)",
     email: "bumrah@cricketvision.ai",
     avatar: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=400&q=80",
-    badge: "🏏 Player Portal ",
+    badge: "🏏 Player Portal",
     permissions: ["personal_stats", "personal_video_analysis", "drill_recommendations"]
   },
   player_rohit: {
@@ -41,7 +42,7 @@ export const DEFAULT_USERS = {
     title: "Opening Batter (#45)",
     email: "rohit@cricketvision.ai",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-    badge: "🏏 Player Portal ",
+    badge: "🏏 Player Portal",
     permissions: ["personal_stats", "personal_video_analysis", "drill_recommendations"]
   },
   user: {
@@ -59,14 +60,15 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
+      if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error("Failed to load auth user:", e);
     }
-    // Default start as Head Coach
     return DEFAULT_USERS.coach;
+  });
+
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem(TOKEN_STORAGE_KEY) || null;
   });
 
   useEffect(() => {
@@ -77,7 +79,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  }, [token]);
+
+  // Persona quick-login — bypasses API for fast demo/evaluation
   const loginAsRole = (roleKey, customPlayer = null) => {
+    setToken(null);
     if (roleKey === 'player' && customPlayer) {
       setCurrentUser({
         name: customPlayer.name,
@@ -92,6 +104,12 @@ export const AuthProvider = ({ children }) => {
     } else if (DEFAULT_USERS[roleKey]) {
       setCurrentUser(DEFAULT_USERS[roleKey]);
     }
+  };
+
+  // Real API login — stores the returned JWT token
+  const loginWithToken = (userData, jwtToken) => {
+    setCurrentUser(userData);
+    setToken(jwtToken);
   };
 
   const switchPlayerAccount = (playerObj) => {
@@ -110,7 +128,7 @@ export const AuthProvider = ({ children }) => {
 
   const canAccessPlayer = (targetPlayerId) => {
     if (!currentUser) return false;
-    if (currentUser.role === 'coach') return true; // Coach has access to all players
+    if (currentUser.role === 'coach') return true;
     if (currentUser.role === 'player') return currentUser.playerId === targetPlayerId;
     return false;
   };
@@ -123,6 +141,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setCurrentUser(null);
+    setToken(null);
   };
 
   const isCoach = currentUser?.role === 'coach';
@@ -132,7 +151,9 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       currentUser,
+      token,
       loginAsRole,
+      loginWithToken,
       switchPlayerAccount,
       canAccessPlayer,
       hasPermission,
@@ -153,4 +174,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

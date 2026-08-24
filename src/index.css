@@ -144,4 +144,94 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   }
 }
 
+/* ─── Mobile Responsive Layout ────────────────────────────────────────────── */
 
+@media (max-width: 768px) {
+
+  /* Prevent horizontal overflow on all screens */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Navbar — collapse to single row */
+  nav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Hide long nav text labels on small screens, keep icons */
+  .nav-label {
+    display: none;
+  }
+
+  /* Make the main content area full width with small padding */
+  main, .main-content {
+    padding: 0.75rem !important;
+    max-width: 100vw;
+  }
+
+  /* Stack all grid layouts vertically on mobile */
+  .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Cards — full width on mobile */
+  .glass-panel, .glass-panel-interactive {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Tables — horizontal scroll on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Modal — full screen on mobile */
+  .modal-container, [class*="max-w-4xl"], [class*="max-w-2xl"] {
+    max-width: 100vw !important;
+    margin: 0.5rem !important;
+    border-radius: 1rem !important;
+  }
+
+  /* Headings — scale down for small screens */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.1rem !important; }
+
+  /* Recharts charts — scale to fit mobile */
+  .recharts-wrapper {
+    max-width: 100% !important;
+    overflow: hidden;
+  }
+
+  /* Buttons — bigger tap targets */
+  button {
+    min-height: 40px;
+  }
+
+  /* Input fields — comfortable touch targets */
+  input, select, textarea {
+    min-height: 42px;
+    font-size: 16px !important; /* prevents iOS zoom on focus */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens — further reductions */
+  h1 { font-size: 1.25rem !important; }
+
+  .glass-panel, .glass-panel-interactive {
+    padding: 0.75rem !important;
+  }
+
+  /* Hide stat cards that overflow on very small screens */
+  .stat-overflow-hide {
+    display: none;
+  }
+}

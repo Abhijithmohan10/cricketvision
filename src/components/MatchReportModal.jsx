@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Printer, Sparkles, Activity, CheckCircle2, Zap, Award, Target } from 'lucide-react';
+import { X, Download, Sparkles, Activity, CheckCircle2, Zap, Award, Target, Loader } from 'lucide-react';
 import PlayerAvatar from './PlayerAvatar';
 import { getCompletePlayerProfile } from '../data/cricketDatabase';
 
@@ -8,10 +8,36 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
   if (!isOpen || !player) return null;
 
   const fullPlayer = getCompletePlayerProfile(player);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handlePrint = () => {
-    window.print();
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const { jsPDF } = await import('jspdf');
+
+      const element = document.getElementById('printable-match-report');
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#020817'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`CricketVision_Report_${fullPlayer.name.replace(/\s+/g, '_')}.pdf`);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      window.print(); // fallback
+    }
+    setIsDownloading(false);
   };
+
+
 
   const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto print:static print:p-0 print:bg-white print:overflow-visible">
@@ -28,11 +54,21 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
 
           <div className="flex items-center space-x-3">
             <button
-              onClick={handlePrint}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs hover:opacity-90 transition-all flex items-center space-x-2 shadow-lg shadow-cyan-500/20"
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs hover:opacity-90 transition-all flex items-center space-x-2 shadow-lg shadow-cyan-500/20 disabled:opacity-60"
             >
-              <Printer className="w-4 h-4" />
-              <span>Print / Save as PDF</span>
+              {isDownloading ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  <span>Generating PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Download PDF Report</span>
+                </>
+              )}
             </button>
 
             <button

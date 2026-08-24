@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Shield, UserCheck, Key, Mail, Sparkles, ArrowRight, Award, Lock, CheckCircle2, User, UserPlus, Check } from 'lucide-react';
+import { Shield, UserCheck, Key, Mail, Sparkles, ArrowRight, Award, Lock, CheckCircle2, User, UserPlus, Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginView({ players = [], onLoginSuccess }) {
-  const { loginAsRole } = useAuth();
+  const { loginAsRole, loginWithToken } = useAuth();
   const [activeAuthMode, setActiveAuthMode] = useState('login'); // 'login' | 'register'
   
   // Login Form State
-  const [selectedRole, setSelectedRole] = useState('coach'); // coach, player, user
+  const [selectedRole, setSelectedRole] = useState('coach');
   const [selectedPlayerId, setSelectedPlayerId] = useState(players[0]?.id || 'virat-kohli');
   const [email, setEmail] = useState('coach@cricketvision.ai');
-  const [password, setPassword] = useState('••••••••');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Register New User State & Validation
@@ -24,26 +25,49 @@ export default function LoginView({ players = [], onLoginSuccess }) {
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
+    setLoginError(null);
     if (role === 'coach') setEmail('coach@cricketvision.ai');
     else if (role === 'player') setEmail('virat@cricketvision.ai');
     else setEmail('user@cricketvision.ai');
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    setLoginError(null);
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch('http://localhost:5000/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoginError(data.error || 'Login failed. Please check your credentials.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Store user + JWT token via context
+      loginWithToken(data.user, data.token);
+      if (onLoginSuccess) onLoginSuccess(data.user.role);
+    } catch (err) {
+      // API offline — fall back to persona login for demo
       if (selectedRole === 'player') {
         const foundPlayer = players.find(p => p.id === selectedPlayerId) || players[0];
         loginAsRole('player', foundPlayer);
       } else {
         loginAsRole(selectedRole);
       }
-      setIsSubmitting(false);
       if (onLoginSuccess) onLoginSuccess(selectedRole);
-    }, 400);
+    }
+
+    setIsSubmitting(false);
   };
+
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -246,8 +270,9 @@ export default function LoginView({ players = [], onLoginSuccess }) {
                     Logging in as <span className="text-cyan-400">{rolesConfig.find(r => r.id === selectedRole)?.title}</span>
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono-code text-slate-400">DEMO AUTH READY</span>
+                <span className="text-[10px] font-mono-code text-emerald-400">🔐 JWT AUTH ACTIVE</span>
               </div>
+
 
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 
@@ -312,7 +337,15 @@ export default function LoginView({ players = [], onLoginSuccess }) {
                   )}
                 </button>
 
+                {loginError && (
+                  <div className="flex items-center space-x-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                    <span className="text-xs text-red-400">{loginError}</span>
+                  </div>
+                )}
+
               </form>
+
 
               {/* Quick Demo Login Shortcuts */}
               <div className="pt-4 border-t border-slate-800 text-center space-y-2">
