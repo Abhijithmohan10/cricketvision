@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Plus, Trash2, ShieldCheck, AlertTriangle, Sparkles, Check, Flame, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import PlayerAvatar from './PlayerAvatar';
 
 export default function TeamBuilderView({ players = [] }) {
   const { isCoach, currentUser, loginAsRole } = useAuth();
-  // Pre-select first 11 players into Playing XI
+  // Initialize XI with first 11 players; re-sync if players load async from MongoDB
   const [playingXI, setPlayingXI] = useState(() => players.slice(0, 11));
   const [teamName, setTeamName] = useState("CricketVision All-Star XI");
+
+  // If players arrived asynchronously (e.g. MongoDB fetch completed after mount),
+  // re-populate the XI so it's never empty
+  useEffect(() => {
+    if (players.length > 0 && playingXI.length === 0) {
+      setPlayingXI(players.slice(0, 11));
+    }
+  }, [players]);
 
 
   const availableSquad = players.filter(p => !playingXI.some(xi => xi.id === p.id));

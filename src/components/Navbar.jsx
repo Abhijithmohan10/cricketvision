@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Activity, 
   Video, 
@@ -32,6 +32,18 @@ export default function Navbar({
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showAccessRestrictedModal, setShowAccessRestrictedModal] = useState(false);
   const [restrictedFeatureName, setRestrictedFeatureName] = useState('');
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowRoleDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity, coachOnly: false },
@@ -170,7 +182,7 @@ export default function Navbar({
 
             {/* Active User Avatar & Dropdown */}
             {currentUser && (
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowRoleDropdown(!showRoleDropdown)}
                   className="flex items-center space-x-1.5 p-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all"

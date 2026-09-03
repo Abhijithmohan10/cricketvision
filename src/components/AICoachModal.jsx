@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Bot, Send, Sparkles, Download, CheckCircle, Shield } from 'lucide-react';
 
 export default function AICoachModal({ isOpen, onClose }) {
@@ -10,6 +10,14 @@ export default function AICoachModal({ isOpen, onClose }) {
     }
   ]);
   const [inputText, setInputText] = useState('');
+  const chatEndRef = useRef(null);
+
+  // Auto-scroll to bottom whenever messages update
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   if (!isOpen) return null;
 
@@ -115,6 +123,8 @@ export default function AICoachModal({ isOpen, onClose }) {
               </div>
             </div>
           ))}
+          {/* Scroll anchor — auto-scrolls here on new messages */}
+          <div ref={chatEndRef} />
         </div>
 
         {/* Message Input Form */}
