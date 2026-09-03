@@ -12,6 +12,7 @@ import LoginView from './components/LoginView';
 import DatabaseManagerModal from './components/DatabaseManagerModal';
 import AICoachModal from './components/AICoachModal';
 import { getStoredPlayerDatabase, savePlayerDatabase, resetPlayerDatabaseToDefault } from './data/cricketDatabase';
+import API_BASE_URL from './config/api';
 
 function MainApp() {
   const { currentUser } = useAuth();
@@ -28,7 +29,7 @@ function MainApp() {
 
   // Fetch from MongoDB server on mount
   useEffect(() => {
-    fetch('http://localhost:5000/api/players')
+    fetch(`${API_BASE_URL}/api/players`)
       .then(res => {
         if (!res.ok) throw new Error('Server error');
         return res.json();
@@ -41,7 +42,7 @@ function MainApp() {
         }
       })
       .catch(() => {
-        console.log('MongoDB server offline at localhost:5000. Operating in LocalStorage fallback mode.');
+        console.log('MongoDB server offline. Operating in LocalStorage fallback mode.');
         setIsMongoConnected(false);
       });
   }, []);
@@ -53,19 +54,21 @@ function MainApp() {
 
     if (isMongoConnected) {
       try {
-        const latestPlayer = updatedPlayers[updatedPlayers.length - 1];
-        if (latestPlayer) {
-          await fetch('http://localhost:5000/api/players', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(latestPlayer)
-          });
-          
-          const res = await fetch('http://localhost:5000/api/players');
-          if (res.ok) {
-            const freshData = await res.json();
-            setPlayers(freshData);
-          }
+        // Upsert every player so edits to any player (not just the last) are persisted
+        await Promise.all(
+          updatedPlayers.map(player =>
+            fetch(`${API_BASE_URL}/api/players`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(player)
+            })
+          )
+        );
+        // Re-fetch fresh sorted list from server
+        const res = await fetch(`${API_BASE_URL}/api/players`);
+        if (res.ok) {
+          const freshData = await res.json();
+          setPlayers(freshData);
         }
       } catch (e) {
         console.error('Error syncing with MongoDB:', e);
@@ -79,9 +82,9 @@ function MainApp() {
 
     if (isMongoConnected) {
       try {
-        const res = await fetch('http://localhost:5000/api/players/seed', { method: 'POST' });
+        const res = await fetch(`${API_BASE_URL}/api/players/seed`, { method: 'POST' });
         if (res.ok) {
-          const freshRes = await fetch('http://localhost:5000/api/players');
+          const freshRes = await fetch(`${API_BASE_URL}/api/players`);
           if (freshRes.ok) {
             const freshData = await freshRes.json();
             setPlayers(freshData);
@@ -112,6 +115,11 @@ function MainApp() {
 
   // Render appropriate view based on activeTab
   const renderActiveView = () => {
+    // If no user is logged in, always show the login screen
+    if (!currentUser && activeTab !== 'login') {
+      return <LoginView players={players} onLoginSuccess={(role) => setActiveTab(role === 'player' ? 'player_portal' : 'dashboard')} />;
+    }
+
     switch (activeTab) {
       case 'next_match_predictor':
         return <NextMatchPredictorView players={players} />;
@@ -132,7 +140,6 @@ function MainApp() {
         return <DashboardView players={players} setActiveTab={setActiveTab} onOpenAICoach={() => setIsAICoachOpen(true)} />;
     }
   };
-
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">

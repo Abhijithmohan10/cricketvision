@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, UserCheck, Key, Mail, Sparkles, ArrowRight, Award, Lock, CheckCircle2, User, UserPlus, Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import API_BASE_URL from '../config/api';
 
 export default function LoginView({ players = [], onLoginSuccess }) {
   const { loginAsRole, loginWithToken } = useAuth();
@@ -37,7 +38,7 @@ export default function LoginView({ players = [], onLoginSuccess }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/users/login', {
+      const res = await fetch(`${API_BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password })
@@ -107,7 +108,7 @@ export default function LoginView({ players = [], onLoginSuccess }) {
 
     try {
       // POST to MongoDB API
-      const res = await fetch('http://localhost:5000/api/users/register', {
+      const res = await fetch(`${API_BASE_URL}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUserPayload)

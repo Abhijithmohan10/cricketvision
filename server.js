@@ -8,7 +8,17 @@ import { INITIAL_PLAYER_DATABASE } from './src/data/cricketDatabase.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/cricketvision';
-const JWT_SECRET = process.env.JWT_SECRET || 'cricketvision_jwt_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  // In development only — warn loudly but allow startup with a generated fallback
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn('⚠️  JWT_SECRET env var not set. Using temporary dev secret — do NOT use in production!');
+  } else {
+    console.error('❌ FATAL: JWT_SECRET environment variable is required in production. Exiting.');
+    process.exit(1);
+  }
+}
+const _JWT_SECRET = JWT_SECRET || 'dev_only_cricketvision_secret_change_me';
 
 app.use(cors());
 app.use(express.json());
@@ -228,7 +238,7 @@ app.post('/api/users/login', async (req, res) => {
     // Sign a 7-day JWT token
     const token = jwt.sign(
       { id: user.id, role: user.role, name: user.name },
-      JWT_SECRET,
+      _JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -267,7 +277,7 @@ app.post('/api/users/register', async (req, res) => {
 
     const token = jwt.sign(
       { id: saved.id, role: saved.role, name: saved.name },
-      JWT_SECRET,
+      _JWT_SECRET,
       { expiresIn: '7d' }
     );
 
