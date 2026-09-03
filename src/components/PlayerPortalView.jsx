@@ -29,7 +29,7 @@ import MatchReportModal from './MatchReportModal';
 import { getCompletePlayerProfile } from '../data/cricketDatabase';
 
 export default function PlayerPortalView({ players = [] }) {
-  const { currentUser, isCoach, isPlayer, switchPlayerAccount } = useAuth();
+  const { currentUser, isCoach, isPlayer, canAccessPlayer } = useAuth();
   
   // Find current active player profile (default to currentUser.playerId or first player in list)
   const defaultPlayerId = currentUser?.playerId || players[0]?.id || 'virat-kohli';
@@ -81,6 +81,24 @@ export default function PlayerPortalView({ players = [] }) {
   };
 
   const isCurrentLoggedInPlayer = currentUser?.playerId === player.id;
+
+  if (!canAccessPlayer(player.id)) {
+    return (
+      <div className="max-w-4xl mx-auto mt-20 px-4 text-center space-y-4">
+        <div className="inline-flex p-4 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-extrabold font-heading text-white">Access Restricted</h2>
+        <p className="text-sm text-slate-400">
+          You do not have permission to view the private portal for <strong className="text-amber-400">{player.name}</strong>.
+        </p>
+        <p className="text-xs text-slate-500">
+          This area contains sensitive biomechanical data and private coach notes. 
+          Only the player themselves and Head Coaches can access it.
+        </p>
+      </div>
+    );
+  }
 
   const toggleDrill = (id) => {
     setCompletedDrills(prev => ({ ...prev, [id]: !prev[id] }));

@@ -64,7 +64,8 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       console.error("Failed to load auth user:", e);
     }
-    return DEFAULT_USERS.coach;
+    // Start as null — visitors must log in (or use quick demo buttons on the Login page)
+    return null;
   });
 
   const [token, setToken] = useState(() => {
