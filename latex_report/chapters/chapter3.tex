@@ -1,6 +1,6 @@
 \chapter{Design}
 
-The design phase translates the functional requirements established during system study into a formal architectural and structural blueprint for CricketVision. This chapter details the system architecture, block diagrams, Data Flow Diagrams (DFDs Level 0, 1, and 2), execution flowcharts, Mongoose database schemas, and user interface component specifications.
+The design phase translates the functional requirements established during system study into a formal architectural and structural blueprint for CricketVision. This chapter details the system architecture, block diagrams, Data Flow Diagrams (DFDs Level 0, 1), execution flowcharts, Mongoose database schemas, and user interface component specifications.
 
 \section{System Architecture \& Block Diagram}
 CricketVision adheres to a modern, decoupled 3-tier client-server architecture:
@@ -13,18 +13,20 @@ CricketVision adheres to a modern, decoupled 3-tier client-server architecture:
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1.4cm, auto,
+\begin{tikzpicture}[
+  node distance=1.4cm, auto,
   block/.style={rectangle, draw=blue!80, fill=blue!5, thick, text width=12cm, align=center, rounded corners, minimum height=1cm},
-  arrow/.style={draw=blue!80, ->, >=stealth, thick}]
+  arrow/.style={draw=blue!80, ->, >=stealth, thick}
+]
   
   \node [block] (frontend) {\textbf{PRESENTATION LAYER (REACT 18 \& VITE)}\\Coach Dashboard $|$ Player Portal $|$ Analyst Simulator $|$ Pose Analyzer};
   \node [block, below=of frontend] (backend) {\textbf{APPLICATION LAYER (EXPRESS.JS \& NODE.JS)}\\Auth Router $|$ Player Controller $|$ Match Simulator Engine $|$ AI Coach};
   \node [block, below=of backend] (database) {\textbf{DATA LAYER (MONGODB 6.0+)}\\Collection: \texttt{players} (100+ Docs) $|$ Collection: \texttt{users} (Role Presets)};
   
-  \draw [arrow] (frontend) -- node[anchor=east] {HTTP REST Requests (JSON)} (backend);
-  \draw [arrow] (backend) -- node[anchor=east] {Mongoose ODM Queries} (database);
-  \draw [arrow] (database) -- node[anchor=west] {Document Data Stream} (backend);
-  \draw [arrow] (backend) -- node[anchor=west] {JSON Response Payload} (frontend);
+  \draw [arrow] (frontend.south west) -- node[left, font=\small, fill=white, inner sep=1pt] {HTTP REST Requests (JSON)} (backend.north west);
+  \draw [arrow] (backend.south west) -- node[left, font=\small, fill=white, inner sep=1pt] {Mongoose ODM Queries} (database.north west);
+  \draw [arrow] (database.north east) -- node[right, font=\small, fill=white, inner sep=1pt] {Document Data Stream} (backend.south east);
+  \draw [arrow] (backend.north east) -- node[right, font=\small, fill=white, inner sep=1pt] {JSON Response Payload} (frontend.south east);
 \end{tikzpicture}
 \caption{CricketVision 3-Tier System Architecture Block Diagram}
 \label{fig:system_architecture}
@@ -37,24 +39,29 @@ The Context Diagram illustrates external user entities (Head Coach, Elite Player
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1.8cm, auto,
-  entity/.style={rectangle, draw=black, fill=gray!10, thick, minimum width=3cm, minimum height=0.9cm, align=center},
+\begin{tikzpicture}[
+  node distance=2.8cm,
+  entity/.style={rectangle, draw=black, fill=gray!10, thick, minimum width=2.8cm, minimum height=0.9cm, align=center},
   process/.style={circle, draw=blue!80, fill=blue!10, thick, minimum size=2.8cm, align=center},
-  line/.style={draw, ->, >=stealth, thick}]
+  line/.style={draw, ->, >=stealth, thick}
+]
   
   \node [process] (system) {\textbf{0.0}\\CricketVision\\System};
-  \node [entity, above=of system] (coach) {Head Coach};
-  \node [entity, below left=of system] (player) {Elite Player};
-  \node [entity, below right=of system] (analyst) {Sports Analyst};
+  \node [entity, above=2.2cm of system] (coach) {Head Coach};
+  \node [entity, below left=2.2cm and 2.5cm of system] (player) {Elite Player};
+  \node [entity, below right=2.2cm and 2.5cm of system] (analyst) {Sports Analyst};
   
-  \path [line] (coach) edge[bend left=15] node[right] {\small Roster Updates} (system);
-  \path [line] (system) edge[bend left=15] node[left] {\small Squad Stats, XI Balance} (coach);
+  % Coach interactions
+  \draw [line] (coach.south west) -- node[left, font=\small, fill=white, inner sep=2pt] {Roster Updates} (system.north west);
+  \draw [line] (system.north east) -- node[right, font=\small, fill=white, inner sep=2pt] {Squad Stats, XI Balance} (coach.south east);
   
-  \path [line] (player) edge[bend left=15] node[above] {\small Persona Login} (system);
-  \path [line] (system) edge[bend left=15] node[below] {\small Private Form, Drills} (player);
+  % Player interactions
+  \draw [line] (player.north) -- node[above left, font=\small, fill=white, inner sep=2pt] {Persona Login} (system.west);
+  \draw [line] (system.south west) -- node[below left, font=\small, fill=white, inner sep=2pt] {Private Form, Drills} (player.east);
   
-  \path [line] (analyst) edge[bend left=15] node[above] {\small Sim Params, Video} (system);
-  \path [line] (system) edge[bend left=15] node[below] {\small Win Prob, Pose Angles} (analyst);
+  % Analyst interactions
+  \draw [line] (analyst.north) -- node[above right, font=\small, fill=white, inner sep=2pt] {Sim Params, Video} (system.east);
+  \draw [line] (system.south east) -- node[below right, font=\small, fill=white, inner sep=2pt] {Win Prob, Pose Angles} (analyst.west);
 \end{tikzpicture}
 \caption{Level 0 Data Flow Diagram (Context Diagram)}
 \label{fig:dfd0}
@@ -65,20 +72,24 @@ Level 1 DFD decomposes the system into functional sub-processes: User Authentica
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1.8cm, auto,
-  entity/.style={rectangle, draw=black, fill=gray!15, thick, minimum width=2.2cm, minimum height=0.9cm, align=center},
-  process/.style={ellipse, draw=blue!80, fill=blue!10, thick, minimum size=2.2cm, align=center},
-  store/.style={rectangle, draw=black, fill=green!10, thick, minimum width=2.2cm, minimum height=0.9cm, align=center},
-  arrow/.style={draw, ->, >=stealth}]
+\begin{tikzpicture}[
+  node distance=2.2cm,
+  entity/.style={rectangle, draw=black, fill=gray!15, thick, minimum width=2.4cm, minimum height=0.9cm, align=center},
+  process/.style={ellipse, draw=blue!80, fill=blue!10, thick, minimum width=2.6cm, minimum height=1.2cm, align=center},
+  store/.style={rectangle, draw=black, fill=green!10, thick, minimum width=2.4cm, minimum height=0.9cm, align=center},
+  arrow/.style={draw, ->, >=stealth, thick}
+]
   
-  \node [entity] (user) {User};
-  \node [process, right=of user, yshift=2.5cm] (p1) {\textbf{1.0}\\Authenticate\\User};
-  \node [process, right=of user, yshift=0.8cm] (p2) {\textbf{2.0}\\Manage\\Squad Roster};
-  \node [process, right=of user, yshift=-0.8cm] (p3) {\textbf{3.0}\\Stochastic\\Simulation};
-  \node [process, right=of user, yshift=-2.5cm] (p4) {\textbf{4.0}\\Pose\\Biomechanics};
+  \node [entity] (user) {User / Actor};
   
-  \node [store, right=of p1] (d1) {D1\\Users DB};
-  \node [store, right=of p2] (d2) {D2\\Players DB};
+  \node [process, right=2.5cm of user, yshift=3.0cm] (p1) {\textbf{1.0}\\Authenticate User};
+  \node [process, right=2.5cm of user, yshift=1.0cm] (p2) {\textbf{2.0}\\Manage Roster};
+  \node [process, right=2.5cm of user, yshift=-1.0cm] (p3) {\textbf{3.0}\\Match Simulation};
+  \node [process, right=2.5cm of user, yshift=-3.0cm] (p4) {\textbf{4.0}\\Pose Biomechanics};
+  
+  \node [store, right=2.5cm of p1] (d1) {D1: Users DB};
+  \node [store, right=2.5cm of p2] (d2) {D2: Players DB};
+  \node [store, right=2.5cm of p3] (d3) {D3: Match Logs DB};
   
   \draw [arrow] (user) -- (p1);
   \draw [arrow] (user) -- (p2);
@@ -87,6 +98,7 @@ Level 1 DFD decomposes the system into functional sub-processes: User Authentica
   
   \draw [arrow] (p1) -- (d1);
   \draw [arrow] (p2) -- (d2);
+  \draw [arrow] (p3) -- (d3);
 \end{tikzpicture}
 \caption{Level 1 Data Flow Diagram}
 \label{fig:dfd1}
@@ -97,11 +109,13 @@ Figure \ref{fig:auth_flowchart} illustrates the user authentication and role val
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1.1cm, auto,
+\begin{tikzpicture}[
+  node distance=1.1cm, auto,
   step/.style={rectangle, draw=black, fill=yellow!15, rounded corners, text width=4.5cm, align=center},
   decision/.style={diamond, draw=red!80, fill=red!10, align=center, aspect=2},
   circleend/.style={circle, draw=black, fill=black, inner sep=2pt},
-  arrow/.style={draw, ->, >=stealth}]
+  arrow/.style={draw, ->, >=stealth}
+]
   
   \node [step] (s1) {Select Preset / Enter Credentials};
   \node [step, below=of s1] (s2) {Submit Auth Request to Express API};

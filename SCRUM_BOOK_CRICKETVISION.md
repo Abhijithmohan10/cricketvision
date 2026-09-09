@@ -208,15 +208,53 @@ A User Story is marked **DONE** when:
 
 ---
 
-### 4.6 Git Version Control & Repository Commit History
+### Sprint 6: Post-Evaluation Hardening, Video Biomechanics & Production Deployment
+**Duration:** 13/08/2026 – 03/09/2026  
+**Sprint Goal:** Harden production security with bcrypt password hashing & JWT tokens, overhaul computer vision video analysis with custom uploads & scanning animations, fix PDF export print overflow, implement strict role authorization for the Player Portal, and resolve responsive UI bugs.
+
+#### Daily Log & Standup Summary
+- **13/08/2026:** Resolved print preview multi-page blank overflow bug in `MatchReportModal.jsx` using React Portals and strict single-page A4 CSS print rules (`@page { size: A4 portrait; margin: 0; }`). (Commits: `bdf8ee8`, `e6f29fa`)
+- **18/08/2026:** Overhauled the Video Analyzer: replaced static stick-figure overlay with interactive computer vision scan animation; added ball speed, bat speed, and shot perfection metrics; removed stumps overlay; deprecated canned sample videos in favor of a dedicated custom MP4/WebM video upload workflow. (Commits: `04c4be8`, `f7e2389`, `a3794f7`, `83bad82`)
+- **20/08/2026:** Conducted UI and aesthetic cleanup pass: removed legacy ML/AI badges and slanted trajectory lines from `VideoAnalyzerView`; streamlined AI assistant greeting; cleaned up footer widgets (`ML SIMULATION ACTIVE`, `DATABASE READY`); fixed JSX syntax errors and rebuilt production bundle in `dist/`. (Commits: `463b1c0`, `c79a765`, `a9241d2`, `d03ed9f`, `70225fe`, `c95c45f`, `8b8e854`)
+- **24/08/2026:** Implemented production authentication security: integrated `bcrypt` password hashing and `jsonwebtoken` (JWT) token verification in `server.js`; added client-side `jspdf` & `html2canvas` PDF generation; implemented mobile responsive CSS breakpoints. (Commit: `e85cb44`)
+- **03/09/2026:** Configured `.env.example`, centralized API URL management in `src/config/api.js`, and set Vite base path for GitHub Pages deployment. Implemented strict role-based access control guarding `PlayerPortalView.jsx` (ensuring non-player users cannot access internal player metrics). Fixed UI bugs across Navbar profile dropdown, TeamBuilder async state loading, AI Chat auto-scroll, and mobile grid alignments. (Commits: `7f37213`, `6562e08`, `2898d5a`, `8e00af0`)
+
+#### Sprint 6 Review & Demo
+- **Delivered:** Fully secured production backend with bcrypt/JWT, professional computer vision scanning animations on custom uploaded video, client-side PDF export, strict role guarding, and clean mobile responsiveness.
+- **Story Points Completed:** 21 / 21
+
+#### Sprint 6 Retrospective
+- **What went well:** Moving to dynamic video uploads with computer vision scanning animations greatly improved credibility and coach usability over static stock videos.
+- **What could be improved:** Multi-device browser testing revealed minor grid wrapping on older Safari versions.
+- **Action Item:** Standardize all grid layouts with Tailwind flex-wrap and responsive breakpoint utility classes.
+
+---
+
+### 4.7 Git Version Control & Repository Commit History
 The source code and project deliverables for **CricketVision** are managed using Git version control and pushed to the GitHub repository (`Abhijithmohan10/cricketvision`).
 
 | Commit Hash | Commit Date | Author | Commit Message / Summary |
 | :--- | :--- | :--- | :--- |
-| `e6f29fa` | Aug 13, 2026 | Abhijithmohan10 | Fix print preview blank page with React portal & clean single-page A4 CSS |
-| `bdf8ee8` | Aug 13, 2026 | Abhijithmohan10 | Fix print preview layout to single page A4 |
-| `bc2e426` | Aug 11, 2026 | Abhijithmohan10 | Initial commit |
-| `a1e1aed` | Aug 11, 2026 | Abhijithmohan10 | Initial CricketVision static site build |
+| `8e00af0` | Sep 03, 2026 | Abhijith Mohan | fix: resolve UI bugs (Navbar dropdown, TeamBuilder async load, Chat scroll, Mobile grid) |
+| `2898d5a` | Sep 03, 2026 | Abhijith Mohan | feat: implement strict access controls for Player Portal and default auth state |
+| `6562e08` | Sep 03, 2026 | Abhijith Mohan | fix: centralize API URLs and secure JWT secret |
+| `7f37213` | Sep 03, 2026 | Abhijith Mohan | chore: add environment config and fix Vite base path for GH Pages |
+| `e85cb44` | Aug 24, 2026 | Abhijith Mohan | feat: add bcrypt auth, JWT tokens, PDF export, mobile responsive CSS |
+| `8b8e854` | Aug 20, 2026 | Abhijith Mohan | Fix footer: remove ML SIMULATION ACTIVE and DATABASE READY, fix broken JSX, rebuild dist |
+| `c95c45f` | Aug 20, 2026 | Abhijith Mohan | Remove ML and AI badges from navbar; clean up code comments in VideoAnalyzerView |
+| `70225fe` | Aug 20, 2026 | Abhijith Mohan | Wrap footer content in a center tag |
+| `d03ed9f` | Aug 20, 2026 | Abhijith Mohan | Update export report text and success message |
+| `a9241d2` | Aug 20, 2026 | Abhijith Mohan | Shorten AI assistant introduction and update report title |
+| `c79a765` | Aug 20, 2026 | Abhijith Mohan | Remove slanted dotted trajectory line from video analysis overlay |
+| `463b1c0` | Aug 20, 2026 | Abhijith Mohan | Update CricketVision app and remove legacy artifacts |
+| `83bad82` | Aug 18, 2026 | Abhijith Mohan | Remove sample videos section and enable custom video upload workflow only |
+| `a3794f7` | Aug 18, 2026 | Abhijith Mohan | Remove stumps animation overlay from video analyzer |
+| `f7e2389` | Aug 18, 2026 | Abhijith Mohan | Remove stick figure skeleton overlay, add interactive Analyze Video trigger button and computer vision scanning animation |
+| `04c4be8` | Aug 18, 2026 | Abhijith Mohan | Add video analysis metrics (ball speed, bat speed, shot perfection) and player-specific scouting report generation |
+| `e6f29fa` | Aug 13, 2026 | Abhijith Mohan | Fix print preview blank page with React portal & clean single-page A4 CSS |
+| `bdf8ee8` | Aug 13, 2026 | Abhijith Mohan | Fix print preview layout to single page A4 |
+| `bc2e426` | Aug 11, 2026 | Abhijith Mohan | Initial commit |
+| `a1e1aed` | Aug 11, 2026 | Abhijith Mohan | Initial CricketVision static site build |
 
 ---
 
@@ -343,8 +381,7 @@ During the final audit on **23/07/2026**, project completion was evaluated again
    - *Future Scope:* Deploy a Python OpenCV + MediaPipe pose estimation sidecar service to process raw MP4 uploads asynchronously.
 
 3. **Production JWT & Password Encryption Hardening:**
-   - *Current State:* Password checks and role matching execute via direct database query strings suitable for local deployment.
-   - *Future Scope:* Integrate `bcrypt` password hashing and `jsonwebtoken` session tokens for internet production hosting.
+   - *Current State:* **COMPLETED in Sprint 6 (Commits `e85cb44`, `6562e08`).** Fully integrated `bcrypt` salt hashing for user passwords, `jsonwebtoken` (JWT) token verification, secured environment secret management, and centralized API routes.
 
 ---
 
