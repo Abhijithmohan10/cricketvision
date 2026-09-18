@@ -74,11 +74,14 @@ A User Story is marked **DONE** when:
 | **US-18** | AI Coach | Build `AICoachModal.jsx` for natural language strategy & rehab prompts | Should Have | 5 | Done |
 | **US-19** | Reports | Build `MatchReportModal.jsx` for generating exportable match summary reports | Could Have | 3 | Done |
 | **US-20** | UX Fix | Fix MongoDB connection fallback, user registration error messaging | Must Have | 2 | Done |
+| **US-23** | H2H | Build `PlayerComparisonView.jsx` for Head-to-Head player comparison & radar overlay | Should Have | 8 | Done |
+| **US-24** | Video AI | Clean Video Analyzer canvas (remove skeleton/stumps), add `ANALYZE VIDEO` CV trigger | Must Have | 5 | Done |
+| **US-25** | Responsive| Optimize mobile/desktop UI with mobile drawer menu & native bottom nav bar | Must Have | 5 | Done |
 | **US-21** | Backlog | Real-time WebSocket live match data stream integration | Could Have | 8 | Deferred |
 | **US-22** | Backlog | Automatic video keyframe extraction via OpenCV sidecar process | Could Have | 8 | Deferred |
 
-**Total Planned Story Points:** 137 Points  
-**Completed Story Points:** 121 Points  
+**Total Planned Story Points:** 155 Points  
+**Completed Story Points:** 139 Points  
 **Deferred Story Points:** 16 Points  
 
 ---
@@ -208,25 +211,22 @@ A User Story is marked **DONE** when:
 
 ---
 
-### Sprint 6: Post-Evaluation Hardening, Video Biomechanics & Production Deployment
-**Duration:** 13/08/2026 – 03/09/2026  
-**Sprint Goal:** Harden production security with bcrypt password hashing & JWT tokens, overhaul computer vision video analysis with custom uploads & scanning animations, fix PDF export print overflow, implement strict role authorization for the Player Portal, and resolve responsive UI bugs.
+### Sprint 7: Head-to-Head Player Comparison & Mobile/Desktop UX Refinement
+**Duration:** 09/09/2026 – 18/09/2026  
+**Sprint Goal:** Implement the Head-to-Head Player Comparison module (`PlayerComparisonView.jsx`) with overlapping dual skill radar charts, comparative stat bars, and AI tactical advantage breakdown. Optimize responsive navigation across mobile and desktop devices with sliding drawer menu and native bottom navigation bar.
 
 #### Daily Log & Standup Summary
-- **13/08/2026:** Resolved print preview multi-page blank overflow bug in `MatchReportModal.jsx` using React Portals and strict single-page A4 CSS print rules (`@page { size: A4 portrait; margin: 0; }`). (Commits: `bdf8ee8`, `e6f29fa`)
-- **18/08/2026:** Overhauled the Video Analyzer: replaced static stick-figure overlay with interactive computer vision scan animation; added ball speed, bat speed, and shot perfection metrics; removed stumps overlay; deprecated canned sample videos in favor of a dedicated custom MP4/WebM video upload workflow. (Commits: `04c4be8`, `f7e2389`, `a3794f7`, `83bad82`)
-- **20/08/2026:** Conducted UI and aesthetic cleanup pass: removed legacy ML/AI badges and slanted trajectory lines from `VideoAnalyzerView`; streamlined AI assistant greeting; cleaned up footer widgets (`ML SIMULATION ACTIVE`, `DATABASE READY`); fixed JSX syntax errors and rebuilt production bundle in `dist/`. (Commits: `463b1c0`, `c79a765`, `a9241d2`, `d03ed9f`, `70225fe`, `c95c45f`, `8b8e854`)
-- **24/08/2026:** Implemented production authentication security: integrated `bcrypt` password hashing and `jsonwebtoken` (JWT) token verification in `server.js`; added client-side `jspdf` & `html2canvas` PDF generation; implemented mobile responsive CSS breakpoints. (Commit: `e85cb44`)
-- **03/09/2026:** Configured `.env.example`, centralized API URL management in `src/config/api.js`, and set Vite base path for GitHub Pages deployment. Implemented strict role-based access control guarding `PlayerPortalView.jsx` (ensuring non-player users cannot access internal player metrics). Fixed UI bugs across Navbar profile dropdown, TeamBuilder async state loading, AI Chat auto-scroll, and mobile grid alignments. (Commits: `7f37213`, `6562e08`, `2898d5a`, `8e00af0`)
+- **09/09/2026:** Refactored responsive layout breakpoints in `Navbar.jsx` and `src/index.css`. Added sliding mobile navigation drawer (`Menu`/`X`), mobile search bar, and native bottom navigation bar (`Dashboard`, `Portal`, `H2H`, `Video AI`, `Database`). (Commits: `9faf036`, `8e00af0`)
+- **18/09/2026:** Designed and implemented `PlayerComparisonView.jsx` enabling 1-on-1 head-to-head analysis for any two players in the database. Added 1-click **Rivalry Presets** (*Kohli vs Rohit*, *Bumrah vs Cummins*, *Dhoni vs Samson*), Recharts dual `<RadarChart>` skill overlays, statistical advantage indicator bars, and AI Head-to-Head Tactical Verdict breakdown. Verified production build (`npm run build`) with 0 errors and deployed live to GitHub Pages (`npm run deploy`). (Commit: `732440f`)
 
-#### Sprint 6 Review & Demo
-- **Delivered:** Fully secured production backend with bcrypt/JWT, professional computer vision scanning animations on custom uploaded video, client-side PDF export, strict role guarding, and clean mobile responsiveness.
-- **Story Points Completed:** 21 / 21
+#### Sprint 7 Review & Demo
+- **Delivered:** Working 1-on-1 Head-to-Head comparison module with dual radar overlays, AI advantage breakdown, mobile navigation drawer, and native bottom navigation bar.
+- **Story Points Completed:** 18 / 18
 
-#### Sprint 6 Retrospective
-- **What went well:** Moving to dynamic video uploads with computer vision scanning animations greatly improved credibility and coach usability over static stock videos.
-- **What could be improved:** Multi-device browser testing revealed minor grid wrapping on older Safari versions.
-- **Action Item:** Standardize all grid layouts with Tailwind flex-wrap and responsive breakpoint utility classes.
+#### Sprint 7 Retrospective
+- **What went well:** Dual skill radar charts provide instantaneous visual contrast between contrasting player types (e.g. anchor batter vs power hitter).
+- **What could be improved:** Mobile drawer menu needed explicit z-index layering to avoid overlapping fixed headers on iOS devices.
+- **Action Item:** Standardize all overlay modals with high z-index backdrop blur containers (`z-50`).
 
 ---
 
