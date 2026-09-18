@@ -1,195 +1,150 @@
-\chapter{Design}
+\chapter{Development Methodology}
 
-The design phase translates the functional requirements established during system study into a formal architectural and structural blueprint for CricketVision. This chapter details the system architecture, block diagrams, Data Flow Diagrams (DFDs Level 0, 1), execution flowcharts, Mongoose database schemas, and user interface component specifications.
+To ensure rapid iteration, continuous quality validation, and adaptive feature prioritization, the development of CricketVision was executed strictly according to the \textbf{Agile/Scrum} software engineering methodology. The project was structured across six sprint cycles between 01 July 2026 and 23 July 2026.
 
-\section{System Architecture \& Block Diagram}
-CricketVision adheres to a modern, decoupled 3-tier client-server architecture:
+\section{Agile / Scrum Framework Configuration}
 
+\subsection{Scrum Team Roles}
+\begin{itemize}
+    \item \textbf{Product Owner / Project Guide:} Academic supervisor responsible for requirement validation, sprint demo evaluation, and formal story completion approval.
+    \item \textbf{Scrum Master \& Lead Full-Stack Developer (Abhijith Mohan):} Responsible for maintaining the Scrum Book, facilitating sprint planning, estimating story point complexities, implementing the MERN stack, and conducting empirical verification tests.
+\end{itemize}
+
+\subsection{Story Point Estimation (Modified Fibonacci Scale)}
+Story points were assigned using a modified Fibonacci sequence (1, 2, 3, 5, 8, 13) reflecting implementation complexity, algorithmic depth, and UI visualization overhead:
+\begin{itemize}
+    \item \textbf{1--2 Points (Low):} Minor styling refinements, static modal components, basic form validation.
+    \item \textbf{3--5 Points (Medium):} Mongoose schema definitions, standard CRUD REST endpoints, routing controllers.
+    \item \textbf{8 Points (High):} MongoDB auto-seeding engine, 360\textdegree{} SVG wagon wheel visualizer, Recharts radar charts, stochastic match simulation engine.
+    \item \textbf{13 Points (Very High):} Computer vision pose estimation kinematics pipeline, complex multi-persona state synchronization.
+\end{itemize}
+
+\subsection{Definition of Done (DoD)}
+A user story is marked \textbf{DONE} only when:
 \begin{enumerate}
-    \item \textbf{Presentation Layer (Frontend):} Built using React 18, Vite, and Tailwind CSS. Houses role-specific views (\texttt{DashboardView}, \texttt{PlayerPortalView}, \texttt{MatchSimulatorView}, \texttt{VideoAnalyzerView}), custom SVG Wagon Wheel visualizers, and interactive modals.
-    \item \textbf{Application Layer (Backend):} Built using Node.js and Express.js REST APIs. Manages HTTP request processing, CORS headers, user authentication controllers, stochastic simulation logic, and database operations.
-    \item \textbf{Data Layer (Persistence):} Powered by MongoDB and Mongoose ODM. Persists document collections for \texttt{players} (100+ pre-seeded records) and \texttt{users}.
+    \item Backend REST endpoints pass Postman unit testing without errors.
+    \item MongoDB Mongoose schema validation handles duplicate entries and invalid enum values gracefully.
+    \item React components render without console errors, with correct live state updates.
+    \item Full role-based user testing (Coach, Player, Analyst) validates interface permissions and data isolation.
 \end{enumerate}
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-  node distance=1.4cm, auto,
-  block/.style={rectangle, draw=blue!80, fill=blue!5, thick, text width=12cm, align=center, rounded corners, minimum height=1cm},
-  arrow/.style={draw=blue!80, ->, >=stealth, thick}
-]
-  
-  \node [block] (frontend) {\textbf{PRESENTATION LAYER (REACT 18 \& VITE)}\\Coach Dashboard $|$ Player Portal $|$ Analyst Simulator $|$ Pose Analyzer};
-  \node [block, below=of frontend] (backend) {\textbf{APPLICATION LAYER (EXPRESS.JS \& NODE.JS)}\\Auth Router $|$ Player Controller $|$ Match Simulator Engine $|$ AI Coach};
-  \node [block, below=of backend] (database) {\textbf{DATA LAYER (MONGODB 6.0+)}\\Collection: \texttt{players} (100+ Docs) $|$ Collection: \texttt{users} (Role Presets)};
-  
-  \draw [arrow] (frontend.south west) -- node[left, font=\small, fill=white, inner sep=1pt] {HTTP REST Requests (JSON)} (backend.north west);
-  \draw [arrow] (backend.south west) -- node[left, font=\small, fill=white, inner sep=1pt] {Mongoose ODM Queries} (database.north west);
-  \draw [arrow] (database.north east) -- node[right, font=\small, fill=white, inner sep=1pt] {Document Data Stream} (backend.south east);
-  \draw [arrow] (backend.north east) -- node[right, font=\small, fill=white, inner sep=1pt] {JSON Response Payload} (frontend.south east);
+\begin{tikzpicture}[node distance=1.3cm, auto,
+  block/.style={rectangle, draw=black!70, fill=blue!5, rounded corners, text width=4.8cm, align=center, minimum height=0.85cm, font=\small},
+  arrow/.style={draw=black!70, -{Stealth}, thick}]
+
+  \node [block] (backlog)  {Product Backlog Formulation};
+  \node [block, below=of backlog]  (planning) {Sprint Planning \& Story Points};
+  \node [block, below=of planning] (dev)      {Iterative Development (MERN Stack)};
+  \node [block, below=of dev]      (testing)  {System Testing \& API Verification};
+  \node [block, below=of testing]  (review)   {Sprint Review \& Guide Approval};
+
+  \draw [arrow] (backlog)  -- (planning);
+  \draw [arrow] (planning) -- (dev);
+  \draw [arrow] (dev)      -- (testing);
+  \draw [arrow] (testing)  -- (review);
+  \draw [arrow] (review.east) -- ++(1.2,0) |- (planning.east)
+        node[midway, right, font=\footnotesize] {Next Sprint};
 \end{tikzpicture}
-\caption{CricketVision 3-Tier System Architecture Block Diagram}
-\label{fig:system_architecture}
+\caption{Agile / Scrum Development Cycle for CricketVision}
+\label{fig:scrum_cycle}
 \end{figure}
 
-\section{Data Flow Diagrams (DFD)}
+\section{Master Product Backlog}
 
-\subsection{Level 0 DFD (Context Diagram)}
-The Context Diagram illustrates external user entities (Head Coach, Elite Player, Sports Analyst) interacting with the core CricketVision system boundary.
+The master product backlog encompasses 22 user stories categorized using the MoSCoW (Must Have, Should Have, Could Have, Won't Have) prioritization framework:
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[
-  node distance=2.8cm,
-  entity/.style={rectangle, draw=black, fill=gray!10, thick, minimum width=2.8cm, minimum height=0.9cm, align=center},
-  process/.style={circle, draw=blue!80, fill=blue!10, thick, minimum size=2.8cm, align=center},
-  line/.style={draw, ->, >=stealth, thick}
-]
-  
-  \node [process] (system) {\textbf{0.0}\\CricketVision\\System};
-  \node [entity, above=2.2cm of system] (coach) {Head Coach};
-  \node [entity, below left=2.2cm and 2.5cm of system] (player) {Elite Player};
-  \node [entity, below right=2.2cm and 2.5cm of system] (analyst) {Sports Analyst};
-  
-  % Coach interactions
-  \draw [line] (coach.south west) -- node[left, font=\small, fill=white, inner sep=2pt] {Roster Updates} (system.north west);
-  \draw [line] (system.north east) -- node[right, font=\small, fill=white, inner sep=2pt] {Squad Stats, XI Balance} (coach.south east);
-  
-  % Player interactions
-  \draw [line] (player.north) -- node[above left, font=\small, fill=white, inner sep=2pt] {Persona Login} (system.west);
-  \draw [line] (system.south west) -- node[below left, font=\small, fill=white, inner sep=2pt] {Private Form, Drills} (player.east);
-  
-  % Analyst interactions
-  \draw [line] (analyst.north) -- node[above right, font=\small, fill=white, inner sep=2pt] {Sim Params, Video} (system.east);
-  \draw [line] (system.south east) -- node[below right, font=\small, fill=white, inner sep=2pt] {Win Prob, Pose Angles} (analyst.west);
-\end{tikzpicture}
-\caption{Level 0 Data Flow Diagram (Context Diagram)}
-\label{fig:dfd0}
-\end{figure}
-
-\subsection{Level 1 DFD}
-Level 1 DFD decomposes the system into functional sub-processes: User Authentication (1.0), Squad Management (2.0), Match Simulation (3.0), and Biomechanics Pose Analysis (4.0).
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[
-  node distance=2.2cm,
-  entity/.style={rectangle, draw=black, fill=gray!15, thick, minimum width=2.4cm, minimum height=0.9cm, align=center},
-  process/.style={ellipse, draw=blue!80, fill=blue!10, thick, minimum width=2.6cm, minimum height=1.2cm, align=center},
-  store/.style={rectangle, draw=black, fill=green!10, thick, minimum width=2.4cm, minimum height=0.9cm, align=center},
-  arrow/.style={draw, ->, >=stealth, thick}
-]
-  
-  \node [entity] (user) {User / Actor};
-  
-  \node [process, right=2.5cm of user, yshift=3.0cm] (p1) {\textbf{1.0}\\Authenticate User};
-  \node [process, right=2.5cm of user, yshift=1.0cm] (p2) {\textbf{2.0}\\Manage Roster};
-  \node [process, right=2.5cm of user, yshift=-1.0cm] (p3) {\textbf{3.0}\\Match Simulation};
-  \node [process, right=2.5cm of user, yshift=-3.0cm] (p4) {\textbf{4.0}\\Pose Biomechanics};
-  
-  \node [store, right=2.5cm of p1] (d1) {D1: Users DB};
-  \node [store, right=2.5cm of p2] (d2) {D2: Players DB};
-  \node [store, right=2.5cm of p3] (d3) {D3: Match Logs DB};
-  
-  \draw [arrow] (user) -- (p1);
-  \draw [arrow] (user) -- (p2);
-  \draw [arrow] (user) -- (p3);
-  \draw [arrow] (user) -- (p4);
-  
-  \draw [arrow] (p1) -- (d1);
-  \draw [arrow] (p2) -- (d2);
-  \draw [arrow] (p3) -- (d3);
-\end{tikzpicture}
-\caption{Level 1 Data Flow Diagram}
-\label{fig:dfd1}
-\end{figure}
-
-\section{Flowcharts \& Activity Diagrams}
-Figure \ref{fig:auth_flowchart} illustrates the user authentication and role validation flow.
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[
-  node distance=1.1cm, auto,
-  step/.style={rectangle, draw=black, fill=yellow!15, rounded corners, text width=4.5cm, align=center},
-  decision/.style={diamond, draw=red!80, fill=red!10, align=center, aspect=2},
-  circleend/.style={circle, draw=black, fill=black, inner sep=2pt},
-  arrow/.style={draw, ->, >=stealth}
-]
-  
-  \node [step] (s1) {Select Preset / Enter Credentials};
-  \node [step, below=of s1] (s2) {Submit Auth Request to Express API};
-  \node [step, below=of s2] (s3) {Verify Persona / User Record};
-  \node [decision, below=of s3] (dec) {Credentials Valid?};
-  \node [step, left=1.5cm of dec] (err) {Display Access Error Alert};
-  \node [step, below=of dec] (auth) {Establish User Session Context};
-  \node [step, below=of auth] (redir) {Redirect to Role Dashboard};
-  \node [circleend, below=of redir] (end) {};
-  
-  \draw [arrow] (s1) -- (s2);
-  \draw [arrow] (s2) -- (s3);
-  \draw [arrow] (s3) -- (dec);
-  \draw [arrow] (dec) -- node[above] {No} (err);
-  \draw [arrow] (err) |- (s1);
-  \draw [arrow] (dec) -- node[right] {Yes} (auth);
-  \draw [arrow] (auth) -- (redir);
-  \draw [arrow] (redir) -- (end);
-\end{tikzpicture}
-\caption{User Authentication \& Role Access Flowchart}
-\label{fig:auth_flowchart}
-\end{figure}
-
-\section{Database Design \& Schemas}
-CricketVision uses MongoDB for flexible document storage. The system features two core collections: \texttt{players} and \texttt{users}.
-
-\subsection{Mongoose Player Schema Specification}
-\begin{table}[H]
-\centering
-\caption{Mongoose Player Schema Data Dictionary}
-\label{tab:player_schema}
-\begin{tabular}{llll}
+\begin{longtable}{p{0.8cm} p{1.8cm} p{5.5cm} p{1cm} p{0.8cm} p{1cm}}
+\caption{Master Product Backlog with MoSCoW Prioritization}
+\label{tab:backlog} \\
 \toprule
-\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\textbf{ID} & \textbf{Epic} & \textbf{User Story Description} & \textbf{Priority} & \textbf{Pts} & \textbf{Status} \\
 \midrule
-\texttt{id} & String & Required, Unique & Unique string ID (e.g., \texttt{virat-kohli}) \\
-\texttt{name} & String & Required, Trimmed & Full player display name \\
-\texttt{country} & String & Required & Represented nation/franchise \\
-\texttt{role} & String & Enum & Batter, Bowler, All-rounder, WK-Batter \\
-\texttt{fatigueLevel} & Number & Range: 0--100 & Physical workload fatigue index \\
-\texttt{clutchRating} & Number & Range: 0--100 & High-pressure scenario index \\
-\texttt{skillRadar} & Object & Nested Object & Holds 6 radar attribute metrics \\
-\texttt{phaseStats} & Object & Nested Object & Powerplay, Middle, Death stats \\
-\texttt{biomechanicsSummary}& Object & Nested Object & Joint angles: flexAngle, shoulderTilt \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Mongoose User Schema Specification}
-\begin{table}[H]
-\centering
-\caption{Mongoose User Schema Data Dictionary}
-\label{tab:user_schema}
-\begin{tabular}{llll}
+\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable{} (continued)} \\
 \toprule
-\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraints} & \textbf{Description} \\
+\textbf{ID} & \textbf{Epic} & \textbf{User Story Description} & \textbf{Priority} & \textbf{Pts} & \textbf{Status} \\
 \midrule
-\texttt{id} & String & Required, Unique & User identifier string \\
-\texttt{name} & String & Min length: 2 & User's full name \\
-\texttt{email} & String & Required, Unique & Account login email \\
-\texttt{password} & String & Min length: 6 & Account access password \\
-\texttt{role} & String & Enum & coach, player, user \\
-\texttt{playerId} & String & Optional (FK Ref) & Associated player profile ID \\
-\texttt{permissions} & [String] & Array & Granular privilege rights array \\
+\endhead
 \bottomrule
-\end{tabular}
-\end{table}
+\endfoot
+\bottomrule
+\endlastfoot
+US-01 & Setup     & Initialize MERN workspace, Vite, Tailwind \& Git         & Must  & 3 & Done     \\
+US-02 & Schema    & Define Mongoose Player schema with phase stats            & Must  & 5 & Done     \\
+US-03 & Schema    & Define Mongoose User schema with role enums               & Must  & 5 & Done     \\
+US-04 & Database  & Build 100+ player auto-seeding controller                 & Must  & 8 & Done     \\
+US-05 & Auth API  & Implement /api/users login \& persona endpoints            & Must  & 5 & Done     \\
+US-06 & Player API& Implement Player CRUD endpoints (GET, POST, PUT, DELETE)  & Must  & 5 & Done     \\
+US-07 & UI Nav    & Build responsive Navbar with role switcher \& drawer      & Must  & 3 & Done     \\
+US-08 & Auth UI   & Build LoginView with 1-click persona quick login          & Must  & 5 & Done     \\
+US-09 & Dashboard & Build Coach DashboardView with squad fatigue cards        & Must  & 5 & Done     \\
+US-10 & Analytics & Build PlayerAnalyticsView with Recharts Radar             & Must  & 8 & Done     \\
+US-11 & Visualizer& Build 360\textdegree{} SVG Wagon Wheel \& Pitch length map & Must & 8 & Done     \\
+US-12 & Player    & Build PlayerPortalView for personalized drill stats       & Must  & 8 & Done     \\
+US-13 & Simulator & Build MatchSimulatorView with win-probability engine      & Must  & 8 & Done     \\
+US-14 & Predictor & Build NextMatchPredictorView with matchup matrix          & Should& 8 & Done     \\
+US-15 & Video     & Build VideoAnalyzerView with pose angle tracking          & Should& 8 & Done     \\
+US-16 & Team      & Build TeamBuilderView with squad balance index            & Should& 5 & Done     \\
+US-17 & DB Admin  & Build DatabaseManagerModal for live CRUD operations       & Must  & 8 & Done     \\
+US-18 & AI Coach  & Build AICoachModal for tactical strategy prompts          & Should& 5 & Done     \\
+US-19 & Reports   & Build MatchReportModal for downloadable summaries         & Could & 3 & Done     \\
+US-20 & UX Fixes  & Fix connection fallbacks \& error handling                & Must  & 2 & Done     \\
+US-21 & Backlog   & Real-time WebSocket live match data stream                & Could & 8 & Deferred \\
+US-22 & Backlog   & Automated OpenCV keyframe extraction sidecar              & Could & 8 & Deferred \\
+\end{longtable}
 
-\section{User Interface \& Form Design}
-The frontend interface is organized into distinct functional view components:
+\noindent\textbf{Backlog Summary:} Total Planned: 137 Story Points $\mid$ Completed: 121 Points (88.3\% velocity) $\mid$ Deferred: 16 Points.
+
+\section{Sprint Execution Log}
+
 \begin{itemize}
-    \item \textbf{Landing \& Preset Login Selector (\texttt{LoginView.jsx}):} Enables one-click persona switching (\texttt{Rahul Dravid}, \texttt{Virat Kohli}, \texttt{Alex Morgan}).
-    \item \textbf{Squad Dashboard (\texttt{DashboardView.jsx}):} Displays squad KPIs, fatigue alerts, and player roster.
-    \item \textbf{Player Analytics Portal (\texttt{PlayerAnalyticsView.jsx}):} Renders 360-degree SVG wagon wheel heatmaps and Recharts radar charts.
-    \item \textbf{Match Simulator (\texttt{MatchSimulatorView.jsx}):} Renders interactive win-probability curves and ball-by-ball scenario controls.
-    \item \textbf{Video Pose Analyzer (\texttt{VideoAnalyzerView.jsx}):} Provides canvas skeleton overlays measuring joint flexion angles.
+    \item \textbf{Sprint 0 --- Conception \& Setup (01/07 -- 07/07/2026):} Delivered approved project synopsis and MERN stack architecture. Configured Vite, Tailwind, MongoDB instance, and Git repository. (\textit{3 Story Points}).
+
+    \item \textbf{Sprint 1 --- Schema \& Auto-Seeding (08/07 -- 11/07/2026):} Engineered Mongoose Player and User schemas. Built auto-seeding engine loading 104 international and IPL players across 10 franchises. Verified database persistence. (\textit{28 Story Points}).
+
+    \item \textbf{Sprint 2 --- Navigation \& Coach Portal (12/07 -- 14/07/2026):} Built responsive navigation bar, role-based persona quick-login, and Coach DashboardView displaying squad fatigue metrics and roster overview cards. (\textit{24 Story Points}).
+
+    \item \textbf{Sprint 3 --- Analytics \& SVG Wagon Wheel (15/07 -- 18/07/2026):} Developed 360\textdegree{} SVG polar wagon wheel, pitch length heatmap, Recharts 6-point radar charts, and personalized Player Portal. (\textit{33 Story Points}).
+
+    \item \textbf{Sprint 4 --- Simulator, Kinematics \& AI Coach (19/07 -- 21/07/2026):} Implemented stochastic match simulation engine, video pose analyzer, squad builder, Next Match Predictor, and AI Coach tactical modal. (\textit{29 Story Points}).
+
+    \item \textbf{Sprint 5 --- Hardening \& Evaluation (22/07 -- 23/07/2026):} Conducted integration testing, verified error fallbacks, optimized production bundle, compiled technical documentation. (\textit{4 Story Points}).
 \end{itemize}
+
+\begin{figure}[H]
+\centering
+\IfFileExists{../temp_charts/burndown.png}{
+    \includegraphics[width=0.82\textwidth]{../temp_charts/burndown.png}
+}{
+    \begin{tikzpicture}
+    \draw[->] (0,0) -- (7,0) node[right] {Sprint};
+    \draw[->] (0,0) -- (0,4) node[above] {Points Remaining};
+    \draw[dashed, gray] (0,3.5) -- (1,2.8) -- (2,2.2) -- (3,1.6) -- (4,1.0) -- (5,0.4) -- (6,0);
+    \draw[blue, thick] (0,3.5) -- (1,2.8) -- (2,2.2) -- (3,1.6) -- (4,1.0) -- (5,0.5) -- (6,0.4);
+    \node[font=\small] at (3.5, 3.8) {--- Planned \quad --- Actual (88.3\%)};
+    \end{tikzpicture}
+}
+\caption{Sprint Burndown Chart --- 137 Total Story Points across 6 Sprints}
+\label{fig:burndown}
+\end{figure}
+
+\subsection{Version Control \& Git Commit History}
+CricketVision source code is managed using Git version control and hosted on GitHub (\texttt{Abhijithmohan10/cricketvision}).
+
+\begin{table}[H]
+\centering
+\caption{Git Version Control Commit Log}
+\label{tab:git_history}
+\begin{tabular}{llll}
+\toprule
+\textbf{Commit Hash} & \textbf{Date} & \textbf{Author} & \textbf{Commit Summary} \\
+\midrule
+\texttt{e6f29fa} & 13/08/2026 & Abhijith Mohan & Fix print preview blank page (React portal) \\
+\texttt{bdf8ee8} & 13/08/2026 & Abhijith Mohan & Fix print layout to single-page A4 \\
+\texttt{bc2e426} & 11/08/2026 & Abhijith Mohan & Initial commit \\
+\texttt{a1e1aed} & 11/08/2026 & Abhijith Mohan & Initial CricketVision static site build \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,100 +1,226 @@
-\chapter{Implementation}
+\chapter{Design}
 
-This chapter documents the technical implementation of CricketVision across environment setup, Express backend REST endpoints, mathematical algorithms, frontend React components, and empirical software testing results.
+The design phase translates the functional requirements established during system study into a formal architectural and structural blueprint for CricketVision. This chapter details the system architecture, Data Flow Diagrams (DFDs), execution flowcharts, Mongoose database schemas, and user interface component specifications.
 
-\section{Development Environment \& Technologies}
-CricketVision was developed within a Node.js JavaScript environment using Vite for fast HMR compilation and Tailwind CSS for utility-first styling.
+\section{System Architecture \& Block Diagram}
+CricketVision adheres to a modern, decoupled 3-tier client-server architecture:
 
-\begin{itemize}
-    \item \textbf{Frontend Stack:} React 18, Vite 5, Tailwind CSS 3, Recharts 2, Lucide React Icons.
-    \item \textbf{Backend Stack:} Node.js v18+, Express.js 4.x, CORS Middleware, Body-Parser.
-    \item \textbf{Database Persistence:} MongoDB 6.0+ Community Server connected via Mongoose 8.x ODM.
-    \item \textbf{Database Auto-Seeding Engine:} On server initialization, \texttt{server.js} verifies document count and automatically seeds 104 verified international and IPL player profiles if the collection contains fewer than 100 documents.
-\end{itemize}
+\begin{enumerate}
+    \item \textbf{Presentation Layer (Frontend):} Built using React 18, Vite, and Tailwind CSS. Houses role-specific views (\texttt{DashboardView}, \texttt{PlayerPortalView}, \texttt{MatchSimulatorView}, \texttt{VideoAnalyzerView}), custom SVG wagon wheel visualizers, Recharts radar charts, and interactive modals.
+    \item \textbf{Application Layer (Backend):} Built using Node.js and Express.js REST APIs. Manages HTTP request processing, CORS headers, user authentication controllers, stochastic simulation logic, and database operations.
+    \item \textbf{Data Layer (Persistence):} Powered by MongoDB and Mongoose ODM. Persists document collections for \texttt{players} (100+ pre-seeded records) and \texttt{users}.
+\end{enumerate}
 
-\section{Backend \& REST API Implementation}
-The Express server exposes modular REST API endpoints for player database operations and simulation queries:
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.5cm, auto,
+  block/.style={rectangle, draw=blue!80, fill=blue!5, thick, text width=12cm, align=center, rounded corners, minimum height=1.1cm},
+  arrow/.style={draw=blue!80, -{Stealth}, thick}
+]
 
+  \node [block] (frontend) {\textbf{PRESENTATION LAYER (REACT 18 + VITE + TAILWIND CSS)}\\
+    Coach Dashboard $\mid$ Player Portal $\mid$ Analyst Simulator $\mid$ Pose Analyzer $\mid$ SVG Wagon Wheel};
+  \node [block, below=of frontend] (backend) {\textbf{APPLICATION LAYER (EXPRESS.JS + NODE.JS)}\\
+    Auth Router $\mid$ Player Controller $\mid$ Match Simulator Engine $\mid$ AI Coach $\mid$ CORS Middleware};
+  \node [block, below=of backend] (database) {\textbf{DATA LAYER (MONGODB 6.0 + MONGOOSE ODM)}\\
+    Collection: \texttt{players} (104 Documents) $\mid$ Collection: \texttt{users} (Role Presets)};
+
+  \draw [arrow] (frontend.south west) -- node[left, font=\small, fill=white, inner sep=1pt] {HTTP REST Requests (JSON)} (backend.north west);
+  \draw [arrow] (backend.south west) -- node[left, font=\small, fill=white, inner sep=1pt] {Mongoose ODM Queries} (database.north west);
+  \draw [arrow] (database.north east) -- node[right, font=\small, fill=white, inner sep=1pt] {Document Data Stream} (backend.south east);
+  \draw [arrow] (backend.north east) -- node[right, font=\small, fill=white, inner sep=1pt] {JSON Response Payload} (frontend.south east);
+\end{tikzpicture}
+\caption{CricketVision 3-Tier Full-Stack System Architecture Block Diagram}
+\label{fig:system_architecture}
+\end{figure}
+
+\section{Data Flow Diagrams (DFD)}
+
+\subsection{Level 0 DFD (Context Diagram)}
+The Context Diagram illustrates external user entities (Head Coach, Elite Player, Sports Analyst) interacting with the core CricketVision system boundary. Coaches provide roster edits and receive squad analytics; players query personal phase stats; analysts feed simulation parameters and video files, receiving win-probability trajectories and kinematic audit reports.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=3.0cm,
+  entity/.style={rectangle, draw=black, fill=gray!10, thick, minimum width=3cm, minimum height=0.9cm, align=center, font=\small},
+  process/.style={circle, draw=blue!80, fill=blue!10, thick, minimum size=3.2cm, align=center, font=\small},
+  line/.style={draw, -{Stealth}, thick}
+]
+
+  \node [process] (system) {\textbf{0.0}\\CricketVision\\System};
+  \node [entity, above=2.4cm of system] (coach) {Head Coach};
+  \node [entity, below left=2.4cm and 2.8cm of system] (player) {Elite Player};
+  \node [entity, below right=2.4cm and 2.8cm of system] (analyst) {Sports Analyst};
+
+  \draw [line] (coach.south west) -- node[left, font=\footnotesize, fill=white, inner sep=2pt] {Roster Updates} (system.north west);
+  \draw [line] (system.north east) -- node[right, font=\footnotesize, fill=white, inner sep=2pt] {Squad Stats, XI Balance} (coach.south east);
+
+  \draw [line] (player.north) -- node[above left, font=\footnotesize, fill=white, inner sep=2pt] {Persona Login} (system.west);
+  \draw [line] (system.south west) -- node[below left, font=\footnotesize, fill=white, inner sep=2pt] {Private Form, Drills} (player.east);
+
+  \draw [line] (analyst.north) -- node[above right, font=\footnotesize, fill=white, inner sep=2pt] {Sim Params, Video} (system.east);
+  \draw [line] (system.south east) -- node[below right, font=\footnotesize, fill=white, inner sep=2pt] {Win Prob, Pose Angles} (analyst.west);
+\end{tikzpicture}
+\caption{Level 0 Data Flow Diagram (Context Diagram)}
+\label{fig:dfd0}
+\end{figure}
+
+\subsection{Level 1 DFD (Functional Decomposition)}
+Level 1 DFD decomposes the system into four functional sub-processes: User Authentication (1.0), Squad Analytics Management (2.0), Match Simulation Engine (3.0), and Computer Vision Pose Analysis (4.0).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=2.0cm,
+  entity/.style={rectangle, draw=black, fill=gray!15, thick, minimum width=2.6cm, minimum height=0.85cm, align=center, font=\small},
+  process/.style={ellipse, draw=blue!80, fill=blue!10, thick, minimum width=2.8cm, minimum height=1.2cm, align=center, font=\small},
+  store/.style={rectangle, draw=black!60, fill=green!8, thick, minimum width=2.8cm, minimum height=0.85cm, align=center, font=\small},
+  arrow/.style={draw, -{Stealth}, thick}
+]
+
+  \node [entity] (user) {User / Actor};
+
+  \node [process, right=2.8cm of user, yshift=3.2cm]  (p1) {\textbf{1.0}\\Authenticate User};
+  \node [process, right=2.8cm of user, yshift=1.0cm]  (p2) {\textbf{2.0}\\Manage Roster};
+  \node [process, right=2.8cm of user, yshift=-1.2cm] (p3) {\textbf{3.0}\\Match Simulation};
+  \node [process, right=2.8cm of user, yshift=-3.4cm] (p4) {\textbf{4.0}\\Pose Biomechanics};
+
+  \node [store, right=2.8cm of p1] (d1) {D1: Users DB};
+  \node [store, right=2.8cm of p2] (d2) {D2: Players DB};
+  \node [store, right=2.8cm of p3] (d3) {D3: Match Logs};
+
+  \draw [arrow] (user) -- (p1);
+  \draw [arrow] (user) -- (p2);
+  \draw [arrow] (user) -- (p3);
+  \draw [arrow] (user) -- (p4);
+
+  \draw [arrow] (p1) -- node[above, font=\footnotesize]{Verify} (d1);
+  \draw [arrow] (p2) -- node[above, font=\footnotesize]{CRUD} (d2);
+  \draw [arrow] (p3) -- node[above, font=\footnotesize]{Log} (d3);
+  \draw [arrow] (d2) -- node[below, font=\footnotesize]{Data} (p2);
+  \draw [arrow] (d1) -- node[below, font=\footnotesize]{Token} (p1);
+\end{tikzpicture}
+\caption{Level 1 Data Flow Diagram (Functional Decomposition)}
+\label{fig:dfd1}
+\end{figure}
+
+\section{Flowcharts \& Activity Diagrams}
+
+\subsection{User Authentication \& Role Access Flowchart}
+Figure \ref{fig:auth_flowchart} illustrates the user authentication and role validation flow from credential entry to role-restricted dashboard access.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.1cm, auto,
+  step/.style={rectangle, draw=black, fill=yellow!10, rounded corners, text width=5cm, align=center, minimum height=0.75cm, font=\small},
+  decision/.style={diamond, draw=red!80, fill=red!8, align=center, aspect=2.2, font=\small},
+  circleend/.style={circle, draw=black, fill=black, inner sep=3pt},
+  arrow/.style={draw, -{Stealth}}
+]
+
+  \node [step] (s1) {Select Preset / Enter Credentials};
+  \node [step, below=of s1] (s2) {Submit Auth Request to Express API};
+  \node [step, below=of s2] (s3) {Verify Persona / User Record in MongoDB};
+  \node [decision, below=of s3] (dec) {Valid?};
+  \node [step, left=2.0cm of dec] (err) {Display Access Error Alert};
+  \node [step, below=of dec] (auth) {Establish User Session \& Role Context};
+  \node [step, below=of auth] (redir) {Redirect to Role-Specific Dashboard};
+  \node [circleend, below=of redir] (end) {};
+
+  \draw [arrow] (s1)  -- (s2);
+  \draw [arrow] (s2)  -- (s3);
+  \draw [arrow] (s3)  -- (dec);
+  \draw [arrow] (dec) -- node[above, font=\footnotesize] {No} (err);
+  \draw [arrow] (err) |- (s1);
+  \draw [arrow] (dec) -- node[right, font=\footnotesize] {Yes} (auth);
+  \draw [arrow] (auth)  -- (redir);
+  \draw [arrow] (redir) -- (end);
+\end{tikzpicture}
+\caption{User Authentication \& Role Access Flowchart}
+\label{fig:auth_flowchart}
+\end{figure}
+
+\subsection{Computer Vision Pose Analysis Flowchart}
+The kinematic video analysis follows a deterministic five-stage pipeline:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.2cm, auto,
+  step/.style={rectangle, draw=blue!70, fill=blue!5, rounded corners, text width=2.4cm, align=center, minimum height=0.85cm, font=\footnotesize},
+  arrow/.style={draw=blue!70, -{Stealth}, thick}
+]
+  \node [step] (s1) {Video Upload\\ (60 FPS MP4)};
+  \node [step, right=0.6cm of s1] (s2) {Frame Extract \& Normalize};
+  \node [step, right=0.6cm of s2] (s3) {Part Affinity Keypoint Detection};
+  \node [step, right=0.6cm of s3] (s4) {Vector Angle Calculation};
+  \node [step, right=0.6cm of s4] (s5) {ICC 15\textdegree{} Compliance Audit};
+
+  \draw [arrow] (s1) -- (s2);
+  \draw [arrow] (s2) -- (s3);
+  \draw [arrow] (s3) -- (s4);
+  \draw [arrow] (s4) -- (s5);
+\end{tikzpicture}
+\caption{Computer Vision Biomechanics Pose Angle Processing Pipeline}
+\label{fig:pose_pipeline}
+\end{figure}
+
+\section{Database Design \& Schemas}
+CricketVision uses MongoDB for flexible document storage. The system features two core collections: \texttt{players} and \texttt{users}.
+
+\subsection{Mongoose Player Schema Specification}
 \begin{table}[H]
 \centering
-\caption{CricketVision REST API Endpoints Specification}
-\label{tab:api_endpoints}
-\begin{tabular}{lll}
+\caption{Mongoose Player Schema Data Dictionary}
+\label{tab:player_schema}
+\begin{tabular}{p{3.2cm} p{1.5cm} p{2.2cm} p{4.8cm}}
 \toprule
-\textbf{HTTP Method} & \textbf{Endpoint Route} & \textbf{Description / Operation} \\
+\textbf{Field Name} & \textbf{Type} & \textbf{Constraints} & \textbf{Description} \\
 \midrule
-\texttt{GET} & \texttt{/api/players} & Fetch all 100+ player documents from MongoDB \\
-\texttt{GET} & \texttt{/api/players/:id} & Retrieve detailed single player profile \\
-\texttt{POST} & \texttt{/api/players} & Create new player document with full stats \\
-\texttt{PUT} & \texttt{/api/players/:id} & Update player stats, fatigue, or joint angles \\
-\texttt{DELETE} & \texttt{/api/players/:id} & Prune player document from active roster \\
-\texttt{POST} & \texttt{/api/users/login} & Authenticate user / persona preset session \\
+\texttt{id} & String & Required, Unique & Unique slug ID (e.g., \texttt{virat-kohli}) \\
+\texttt{name} & String & Required & Full player display name \\
+\texttt{country} & String & Required & Represented nation/franchise \\
+\texttt{role} & String & Enum & Batter, Bowler, All-Rounder, WK-Batter \\
+\texttt{fatigueLevel} & Number & 0--100 & Physical workload fatigue index \\
+\texttt{clutchRating} & Number & 0--100 & High-pressure performance index \\
+\texttt{skillRadar} & Object & Nested & Power, Consistency, Spin, Pace, Fielding, Clutch \\
+\texttt{phaseStats} & Object & Nested & Powerplay, Middle, Death over sub-documents \\
+\texttt{biomechanicsSummary} & Object & Nested & elbowAngle, shoulderTilt, strideLength, actionStatus \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{Algorithmic Logic \& Mathematical Formulation}
-
-\subsection{Match Simulator \& Win-Probability Formula}
-The stochastic simulation engine calculates the win probability $P_{\text{win}}$ after each over using a logistic regression curve:
-
-\begin{equation}
-P_{\text{win}} = \frac{1}{1 + e^{-\left( \alpha \cdot (RRR_{\text{target}} - RRR_{\text{current}}) + \beta \cdot W_{\text{rem}} + \gamma \cdot F_{\text{pitch}} + \delta \cdot \Omega_{\text{weather}} \right)}}
-\end{equation}
-
-Where $RRR_{\text{target}}$ is the required run rate, $RRR_{\text{current}}$ is the current run rate, $W_{\text{rem}}$ is the remaining wickets, $F_{\text{pitch}}$ is the pitch friction factor, and $\Omega_{\text{weather}}$ represents weather impact.
-
-\subsection{360° Wagon Wheel Polar-to-Cartesian Transformation}
-Shot coordinates $(r, \theta)$ are mapped onto a 2D SVG canvas using Cartesian transformations:
-
-\begin{equation}
-x = x_{\text{center}} + r \cdot \cos\left(\theta - \frac{\pi}{2}\right)
-\end{equation}
-\begin{equation}
-y = y_{\text{center}} + r \cdot \sin\left(\theta - \frac{\pi}{2}\right)
-\end{equation}
-
-\subsection{Biomechanics Pose Angle Calculation}
-Elbow flexion angle $\theta_{\text{elbow}}$ is derived from joint keypoint vectors $\vec{BA}$ (Shoulder to Elbow) and $\vec{BC}$ (Wrist to Elbow):
-
-\begin{equation}
-\vec{BA} = (A_x - B_x, A_y - B_y), \quad \vec{BC} = (C_x - B_x, C_y - B_y)
-\end{equation}
-\begin{equation}
-\theta_{\text{elbow}} = \arccos\left( \frac{\vec{BA} \cdot \vec{BC}}{\|\vec{BA}\| \|\vec{BC}\|} \right) \times \left(\frac{180}{\pi}\right)
-\end{equation}
-
-\section{Frontend React Components Implementation}
-The React application architecture is structured cleanly into components and views:
-\begin{itemize}
-    \item \texttt{App.jsx}: Root layout router rendering top Navigation bar and active view container.
-    \item \texttt{DashboardView.jsx}: Renders squad KPIs, fatigue alerts, and player roster cards.
-    \item \texttt{PlayerAnalyticsView.jsx}: Visualizes Recharts radar metrics and phase breakdowns.
-    \item \texttt{PitchAndWagonWheel.jsx}: Renders 360-degree SVG wagon wheel heatmaps.
-    \item \texttt{MatchSimulatorView.jsx}: Renders real-time win probability curves and controls.
-    \item \texttt{VideoAnalyzerView.jsx}: Renders pose skeleton overlays and joint flexion telemetry.
-\end{itemize}
-
-\section{System Testing \& Verification}
-System testing verified functional correctness, data integrity, and API responsiveness across key modules.
-
+\subsection{Mongoose User Schema Specification}
 \begin{table}[H]
 \centering
-\caption{System Unit and Integration Test Results}
-\label{tab:test_results}
-\begin{tabular}{lll}
+\caption{Mongoose User Schema Data Dictionary}
+\label{tab:user_schema}
+\begin{tabular}{p{3.2cm} p{1.5cm} p{2.2cm} p{4.8cm}}
 \toprule
-\textbf{Test Case / Operation} & \textbf{Expected Outcome} & \textbf{Status} \\
+\textbf{Field Name} & \textbf{Type} & \textbf{Constraints} & \textbf{Description} \\
 \midrule
-Database Auto-Seeding & Populates 104 player documents into MongoDB on boot & \textbf{PASS} \\
-REST API CRUD Endpoints & Executes GET, POST, PUT, DELETE without error & \textbf{PASS} \\
-Persona Auth Preset & Switches between Coach, Player, Analyst roles correctly & \textbf{PASS} \\
-Wagon Wheel SVG Render & Correctly maps polar coordinates into SVG canvas & \textbf{PASS} \\
-Stochastic Match Simulator & Computes win probability curves dynamically & \textbf{PASS} \\
-Pose Video Analyzer & Calculates joint flex angles against ICC 15° limit & \textbf{PASS} \\
+\texttt{id} & String & Required, Unique & User identifier string \\
+\texttt{name} & String & Min: 2 chars & User's full name \\
+\texttt{email} & String & Required, Unique & Account login email \\
+\texttt{password} & String & Min: 6 chars & Access password (hashed) \\
+\texttt{role} & String & Enum & coach, player, analyst, user \\
+\texttt{playerId} & String & Optional (FK) & Associated player profile ID \\
+\texttt{permissions} & [String] & Array & Granular privilege rights array \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{Summary}
-This chapter detailed the implementation and empirical verification of CricketVision. The system successfully implements all core REST APIs, visual graphics engines, simulation logic, and pose biomechanics tracking required for first evaluation approval.
+\section{User Interface \& Form Design}
+The frontend interface is organized into distinct functional view components, each tailored to a specific persona:
+
+\begin{itemize}
+    \item \textbf{Preset Login Selector (\texttt{LoginView.jsx}):} Enables one-click persona switching with pre-configured credential cards for seamless role demonstration.
+    \item \textbf{Squad Dashboard (\texttt{DashboardView.jsx}):} Displays KPI summary cards (total squad, active bowlers, high-fatigue alerts, win rate), squad roster grid, and interactive fatigue dials.
+    \item \textbf{Player Analytics Explorer (\texttt{PlayerAnalyticsView.jsx}):} Dual-column layout pairing a 6-axis Recharts radar chart with phase-by-phase situational performance cards.
+    \item \textbf{Pitch \& Wagon Visualizer (\texttt{PitchAndWagonWheel.jsx}):} Interactive 360\textdegree{} SVG canvas displaying radial delivery plots color-coded by boundary classification.
+    \item \textbf{Match Simulator (\texttt{MatchSimulatorView.jsx}):} Renders interactive win-probability curves and ball-by-ball scenario control panels.
+    \item \textbf{Video Kinematics Studio (\texttt{VideoAnalyzerView.jsx}):} Video playback viewport with real-time skeletal overlay canvas, angle telemetry meters, and ICC compliance indicator.
+    \item \textbf{DB Admin Panel (\texttt{DatabaseManagerModal.jsx}):} Full player CRUD form controls with client-side numeric boundary validation before API dispatch.
+\end{itemize}

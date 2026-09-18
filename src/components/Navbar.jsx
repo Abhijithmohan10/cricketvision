@@ -14,7 +14,8 @@ import {
   Key,
   Lock,
   Menu,
-  X
+  X,
+  Swords
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,6 +50,7 @@ export default function Navbar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity, coachOnly: false },
     { id: 'player_portal', label: 'My Player Portal', icon: UserCheck, highlight: true, playerOnly: false },
+    { id: 'player_comparison', label: 'H2H Comparison', icon: Swords },
     { id: 'next_match_predictor', label: 'Next Match Predictor', icon: Sparkles },
     { id: 'video_analyzer', label: 'AI Video Upload', icon: Video },
     { id: 'database', label: 'IPL & Intl Database', icon: Database },
@@ -60,9 +62,9 @@ export default function Navbar({
   const mobileBottomItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'player_portal', label: 'Portal', icon: UserCheck },
+    { id: 'player_comparison', label: 'H2H', icon: Swords },
     { id: 'video_analyzer', label: 'Video AI', icon: Video },
     { id: 'database', label: 'Database', icon: Database },
-    { id: 'next_match_predictor', label: 'Predictor', icon: Sparkles },
   ];
 
   const handleTabClick = (item) => {

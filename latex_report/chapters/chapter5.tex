@@ -1,0 +1,129 @@
+\chapter{Implementation}
+
+This chapter documents the technical implementation of CricketVision across environment setup, Express backend REST endpoints, mathematical algorithm formulations, frontend React component architecture, and AI coaching integration.
+
+\section{Development Environment \& Technology Stack}
+CricketVision was developed within a Node.js JavaScript environment using Vite for fast HMR compilation and Tailwind CSS for utility-first styling.
+
+\begin{itemize}
+    \item \textbf{Frontend Stack:} React 18, Vite 5, Tailwind CSS 3, Recharts 2, Lucide React Icons.
+    \item \textbf{Backend Stack:} Node.js v18+, Express.js 4.x, CORS Middleware, Body-Parser.
+    \item \textbf{Database Persistence:} MongoDB 6.0+ Community Server connected via Mongoose 8.x ODM.
+    \item \textbf{Database Auto-Seeding Engine:} On server initialization, \texttt{server.js} verifies document count and automatically seeds 104 verified international and IPL player profiles if the collection contains fewer than 100 documents.
+\end{itemize}
+
+\section{Backend \& REST API Implementation}
+The Express server exposes modular, RESTful endpoints adhering to standard HTTP verbs and JSON payload conventions:
+
+\begin{table}[H]
+\centering
+\caption{CricketVision REST API Endpoints Specification}
+\label{tab:api_endpoints}
+\begin{tabular}{p{1.5cm} p{3.5cm} p{3cm} p{4cm}}
+\toprule
+\textbf{Method} & \textbf{Endpoint Route} & \textbf{Controller} & \textbf{Description} \\
+\midrule
+\texttt{GET}    & \texttt{/api/players}        & \texttt{getAllPlayers()}    & Fetch all 104 player profiles \\
+\texttt{GET}    & \texttt{/api/players/:id}    & \texttt{getPlayerById()}   & Retrieve single player stats \\
+\texttt{POST}   & \texttt{/api/players}        & \texttt{createPlayer()}    & Create new player document \\
+\texttt{PUT}    & \texttt{/api/players/:id}    & \texttt{updatePlayer()}    & Update stats, fatigue, angles \\
+\texttt{DELETE} & \texttt{/api/players/:id}    & \texttt{deletePlayer()}    & Remove player from roster \\
+\texttt{POST}   & \texttt{/api/users/login}    & \texttt{authenticateUser()} & Validate credentials / persona \\
+\texttt{POST}   & \texttt{/api/users/register} & \texttt{registerUser()}    & Register new user account \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Auto-Seeding Implementation}
+The auto-seeding controller in \texttt{server.js} ensures the database is initialized on first boot without manual import steps:
+
+\begin{lstlisting}[caption={MongoDB Auto-Seeding Controller (server.js)}, label={lst:seeding}]
+const seedDatabase = async () => {
+  const count = await Player.countDocuments();
+  if (count < 100) {
+    await Player.insertMany(initialPlayersData);
+    console.log(
+      `[DB] Auto-seeded ${initialPlayersData.length} verified players.`
+    );
+  } else {
+    console.log(`[DB] ${count} players already loaded. Skipping seed.`);
+  }
+};
+\end{lstlisting}
+
+\section{Mathematical Algorithms \& Computational Logic}
+
+\subsection{Match Simulator Win-Probability Logistic Model}
+The dynamic win probability $P_{\text{win}}$ for a chasing team at any delivery is computed using a multi-parameter logistic function:
+
+\begin{equation}
+P_{\text{win}} = \frac{1}{1 + e^{-\left( \alpha \cdot (RRR_{\text{target}} - RRR_{\text{curr}}) + \beta \cdot W_{\text{rem}} + \gamma \cdot F_{\text{pitch}} + \delta \cdot \Omega_{\text{weather}} \right)}}
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $RRR_{\text{target}}$: Target required run rate
+    \item $RRR_{\text{curr}}$: Current achieved run rate
+    \item $W_{\text{rem}}$: Remaining wickets in hand (1--10)
+    \item $F_{\text{pitch}}$: Pitch wear index ($-1.0$ to $+1.0$)
+    \item $\Omega_{\text{weather}}$: Dew factor advantage coefficient ($+0.25$ in night chases)
+    \item $\alpha, \beta, \gamma, \delta$: Calibrated sensitivity coefficients
+\end{itemize}
+
+\subsection{360\textdegree{} Wagon Wheel Polar-to-Cartesian Transformation}
+Shot coordinates $(r, \theta)$ recorded in polar space are projected onto the 2D SVG canvas (center $x_c, y_c$):
+
+\begin{equation}
+x_{\text{svg}} = x_c + r \cdot \cos\!\left((\theta - 90) \cdot \frac{\pi}{180}\right)
+\end{equation}
+\begin{equation}
+y_{\text{svg}} = y_c + r \cdot \sin\!\left((\theta - 90) \cdot \frac{\pi}{180}\right)
+\end{equation}
+
+\subsection{Biomechanics Pose Angle Calculation}
+The elbow extension angle $\theta_{\text{elbow}}$ is computed from skeletal coordinate vectors $\vec{BA}$ (elbow $B$ to shoulder $A$) and $\vec{BC}$ (elbow $B$ to wrist $C$):
+
+\begin{equation}
+\vec{BA} = (A_x - B_x,\; A_y - B_y), \quad \vec{BC} = (C_x - B_x,\; C_y - B_y)
+\end{equation}
+\begin{equation}
+\theta_{\text{elbow}} = \arccos\!\left( \frac{\vec{BA} \cdot \vec{BC}}{\|\vec{BA}\| \cdot \|\vec{BC}\|} \right) \times \frac{180}{\pi}
+\end{equation}
+
+If $\theta_{\text{elbow,release}} - \theta_{\text{elbow,horizontal}} > 15.0°$, the system flags a regulatory bowling violation.
+
+\subsection{Squad Balance Scoring Algorithm}
+The Team Builder computes an aggregate Balance Score $B_s$ (0 to 100) for selected XI:
+
+\begin{equation}
+B_s = w_{\text{bat}} \cdot \overline{\text{BatRating}} + w_{\text{bowl}} \cdot \overline{\text{BowlRating}} + w_{\text{clutch}} \cdot \overline{\text{Clutch}} - P_{\text{penalty}}
+\end{equation}
+
+Penalties $P_{\text{penalty}}$ are dynamically applied if the squad has fewer than 5 bowling options or lacks a certified wicket-keeper.
+
+\section{Frontend React Components Implementation}
+The React application is modularly structured into functional components:
+
+\begin{itemize}
+    \item \textbf{\texttt{App.jsx} (Root Orchestrator):} Maintains global user session, manages active view routing, controls notification modals, and initializes MongoDB synchronization.
+    \item \textbf{\texttt{Navbar.jsx}:} Provides responsive view switching, active role badges (Coach, Player, Analyst), notification tray counter, and instant persona switching.
+    \item \textbf{\texttt{PlayerAnalyticsView.jsx}:} Integrates Recharts \texttt{PolarGrid} and \texttt{Radar} components for 6-dimensional athlete profiling alongside phase-by-phase scoring metrics.
+    \item \textbf{\texttt{PitchAndWagonWheel.jsx}:} Renders an SVG cricket boundary oval with 8 fielding sectors, mapping ball trajectory lines color-coded by run value.
+    \item \textbf{\texttt{VideoAnalyzerView.jsx}:} Embeds HTML5 video playback with canvas overlay drawing skeletal segments and real-time angular gauge meters.
+    \item \textbf{\texttt{MatchSimulatorView.jsx}:} Computes and renders Recharts \texttt{LineChart} win-probability curves updated per ball simulation tick.
+    \item \textbf{\texttt{DatabaseManagerModal.jsx}:} Offers comprehensive form controls to add, edit, and delete player records against the backend MongoDB cluster.
+\end{itemize}
+
+\section{AI Coach Assistant \& Tactical Module}
+The AI Coach (\texttt{AICoachModal.jsx}) operates as a domain-specific conversational tactical advisor, leveraging context-aware prompt engineering:
+
+\begin{lstlisting}[caption={AI Coach Tactical Prompt Generator}, label={lst:aicoach}]
+const generateTacticalPrompt = (player, opposition, pitchType) => {
+  return `Analyze ${player.name} (SR: ${player.strikeRate},
+    Middle SR: ${player.phaseStats.middleOvers.strikeRate})
+    vs ${opposition} on ${pitchType} pitch.
+    Suggest optimal field placements and bowling rotation.`;
+};
+\end{lstlisting}
+
+Predefined prompt categories include: \textit{Workload \& Fatigue Management}, \textit{Death Overs Bowling Strategy}, \textit{Matchup Vulnerability Analysis}, and \textit{Biomechanics Rehabilitation Drills}.

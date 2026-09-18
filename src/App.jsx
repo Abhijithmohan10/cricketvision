@@ -8,6 +8,7 @@ import MatchSimulatorView from './components/MatchSimulatorView';
 import TeamBuilderView from './components/TeamBuilderView';
 import NextMatchPredictorView from './components/NextMatchPredictorView';
 import PlayerPortalView from './components/PlayerPortalView';
+import PlayerComparisonView from './components/PlayerComparisonView';
 import LoginView from './components/LoginView';
 import DatabaseManagerModal from './components/DatabaseManagerModal';
 import AICoachModal from './components/AICoachModal';
@@ -133,6 +134,8 @@ function MainApp() {
         return <TeamBuilderView players={players} />;
       case 'player_portal':
         return <PlayerPortalView players={players} />;
+      case 'player_comparison':
+        return <PlayerComparisonView players={players} />;
       case 'login':
         return <LoginView players={players} onLoginSuccess={(role) => setActiveTab(role === 'player' ? 'player_portal' : 'dashboard')} />;
       case 'dashboard':
