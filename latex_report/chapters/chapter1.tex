@@ -2,85 +2,89 @@
 
 Modern professional cricket has evolved from a game driven purely by intuition and qualitative observation into a highly sophisticated, data-intensive discipline governed by quantitative modeling, computer vision body-tracking, and predictive simulation engines. Franchise leagues such as the Indian Premier League (IPL), Big Bash League (BBL), and international governing bodies like the International Cricket Council (ICC) increasingly rely on granular, real-time tactical intelligence to optimize player workloads, execute matchup-driven strategic decisions, and analyze biomechanical movements for injury prevention.
 
-\textbf{CricketVision} is a full-stack, enterprise-grade sports analytics and biomechanics platform engineered specifically for head coaches, elite professional players, and performance analysts. Built on the MERN stack architecture (MongoDB, Express.js, React 18, and Node.js) paired with Vite and Tailwind CSS, CricketVision integrates a pre-seeded database of over 100 verified international and IPL players with multi-tier visual analytics. The system delivers phase-wise statistical breakdowns (Powerplay, Middle Overs, Death Overs), interactive 360-degree SVG wagon wheel shot dispersion heatmaps, pitch length distribution plots, pose-estimation video biomechanics analysis, an AI-powered natural language strategy assistant, and a stochastic ball-by-ball match simulation engine.
+A performance dashboard is an important tool used by sports organizations, coaches, and analysts to present player statistics, physical fatigue indicators, tactical matchup breakdowns, and video telemetry. With the increasing reliance on online sports technology, player data is processed digitally before strategic decisions are finalized. Therefore, the structure, clarity, and organization of performance information have become essential.
 
-By establishing a unified, role-aware digital environment, CricketVision bridges the gap between raw statistical data collection and actionable tactical execution, enabling sports organizations to maximize winning probabilities while safeguarding athlete physical longevity.
+Preparing and updating player evaluation reports manually can consume significant time, especially when coaching staff need to maintain different versions of performance data. Analysts also find it difficult to identify whether a player's physical workload is nearing injury thresholds or whether bowling actions comply with ICC regulations. Problems such as fragmented data sources, uncontextualized aggregate scorecards, inconsistent formatting, and unmonitored fatigue can lead to unmitigated athlete burnout and tactical vulnerabilities.
+
+The project titled \textbf{CricketVision: AI-Powered Cricket Performance Analytics and Biomechanics Platform} is developed as a web-based application to address these requirements. It allows users to manage squad rosters, organize phase-wise performance statistics (Powerplay, Middle Overs, Death Overs), analyze 360-degree SVG wagon wheel shot dispersion heatmaps, evaluate stochastic ball-by-ball win probabilities, audit video bowling kinematics against ICC limits, and generate strategic recommendations using an AI Coach assistant.
+
+The application combines squad management, statistical analysis, predictive simulation, video biomechanics tracking, and dynamic report generation in one system. AI-assisted processing is used mainly for natural language strategy advice and pose keypoint angle calculations. The application itself manages the stored database records, mathematical graphics rendering, document generation, and interactive dashboard presentation.
 
 \section{Scope}
-The functional scope of CricketVision encompasses end-to-end performance evaluation, squad optimization, and match planning across three primary user roles:
+The scope of the project covers the development of a web application for creating, managing, analyzing, and presenting cricket performance and biomechanics information. The system is mainly intended for head coaches, elite professional players, and performance analysts who require a unified digital platform to manage athletic data.
 
-\begin{enumerate}
-    \item \textbf{Head Coach \& Performance Director Scope:}
-    \begin{itemize}
-        \item Centralized squad overview and management with live player fatigue monitoring.
-        \item Team Builder XI optimizer to dynamically evaluate overall batting, bowling, and spin/pace balance scores.
-        \item Interactive database manager with full MongoDB CRUD capabilities to insert, update, or prune player records.
-        \item Natural language AI Coach Strategy Assistant for tactical match planning, bowling rotation advice, and rehabilitation guidance.
-    \end{itemize}
-    
-    \item \textbf{Elite Player Scope:}
-    \begin{itemize}
-        \item Private, role-restricted dashboard providing personalized phase-wise stats (Powerplay Strike Rate, Death Overs Economy Rate, Clutch Rating).
-        \item Interactive 360-degree Wagon Wheel and pitch length distribution heatmaps for shot selection evaluation.
-        \item Tailored practice drill recommendations linked to weak performance areas or physical strain indicators.
-        \item Video review portal for biomechanical self-correction and technical posture analysis.
-    \end{itemize}
-    
-    \item \textbf{Performance Analyst Scope:}
-    \begin{itemize}
-        \item Interactive Ball-by-Ball Match Simulator featuring real-time win probability curves recalculated against pitch condition, weather metrics, and opposition bowling quality.
-        \item Next Match Predictor module evaluating player vs player head-to-head matchups and pitch conditions at major international venues.
-        \item Pose-Estimation Video Analyzer engine extracting joint angles (elbow flex angle, shoulder tilt, stride length) to audit bowling action legality against ICC regulations.
-        \item Multi-player Radar Chart visualizer comparing up to 6 core attributes (Power, Consistency, Spin, Pace, Fielding, Clutch).
-    \end{itemize}
-\end{enumerate}
+The application provides user registration and login facilities supporting pre-configured persona presets (\texttt{Rahul Dravid} - Head Coach, \texttt{Virat Kohli} - Batter, \texttt{Jasprit Bumrah} - Bowler, \texttt{Alex Morgan} - Analyst) as well as custom user accounts. Passwords are securely processed using password hashing. After successful login, users can access the dashboard and use the functions available in the system.
+
+Users can create and edit player profiles by entering information such as personal details, country/franchise, primary role (Batter, Bowler, All-rounder, WK-Batter), fatigue levels, clutch ratings, radar skill attributes, and phase-wise statistical breakdowns. The entered information is stored in a structured MongoDB document database and can be edited when required.
+
+The system also supports automated database seeding. On initial application deployment, the backend checks the player database collection and automatically seeds 104 verified international and IPL player profiles if fewer than 100 records exist.
+
+Another major part of the project is the Stochastic Match Simulator. The system evaluates live target scores, overs elapsed, wickets lost, pitch friction factors, and weather impact variables to generate dynamic win-probability curves recalculated ball-by-ball.
+
+The system can also generate interactive 360-degree SVG wagon wheel shot dispersion heatmaps and pitch length distribution plots. The generated graphics map polar coordinates into Cartesian coordinates to display boundary hits across 8 stadium sectors.
+
+Markerless video biomechanics analysis is also included within the scope of the project. Video playback feeds are processed on an interactive canvas to overlay pose keypoint skeletons, calculate elbow flex angles, and audit bowling action legality against the ICC 15-degree flexion threshold.
+
+The project therefore covers the complete process of managing cricket performance information, from roster creation and data seeding to stochastic simulation, biomechanics analysis, and dynamic report generation. The application uses a database to store structured information and connects the frontend and backend components through REST APIs.
 
 \section{Relevance}
-Traditional cricket evaluation suffers from fragmented tools—coaches rely on flat, static spreadsheets for statistics, standalone video player tools for video review, and manual estimations for team selection. This leads to three major bottlenecks in high-performance sports management:
+The project is relevant because performance analytics and biomechanics tracking are an integral part of modern competitive sports. Sports organizations and franchise teams regularly need to analyze player form, evaluate team composition balance, and monitor physical workload when preparing for high-stakes matches. Managing this information manually across separate spreadsheets and standalone media players can become difficult and error-prone.
 
-\begin{itemize}
-    \item \textbf{Siloed Insights:} Performance statistics, physical fatigue indicators, and video footage are stored separately, preventing holistic evaluations.
-    \item \textbf{Lack of Predictive Depth:} Conventional scorecards provide historical totals but fail to simulate future match scenarios under dynamic conditions (e.g., dew factor, pitch degradation, rain delays).
-    \item \textbf{Injury \& Biomechanics Gaps:} Fatigue tracking is often qualitative, leading to unexpected player burnout or bowling action illegalities (flexion exceeding the ICC 15-degree limit).
-\end{itemize}
+The use of Applicant Tracking and automated performance monitoring systems has also made structured data representation important. Performance statistics are often processed automatically to identify key metrics before tactical decisions are communicated to players. Decision-makers need clear headings, organized visual panels, and accurate metrics for rapid evaluation.
 
-CricketVision solves these challenges by unifying document-based data storage (MongoDB) with interactive data visualization libraries (Recharts, SVG rendering engines) and modern web technology. By introducing quantitative metrics such as the \textbf{Clutch Rating} and \textbf{Fatigue Level Index}, CricketVision enables teams to maximize win probabilities while protecting athlete physical longevity.
+The proposed system provides phase-wise breakdowns, situational clutch indices, and automated fatigue alerts to help coaches understand areas of tactical advantage and physical risk. Instead of using separate tools for statistics, video review, and match simulation, the user can manage squad data and perform analytical evaluations within the same application.
 
-From a software engineering perspective, CricketVision serves as a practical model for modern full-stack web application development, demonstrating role-based access control, reactive state management, asynchronous REST API integration, mathematical graphics rendering, and stochastic simulation modeling within a unified React/Node platform.
+The video biomechanics feature adds another valuable aspect to the project. Traditional biomechanical evaluations require expensive physical motion-capture suits or offline video frame pauses. Generating joint flexion angles directly from video feeds reduces equipment costs and enables regular posture auditing during practice sessions.
+
+The project is also relevant from the perspective of software development. It brings together full-stack engineering concepts such as user authentication, database management, REST API communication, mathematical graphics rendering, stochastic modeling, canvas video processing, and dynamic web page presentation.
+
+The application therefore provides a practical solution for managing professional sports analytics while demonstrating the application of modern web development and computer vision concepts.
 
 \section{Problem Statement}
-In contemporary professional cricket management, decision-makers face severe operational inefficiencies caused by decentralized and static analytical tools. The specific problem components addressed by this project are:
 
-\begin{enumerate}
-    \item \textbf{Data Fragmentation and Information Silos:} Current analytics setups require sports staff to navigate between external scoring portals, offline Excel sheets, physical medical logs, and standalone media player applications. This fragmentation hampers rapid tactical decision-making during high-stakes matches.
-    \item \textbf{Absence of Contextual Phase-Wise Analytics:} Standard scorecards record aggregate runs, overs, and wickets without isolating performance across critical match phases (Powerplay overs 1–6, Middle overs 7–15, Death overs 16–20). As a result, strategic vulnerabilities during specific overs remain hidden.
-    \item \textbf{Inability to Perform Real-Time Match Simulation:} Existing platforms offer static historical lookup tables (e.g., Duckworth-Lewis-Stern tables) but lack dynamic stochastic simulation engines capable of recalculating win-probability curves in real time based on pitch friction, weather shifts, and live bowler-batter matchups.
-    \item \textbf{Lack of Integrated Markerless Biomechanics:} Biomechanical video analysis traditionally requires expensive motion-capture sensor suits or manual offline frame pausing. There is a lack of accessible, web-integrated pose-estimation tools capable of extracting joint angles (elbow flexion, shoulder inclination) to enforce ICC bowling action compliance.
-    \item \textbf{Unsystematic Workload and Fatigue Monitoring:} Player fatigue tracking is predominantly qualitative and subjective, resulting in unmonitored physical overload, increased risk of stress fractures, and unoptimized squad rotations.
-\end{enumerate}
+Students, sports analysts, and coaching staff often face difficulties when preparing and maintaining comprehensive performance records for professional cricket squads. Information such as phase-wise strike rates, economy rates, fatigue indicators, and video telemetry must be updated regularly. Manually preparing and maintaining these details across disconnected platforms requires repeated effort and introduces data inconsistencies.
+
+Another major difficulty is the lack of contextual phase-wise analytics. Standard scorecards display aggregate career totals without isolating performance across critical match phases—namely the Powerplay (overs 1–6), Middle overs (7–15), and Death overs (16–20). As a result, strategic vulnerabilities during specific overs remain hidden.
+
+Coaches and analysts who want to simulate future match scenarios face a similar problem. Existing match evaluation relies on static lookup tables (such as Duckworth-Lewis-Stern tables) that cannot dynamically recalculate win probabilities in real time when pitch friction, dew factors, weather parameters, or live player matchups fluctuate.
+
+Furthermore, biomechanical video analysis has traditionally required expensive motion-capture sensor suits or manual offline frame pausing. There is a lack of accessible, web-integrated pose-estimation tools capable of extracting joint angles (elbow flex, shoulder tilt, stride length) to audit bowling action compliance against ICC regulations.
+
+There is therefore a need for an integrated system that can accept player performance data, store it in a structured database, provide phase-wise breakdowns, simulate dynamic match outcomes, audit video bowling kinematics, and present the information through an interactive web interface.
+
+The \textbf{CricketVision: AI-Powered Cricket Performance Analytics and Biomechanics Platform} addresses this requirement by maintaining structured player data as the common source for different functions. The same stored data is reused across squad management, wagon wheel rendering, match simulation, pose analysis, and AI strategy advice, reducing repeated data entry and improving operational consistency.
 
 \section{Objectives}
-The primary objective of this project is to design, develop, and evaluate \textbf{CricketVision}—a centralized, full-stack web application for comprehensive cricket analytics, match simulation, and markerless pose biomechanics.
-
-The specific technical and operational objectives of the project are:
+The main objectives of CricketVision are:
 
 \begin{enumerate}
-    \item \textbf{Develop a Scalable MERN Stack Infrastructure:} Construct a high-performance backend (Node.js, Express.js) connected to a MongoDB database pre-seeded with 100+ verified player documents, paired with a modern React 18 / Vite frontend.
-    \item \textbf{Implement Persona-Based Access Control:} Build a role-aware authentication engine supporting pre-configured persona presets (Head Coach, Elite Player, Performance Analyst) and customized permissions.
-    \item \textbf{Build Interactive Visual Analytics Engines:} Develop custom SVG mathematical rendering for 360-degree Wagon Wheel shot dispersion heatmaps and pitch length plots, alongside Recharts multi-attribute radar charts.
-    \item \textbf{Formulate a Stochastic Match Simulation Engine:} Implement a logistic regression win-probability model incorporating required run rate differentials, wicket reserves, pitch friction factors, and weather impact variables.
-    \item \textbf{Integrate Pose-Estimation Biomechanics Analyzer:} Construct an interactive canvas video review module that overlays pose tracking skeletons and computes joint flexion angles (elbow flex, shoulder tilt) to verify bowling action legality against ICC limits.
-    \item \textbf{Provide AI-Assisted Strategic Guidance:} Integrate an AI Coach natural language recommendation engine to assist coaches in team selection, workload management, and tactical match preparations.
+    \item To develop a web-based application for creating and managing cricket performance information.
+    \item To provide secure user registration and login using persona presets and password hashing.
+    \item To implement an automated database seeding engine populating 100+ verified player profiles.
+    \item To store structured player data in a MongoDB document database for future use and editing.
+    \item To generate phase-wise performance breakdowns across Powerplay, Middle, and Death overs.
+    \item To render interactive 360-degree SVG wagon wheel shot dispersion heatmaps and pitch length plots.
+    \item To formulate a stochastic match simulation engine calculating dynamic win-probability curves.
+    \item To construct a markerless pose estimation video analyzer measuring elbow flex angles against ICC 15-degree rules.
+    \item To integrate an AI Coach natural language strategy assistant for tactical recommendations.
+    \item To maintain consistency between stored player records, visual analytics, match simulations, and biomechanical audit reports.
 \end{enumerate}
 
 \section{Organization of the Report}
-The remainder of this report is structured into the following chapters:
+This report is organized into seven chapters that describe the development of CricketVision.
 
-\begin{itemize}
-    \item \textbf{Chapter 2: System Study} --- Investigates existing sports analytics platforms, presents a literature survey, conducts a gap analysis, describes the proposed CricketVision architecture, and specifies software and hardware requirements.
-    \item \textbf{Chapter 3: Development Methodology} --- Describes the Agile/Scrum engineering framework, sprint lifecycle, story point estimation, master product backlog with MoSCoW prioritization, and sprint burndown velocity analysis.
-    \item \textbf{Chapter 4: Design} --- Details the 3-tier block diagram, Data Flow Diagrams (DFD Level 0 and Level 1), process flowcharts, Mongoose database schemas, and user interface component specifications.
-    \item \textbf{Chapter 5: Implementation} --- Documents backend REST endpoints, mathematical algorithm formulations (win probability, wagon wheel transformation, pose angle computation), frontend React component architecture, and AI Coach integration.
-    \item \textbf{Chapter 6: Results \& Analysis} --- Presents the full unit and integration test suite results, UI execution screenshots, stochastic win-probability curve analysis, biomechanical pose benchmark evaluations, and workload fatigue degradation analysis.
-    \item \textbf{Chapter 7: Conclusion \& Future Scope} --- Summarizes project achievements, validates system against objectives, and outlines strategic enhancements planned for future development phases.
-\end{itemize}
+\textbf{Chapter 1 -- Introduction} presents the background of the project along with its scope, relevance, problem statement, objectives, and organization of the report.
+
+\textbf{Chapter 2 -- System Study} describes the existing system and its limitations, literature survey of related works, proposed system, and software and hardware requirements.
+
+\textbf{Chapter 3 -- Development Methodology} explains the methodology followed during the development of the project, including Scrum practices, requirement planning, implementation stages, and testing validation.
+
+\textbf{Chapter 4 -- System Design} presents the overall design of the system, including the 3-tier architecture, Level 0 and Level 1 Data Flow Diagrams, system workflow, and design summary.
+
+\textbf{Chapter 5 -- Implementation} explains the implementation of frontend and backend components, including authentication, roster management, SVG wagon wheel rendering, stochastic simulation, video pose analysis, REST API communication, and database operations.
+
+\textbf{Chapter 6 -- Results \& Analysis} presents the empirical results obtained from the developed application, evaluating database throughput, API latency, simulation accuracy, and pose telemetry precision.
+
+\textbf{Chapter 7 -- Conclusion and Future Scope} summarizes the developed system and its main outcomes, discussing possible future enhancements such as live WebSocket streaming and React Native mobile deployment.
+
+The report is followed by references and an appendix containing supporting project information such as the Git commit development history and core source code listings.

@@ -1,111 +1,100 @@
 \chapter{System Study}
 
-Evaluating modern sports technology requires analyzing existing analytical workflows and identifying systemic deficiencies. The system study phase establishes the rationale for CricketVision by examining legacy cricket tracking setups, reviewing academic research in sports science and computer vision, conducting a gap analysis, and specifying software and hardware requirements.
+System study is carried out to understand the existing methods used for cricket performance tracking, statistical scorecards, match outcome simulation, and video biomechanics presentation. It helps to identify the limitations of existing systems and define the requirements of the proposed application. The \textbf{CricketVision: AI-Powered Cricket Performance Analytics and Biomechanics Platform} combines squad roster creation, database seeding, phase-wise analytics, 360-degree SVG wagon wheel rendering, stochastic match simulation, video pose analysis, and dynamic report generation in a single web application.
 
 \section{Existing System}
+Traditionally, cricket statistics and team rosters are maintained using document editing applications or flat spreadsheets where users manually enter player details, career averages, strike rates, and bowling figures. Coaching staff are responsible for maintaining content formatting and cross-tab calculations. Although this method provides flexibility, it requires repeated manual effort when player data needs to be updated or modified for different upcoming matches.
 
-\subsection{Overview and Limitations}
-Existing cricket management setups typically rely on commercial sports platforms (e.g., Cricinfo, Cricbuzz, standalone media player software, and offline Excel spreadsheets). While these tools provide baseline scoring metrics, they exhibit severe operational constraints when applied to elite franchise management:
+Several online sports portals provide live scorecards and aggregate statistical tables. These systems make match viewing easier, but performance statistics, workload fatigue tracking, match simulation, and video biomechanics are handled separately. Users must therefore navigate across multiple applications to review player statistics, evaluate pitch conditions, check bowling action legality, and compile scouting reports.
 
-\begin{enumerate}
-    \item \textbf{Static Historical Data:} Existing scorecards display aggregate runs and wickets but fail to segregate performance across distinct match phases (Powerplay overs 1--6, Middle overs 7--15, Death overs 16--20).
-    \item \textbf{No Integrated Biomechanics:} Video review in standard software lacks computer-vision pose tracking, requiring expensive offline motion-capture hardware (e.g., Vicon, Qualisys optical systems costing hundreds of thousands of dollars).
-    \item \textbf{Absence of Real-Time Win Probability Simulation:} Conventional systems cannot simulate match outcomes in real time when key variables change (e.g., sudden loss of wickets, dew factor shifts, weather adjustments).
-    \item \textbf{Coarse Fatigue Management:} Workload tracking is usually recorded manually in physical logs or generic GPS vests, making it difficult to prevent lumbar stress fractures or shoulder impingements.
-    \item \textbf{No Persona-Based Access Control:} Standard tools lack tailored permissions; coaches, players, and analysts view identical generic interfaces without context-aware personalization.
-\end{enumerate}
+Research in sports analytics and computer vision has introduced automated methods for extracting and analyzing athletic performance. Natural Language Processing (NLP), Named Entity Recognition (NER), computer vision pose tracking, and machine learning have been used for identifying player keypoints, calculating joint angles, and predicting match outcomes.
+
+For example, Perera et al. studied context-aware player efficiency metrics in cricket, demonstrating that traditional career averages fail to reflect situational performance during high-pressure overs. [8]
+
+Another study by Moorthy \& DeSarbo proposed dynamic stochastic simulation modeling for franchise T20 cricket, proving that incorporating venue pitch friction, weather impact, and bowler-batter matchups yields higher predictive accuracy than static lookup tables. [9]
+
+Recent work has also explored the use of generative AI and markerless pose estimation for sports biomechanics. A 2021 IEEE study by Cao et al. combined Part Affinity Fields (PAF) and 2D pose keypoint tracking to extract joint coordinates and calculate segment flexion angles from video frames without requiring physical motion-capture suits. [10]
+
+These studies show that automated data processing and computer vision pose tracking can reduce manual effort and help organize information from sports video feeds. However, CricketVision focuses not only on video parsing but also on the complete user-side workflow of squad management, phase-wise analytics, stochastic match simulation, video pose analysis, and dynamic portfolio report generation.
+
+\subsection{Literature Survey}
+A literature survey was conducted to understand the existing approaches used for sports analytics, match outcome forecasting, and video biomechanics tracking. The reviewed studies mainly focus on techniques such as statistical decomposition, stochastic simulation modeling, and markerless pose keypoint tracking for extracting and organizing sports data. These studies provide a basis for understanding how performance data can be processed automatically and help identify the scope for combining performance analysis and visual presentation features in a single application. The major research works considered for the project are summarized in Table 2.1.
 
 \begin{table}[H]
 \centering
-\caption{Comparison of Existing Systems vs.\ CricketVision Platform}
-\label{tab:system_comparison}
-\begin{tabular}{p{3.2cm} p{4.5cm} p{5cm}}
+\caption{Selected Literature Related to Sports Analytics \& Biomechanics Processing}
+\label{tab:lit_survey}
+\begin{tabular}{p{3.2cm} p{1.2cm} p{3.8cm} p{5.2cm}}
 \toprule
-\textbf{Feature / Metric} & \textbf{Conventional Tools} & \textbf{CricketVision Platform} \\
+\textbf{Research Work} & \textbf{Year} & \textbf{Method Used} & \textbf{Main Contribution} \\
 \midrule
-Data Storage & Static Flat Files / CSVs & Centralized MongoDB (100+ Players) \\
-Phase-Wise Stats & Manual Calculation Only & Automated (Powerplay, Middle, Death) \\
-Match Simulation & Static DLS Lookups & Dynamic Ball-by-Ball Win Prob Engine \\
-Visual Analytics & Basic Bar/Pie Charts & Recharts Radar, 360\textdegree{} Wagon Wheel SVG \\
-Biomechanics & Manual Video Frame Pause & Computer Vision Pose Angle Extraction \\
-Role Access & Uniform Single View & Role-Based Auth (Coach, Player, Analyst) \\
-AI Tactical Advice & Static PDF Scouting Reports & Interactive Natural Language AI Coach \\
+Perera et al. -- Sports Analytics in Cricket & 2018 & Statistical decomposition, contextual efficiency rating & Decomposes career averages into phase-specific metrics (Powerplay, Middle, Death overs) and situational clutch indices. \\
+Moorthy \& DeSarbo -- Predictive Modeling & 2020 & Stochastic simulation, logistic regression, friction modeling & Incorporates venue pitch friction, weather parameters, and bowler-batter matchups for dynamic T20 win probability. \\
+Cao et al. -- Real-time 2D Pose Estimation & 2021 & Part Affinity Fields (PAF), 2D keypoint tracking & Extracts 2D joint location coordinates (shoulder, elbow, wrist) to measure segment flexion angles from video. \\
+Ferdinands et al. -- Lumbar Loading Analysis & 2019 & Kinematic motion capture, joint angular velocity & Identifies front knee flexion and elbow extension velocity as primary determinants of bowling speed and injury risk. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Literature Survey}
-Recent academic literature in sports analytics, computer vision, and predictive modeling emphasizes the transition toward automated, data-driven frameworks:
-
-\begin{enumerate}
-    \item \textbf{Perera et al.\ (2018) --- \textit{Sports Analytics in Cricket: A Survey}}:\\
-    Highlights that traditional aggregate metrics (e.g., batting average, bowling economy) fail to capture context-specific pressure situations. The authors advocate for phase-based efficiency ratings, venue-adjusted performance metrics, and clutch situational indices. Their research directly motivates CricketVision's phase-wise breakdown modules.
-
-    \item \textbf{Moorthy \& DeSarbo (2020) --- \textit{Predictive Modeling in Franchise Cricket}}:\\
-    Demonstrates that stochastic simulation models incorporating pitch condition, weather parameters, and bowler-batter matchups yield significantly higher predictive accuracy for match outcomes compared to static linear regression models. This work inspired CricketVision's logistic win-probability engine incorporating RRR decay, wicket survival, and dew factors.
-
-    \item \textbf{Cao et al.\ (2021) --- \textit{Real-time Multi-Person 2D Pose Estimation using Part Affinity Fields}}:\\
-    Establishes the foundation for markerless biomechanics tracking in sports, proving that joint location coordinates derived from video frames can accurately measure body segment angles (such as elbow flex and shoulder inclination) without physical motion sensors. This forms the theoretical basis of CricketVision's VideoAnalyzerView pose engine.
-
-    \item \textbf{Ferdinands et al.\ (2019) --- \textit{Biomechanical Analysis of Lumbar Loading in Cricket Fast Bowlers}}:\\
-    Explored the kinematic factors associated with bowling performance and lumbar spinal injury risk. The research demonstrated that front knee flexion at impact and elbow extension velocity are critical determinants of both ball speed and injury susceptibility, reinforcing the need for continuous automated video monitoring.
-\end{enumerate}
+The reviewed works demonstrate the use of statistical decomposition, stochastic modeling, and computer vision for automated sports processing. The proposed system uses AI-assisted parsing and pose keypoint tracking as one part of the application while extending the functionality to include squad management, SVG wagon wheel heatmaps, stochastic match simulation, and dynamic report rendering.
 
 \section{Proposed System}
+The proposed system is a web-based application named \textbf{CricketVision: AI-Powered Cricket Performance Analytics and Biomechanics Platform}. It provides a single platform for creating, managing, analyzing, improving, and presenting cricket performance and kinematic information.
 
-\subsection{Key Highlights and Capabilities}
-The proposed \textbf{CricketVision} platform introduces a full-stack solution designed to address the limitations of existing tools:
+Users can create player profiles manually or utilize the automated database seeding engine. On application startup, the backend checks the MongoDB database and automatically seeds 104 verified international and IPL player profiles if the database count falls below 100.
 
+The structured player information is stored in the MongoDB database and is used by the different functions of the application. Users can edit player details, update fatigue levels, and reuse the stored data without entering the same details repeatedly.
+
+The application provides phase-wise performance analytics that examine player statistics across Powerplay (overs 1--6), Middle (overs 7--15), and Death (overs 16--20) overs. The analysis calculates specialized metrics such as the Clutch Rating and Fatigue Level Index.
+
+The system also includes a 360-degree SVG Wagon Wheel shot dispersion visualizer and pitch length distribution plot. The graphics dynamically transform polar shot coordinates into Cartesian SVG canvas points color-coded by boundary classification.
+
+Another major feature is the Stochastic Match Simulator. The application evaluates target scores, current overs, wickets lost, pitch friction factors, and weather impact variables to generate dynamic win-probability curves recalculated ball-by-ball.
+
+Video biomechanics analysis is integrated into the video review studio. The canvas overlays skeletal keypoints, computes elbow joint flex angles $\theta_{\text{elbow}}$, and audits bowling action legality against the ICC 15-degree flexion limit.
+
+An AI Coach natural language strategy assistant is also provided, offering contextual recommendations for team selection, bowling rotations, and workload management.
+
+The major functions of the proposed system include:
 \begin{itemize}
-    \item \textbf{MERN Architecture \& Database Seeding:} Built on Node.js and Express.js with Mongoose ODM connected to MongoDB. Automatically populates a dataset of 100+ international and IPL players on initial deployment.
-    \item \textbf{Role-Based Authentication Engine:} Includes pre-configured persona presets (e.g., Coach Dravid, Player Kohli / Bumrah, Analyst Alex Morgan) enforcing access rights across sensitive endpoints.
-    \item \textbf{Interactive 360\textdegree{} Wagon Wheel \& Pitch Heatmap:} Utilizes SVG polar-to-Cartesian math to calculate shot directions across 8 stadium sectors alongside pitch length distribution heatmaps.
-    \item \textbf{Stochastic Match Simulator:} Executes ball-by-ball win-probability calculations considering target score, current run rate, required run rate, remaining wickets, weather impact factors, and pitch friction coefficients.
-    \item \textbf{Pose Estimation Biomechanics Video Analyzer:} Features an interactive video engine rendering pose tracking skeletons, overlaying elbow flex angles and stride length metrics, and verifying ICC 15\textdegree{} compliance.
-    \item \textbf{AI Coach Assistant:} Provides a contextual natural language strategy engine suggesting optimal bowling rotations, field placements, rehabilitation drills, and team selection tweaks.
+    \item User registration and secure login supporting persona presets.
+    \item Manual player creation, roster editing, and automated database seeding (104 players).
+    \item Phase-wise performance analytics (Powerplay, Middle, Death overs).
+    \item 360-degree SVG wagon wheel shot dispersion heatmaps and pitch length plots.
+    \item Ball-by-ball Stochastic Match Simulator with dynamic win-probability curves.
+    \item Markerless video pose estimation analyzer measuring joint flex angles against ICC rules.
+    \item AI Coach natural language strategy recommendation engine.
+    \item Team Builder XI balance optimizer evaluating squad depth and experience scores.
 \end{itemize}
 
 \section{Requirement Analysis}
+Requirement analysis identifies the software and hardware resources required for developing and running the proposed system. The requirements are divided into software and hardware requirements.
 
 \subsection{S/W Requirement}
-\begin{table}[H]
-\centering
-\caption{Software Requirements Specification}
-\label{tab:software_reqs}
-\begin{tabular}{p{3.5cm} p{4cm} p{4.5cm}}
-\toprule
-\textbf{Component Layer} & \textbf{Technology} & \textbf{Specification / Version} \\
-\midrule
-Operating System & Windows 10/11, Ubuntu 22.04, macOS & 64-bit OS \\
-Runtime Environment & Node.js (V8 Engine) & Node.js v18.16.0+ \\
-Web Framework & Express.js RESTful API & v4.18.2+ \\
-Database Server & MongoDB Community + Mongoose ODM & MongoDB v6.0+ \\
-Frontend Library & React 18 (Hooks, Context) & v18.2.0+ \\
-Build Tooling & Vite + HMR & v4.4.0+ \\
-UI Styling & Tailwind CSS + PostCSS & v3.3.0+ \\
-Data Visualization & Recharts + Lucide Icons & Recharts v2.7.0+ \\
-Language Support & JavaScript ES2022+, Python 3 & Python 3.10+ \\
-Version Control & Git \& GitHub & Git v2.40+ \\
-API Testing & Postman, Chrome DevTools & Postman v10.x \\
-\bottomrule
-\end{tabular}
-\end{table}
+The major software requirements of the system are given below:
 
-\subsection{H/W Requirement}
-\begin{table}[H]
-\centering
-\caption{Hardware Requirements Specification}
-\label{tab:hardware_reqs}
-\begin{tabular}{p{3.5cm} p{4cm} p{4.5cm}}
-\toprule
-\textbf{Hardware Component} & \textbf{Development Machine} & \textbf{Client / End-User} \\
-\midrule
-Processor (CPU) & Intel Core i5/i7, AMD Ryzen 5/7 & Dual-Core 2.0 GHz+ \\
-System Memory (RAM) & 16 GB DDR4 / DDR5 & 8 GB RAM minimum \\
-Storage Space & 512 GB NVMe SSD & 10 GB free disk space \\
-Display Resolution & 1920$\times$1080 Full HD & 1366$\times$768 or higher \\
-Network Interface & Gigabit Ethernet / Wi-Fi 6 & Broadband (10 Mbps+) \\
-GPU (Optional) & Dedicated for video pose rendering & Integrated graphics sufficient \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{itemize}
+    \item \textbf{Operating System:} Windows 10/11 (64-bit), macOS Monterey+, or Ubuntu 22.04 LTS.
+    \item \textbf{Frontend Framework:} React 18 with Vite for developing the reactive user interface.
+    \item \textbf{Backend Framework:} Node.js and Express.js for server-side REST API development.
+    \item \textbf{Database System:} MongoDB Community Server (v6.0+) with Mongoose ODM (v8.x) for document persistence.
+    \item \textbf{Programming Languages:} JavaScript (ES6+), HTML5 Canvas API, SVG mathematical graphics.
+    \item \textbf{Visualization Libraries:} Recharts 2 for multi-attribute radar charts and dynamic line graphs.
+    \item \textbf{Styling \& UI Components:} Tailwind CSS 3 and Lucide React icons.
+    \item \textbf{AI \& Document Libraries:} Google Gemini API for natural language AI Coach advice.
+    \item \textbf{Development Tools:} Visual Studio Code, Postman v10.x, Chrome Developer Tools.
+    \item \textbf{Version Control:} Git and GitHub (\texttt{Abhijithmohan10/cricketvision}).
+\end{itemize}
+
+The frontend provides the user interface, while the backend manages authentication, database operations, REST API routing, match simulation logic, and pose telemetry calculations. The frontend and backend communicate through asynchronous HTTP REST APIs.
+
+\subsection{H/W Requirements}
+The hardware requirements for the development and execution of the project are:
+
+\begin{itemize}
+    \item \textbf{Processor:} Quad-Core Intel Core i3/i5/i7 (8th Gen+), AMD Ryzen 5/7, or Apple M1/M2/M3.
+    \item \textbf{System Memory (RAM):} Minimum 4 GB; 8 GB or 16 GB is recommended for canvas video pose rendering.
+    \item \textbf{Storage:} At least 10 GB of available Solid State Drive (SSD) storage for the project, database documents, and media dependencies.
+    \item \textbf{Display:} Full HD (1920x1080) resolution display monitor.
+    \item \textbf{Network Connection:} Required for downloading dependencies, initial repository setup, and accessing AI services.
+\end{itemize}

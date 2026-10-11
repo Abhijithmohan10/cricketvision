@@ -4,7 +4,7 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { INITIAL_PLAYER_DATABASE } from './src/data/cricketDatabase.js';
-
+import aiCoachRouter from './src/routes/aiCoach.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/cricketvision';
@@ -22,6 +22,7 @@ const _JWT_SECRET = JWT_SECRET || 'dev_only_cricketvision_secret_change_me';
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/ai-coach', aiCoachRouter);
 
 // ─── Player Schema ───────────────────────────────────────────────────────────
 const playerSchema = new mongoose.Schema({

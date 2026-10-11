@@ -11,6 +11,7 @@
             bottom=1in]{geometry}
 
 \usepackage{graphicx}
+\graphicspath{{./}{./screenshots/}{./chapters/}{../screenshots/}}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
 \usepackage{hyperref}
@@ -21,14 +22,48 @@
 \usepackage{array}
 \usepackage{longtable}
 \usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage[most]{tcolorbox}
 \usetikzlibrary{shapes.geometric, arrows, positioning, arrows.meta}
 
 \usepackage{parskip}
 \usepackage{microtype}
 \usepackage{ragged2e}
+
+% ------------------------------------------------
+% Box Styles
+% ------------------------------------------------
+\tcbset{
+    litsurveybox/.style={
+        enhanced,
+        colback=blue!3!white,
+        colframe=blue!75!black,
+        fonttitle=\bfseries\large,
+        boxrule=1.2pt,
+        arc=4pt,
+        left=10pt,
+        right=10pt,
+        top=8pt,
+        bottom=8pt
+    },
+    diagrambox/.style={
+        enhanced,
+        colback=gray!2!white,
+        colframe=blue!75!black,
+        fonttitle=\bfseries\large,
+        boxrule=1.2pt,
+        arc=4pt,
+        left=8pt,
+        right=8pt,
+        top=10pt,
+        bottom=10pt,
+        halign=center
+    }
+}
 
 % ------------------------------------------------
 % Listing (Code) Style
@@ -47,6 +82,7 @@
   basicstyle=\ttfamily\footnotesize,
   breakatwhitespace=false,
   breaklines=true,
+  captionpos=b,
   keepspaces=true,
   numbers=left,
   numbersep=6pt,
@@ -70,9 +106,10 @@
 \setlength{\parskip}{5pt plus 2pt minus 1pt}
 
 \titleformat{\chapter}[display]
-{\normalfont\bfseries}
-{}{0pt}
-{\centering\Huge}
+{\normalfont\bfseries\centering}
+{\Huge\bfseries CHAPTER \thechapter}
+{8pt}
+{\Huge\bfseries}
 
 \titleformat{\section}
 {\large\bfseries\raggedright}
@@ -114,9 +151,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-
 \fancyfoot[C]{\thepage}
-
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
@@ -127,154 +162,182 @@
 \begin{document}
 
 % =================================================
-% TITLE PAGE
+% PAGE 1: TITLE PAGE (KTU / RIT TEMPLATE)
 % =================================================
 
 \begin{titlepage}
-
 \centering
 
-\textbf{\Large GOVERNMENT OF KERALA}
-
-\vspace{0.4cm}
-
-\textbf{\Large DEPARTMENT OF TECHNICAL EDUCATION}
-
-\vspace{0.8cm}
-
-\textbf{\Large RAJIV GANDHI INSTITUTE OF TECHNOLOGY}
-
-\vspace{0.4cm}
-
-\textbf{\Large (GOVT. ENGINEERING COLLEGE)}
-
-\vspace{0.4cm}
-
-\textbf{\Large KOTTAYAM - 686501}
-
-\vspace{2cm}
+{\Large\textbf{RAJIV GANDHI INSTITUTE OF TECHNOLOGY}}\\[0.2cm]
+{\Large\textbf{GOVERNMENT ENGINEERING COLLEGE}}\\[0.2cm]
+{\Large\textbf{KOTTAYAM - 686 501}}\\[1.0cm]
 
 \IfFileExists{image.png}{
-    \includegraphics[width=0.25\textwidth]{image.png}
+    \includegraphics[width=0.22\textwidth]{image.png}\\[0.8cm]
 }{
     \begin{tikzpicture}
-        \draw[thick, fill=gray!10] (0,0) circle (1.5cm);
+        \draw[thick, fill=gray!10] (0,0) circle (1.3cm);
         \node at (0,0) {\textbf{RIT LOGO}};
-    \end{tikzpicture}
+    \end{tikzpicture}\\[0.8cm]
 }
 
-\vspace{2cm}
+{\large\textbf{DEPARTMENT OF COMPUTER APPLICATIONS}}\\[0.6cm]
 
-{\Large\textbf{PROJECT REPORT}}
+{\large 20MCA245 - MINI PROJECT}\\[0.8cm]
 
-\vspace{1cm}
+{\Large\textbf{CRICKETVISION: AI-POWERED CRICKET PERFORMANCE ANALYTICS AND BIOMECHANICS PLATFORM}}\\[1.2cm]
 
-{\LARGE\textbf{CRICKETVISION}}
+Submitted By\\[0.2cm]
+{\large\textbf{ABHIJITH MOHAN}}\\[0.1cm]
+{\large\textbf{KTE24MCA001}}\\[1.2cm]
 
-\vspace{0.5cm}
+Under the Guidance of\\[0.2cm]
+{\large\textbf{Dr. REENA MURALI}}\\[1.2cm]
 
-{\large
-AI-Powered Cricket Performance Analytics \& Biomechanics Platform
+\IfFileExists{ktu_logo.png}{
+    \includegraphics[width=0.2\textwidth]{ktu_logo.png}\\[0.6cm]
+}{
+    \begin{tikzpicture}
+        \draw[thick, fill=blue!10] (0,0) rectangle (2.2, 1.8);
+        \node at (1.1,0.9) {\textbf{KTU LOGO}};
+    \end{tikzpicture}\\[0.6cm]
 }
 
-\vfill
+{\large\textbf{APJ ABDUL KALAM TECHNOLOGICAL UNIVERSITY}}\\[0.2cm]
+{\large\textbf{THIRUVANANTHAPURAM}}\\[0.6cm]
 
-\textbf{ABHIJITH MOHAN}
-
-\vspace{0.3cm}
-
-Master of Computer Applications
-
-\vspace{0.3cm}
-
-Reg. No. KTE24MCA001
-
-\vspace{0.8cm}
-
-Academic Year 2025 -- 2026
+{\large October 2026}
 
 \end{titlepage}
 
 % =================================================
-% FRONT MATTER
+% PAGE 2: CERTIFICATE PAGE
 % =================================================
 
-\pagenumbering{roman}
-
-% ----- Certificate -----
-\chapter*{Certificate of Approval}
-\addcontentsline{toc}{chapter}{Certificate of Approval}
-
-This is to certify that the project report titled \textbf{``CricketVision: AI-Powered Cricket Performance Analytics \& Biomechanics Platform''} is a bona fide record of work carried out by \textbf{ABHIJITH MOHAN} (Reg. No. KTE24MCA001) in partial fulfillment of the requirements for the award of the degree of Master of Computer Applications (MCA) of APJ Abdul Kalam Technological University, Kerala, at Rajiv Gandhi Institute of Technology, Kottayam, during the academic year 2025--2026.
-
-\vspace{2.5cm}
-
-\begin{tabular}{@{}p{0.45\textwidth}@{}p{0.45\textwidth}@{}}
-Project Guide & Head of Department \\[1cm]
-\hrulefill & \hrulefill \\
-MCA Department & Dept. of Computer Applications \\
-\end{tabular}
-
-\vspace{1.5cm}
-\noindent Place: Kottayam \hfill Date: 12 / 09 / 2026
-
-% ----- Declaration -----
-\chapter*{Declaration}
-\addcontentsline{toc}{chapter}{Declaration}
-
-I hereby declare that this project report entitled \textbf{``CricketVision: AI-Powered Cricket Performance Analytics \& Biomechanics Platform''} represents my original research and software development work. The material incorporated here has not been submitted previously in part or in full for the award of any other degree, diploma, or title in any university or institution. All external citations, algorithms, code libraries, and dataset references have been duly recognized and listed in the References section.
-
-\vspace{2.5cm}
-
-\begin{tabular}{@{}p{0.5\textwidth}@{}p{0.45\textwidth}@{}}
-Place: Kottayam & \textbf{ABHIJITH MOHAN} \\
-Date: 12 / 09 / 2026 & Reg. No. KTE24MCA001 \\
-\end{tabular}
-
-\clearpage
-
-\tableofcontents
-
-\clearpage
-
-\listoffigures
-
-\clearpage
-
-\listoftables
-
-\clearpage
-
-% =================================================
-% ABSTRACT
-% =================================================
-\addcontentsline{toc}{chapter}{Abstract}
-\chapter*{Abstract}
+\thispagestyle{empty}
 \centering
-\begin{minipage}{0.9\textwidth}
-Modern professional cricket demands real-time tactical intelligence, quantitative analytics, and computer-vision-driven biomechanics tracking to optimize athlete performance, manage workload fatigue, and execute matchup-driven strategic decisions. Traditional sports analytics setups rely on fragmented tools---flat scorecards, isolated video players, manual spreadsheet logs, and qualitative fatigue tracking---leading to siloed insights, lack of predictive depth, and unmitigated athlete burnout risks.
 
-\vspace{0.4cm}
+{\large\textbf{DEPARTMENT OF COMPUTER APPLICATIONS}}\\[0.3cm]
+{\Large\textbf{RAJIV GANDHI INSTITUTE OF TECHNOLOGY}}\\[0.2cm]
+{\Large\textbf{KOTTAYAM}}\\[0.8cm]
 
-\textbf{CricketVision} is a full-stack, enterprise-grade sports analytics and biomechanics platform engineered specifically for head coaches, elite players, and performance analysts. Built on the MERN stack architecture (MongoDB, Express.js, React 18, and Node.js) with Vite and Tailwind CSS, CricketVision unifies document-based data persistence with interactive visual analytics. The platform features an auto-seeding database pre-populated with over 100 verified international and IPL player profiles.
+\IfFileExists{image.png}{
+    \includegraphics[width=0.2\textwidth]{image.png}\\[0.8cm]
+}{
+    \begin{tikzpicture}
+        \draw[thick, fill=gray!10] (0,0) circle (1.2cm);
+        \node at (0,0) {\textbf{RIT LOGO}};
+    \end{tikzpicture}\\[0.8cm]
+}
 
-\vspace{0.4cm}
+{\Large\textbf{CERTIFICATE}}\\[1.0cm]
 
-Key functional modules include phase-wise performance breakdowns (Powerplay, Middle Overs, Death Overs), interactive 360-degree SVG wagon wheel shot dispersion heatmaps, pitch length distribution plots, a stochastic ball-by-ball match simulation engine calculating dynamic win-probability curves, a pose-estimation video biomechanics analyzer measuring joint flex angles (elbow, shoulder, stride length) to audit bowling action legality against ICC limits, an AI Coach natural language strategy assistant, and a role-based authentication system with pre-configured persona presets.
+\justifying
+This is to certify that the project entitled \textbf{“CRICKETVISION: AI-POWERED CRICKET PERFORMANCE ANALYTICS AND BIOMECHANICS PLATFORM”} is a bonafide work carried out by \textbf{ABHIJITH MOHAN} (Register No.: \textbf{KTE24MCA001}) during the academic year \textbf{2025–2026} in partial fulfillment of the requirements for the award of the degree of \textbf{Master of Computer Applications} of \textbf{APJ Abdul Kalam Technological University, Thiruvananthapuram, Kerala}.\\[2.5cm]
 
-\vspace{0.4cm}
-
-This report documents the complete engineering of CricketVision, presenting a comprehensive system study, Agile/Scrum development methodology, requirement analysis, architectural design, Data Flow Diagrams (DFDs), database schemas, algorithmic formulations, and empirical testing results demonstrating system stability, real-time calculation responsiveness, and operational efficiency.
+\noindent
+\begin{minipage}{0.48\textwidth}
+\textbf{Dr. Reena Murali}\\
+(Project Guide)\\
+Professor\\
+Department of Computer Applications
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\raggedleft
+\textbf{Dr. Vineetha S}\\
+Head of Department\\
+Department of Computer Applications
 \end{minipage}
 
 \clearpage
 
 % =================================================
-% MAIN REPORT
+% PAGE 3: DECLARATION PAGE
+% =================================================
+
+\thispagestyle{empty}
+\centering
+
+{\Large\textbf{DECLARATION}}\\[1.2cm]
+
+\justifying
+I, the undersigned, hereby declare that the project report entitled \textbf{“CRICKETVISION: AI-POWERED CRICKET PERFORMANCE ANALYTICS AND BIOMECHANICS PLATFORM”}, submitted for partial fulfillment of the requirements for the award of the degree of Master of Computer Applications of the APJ Abdul Kalam Technological University, Kerala, is a bonafide work carried out by me under the guidance of \textbf{Dr. Reena Murali}.
+
+The work presented in this report is based on the project developed by me and the information, ideas, and sources used from other works have been appropriately acknowledged and referenced. I further declare that this report has not been submitted previously, either in whole or in part, for the award of any degree, diploma, or other similar qualification of this or any other University.\\[2.5cm]
+
+\noindent
+Place: Kottayam \hfill \textbf{ABHIJITH MOHAN}\\[0.3cm]
+Date: October 2026
+
+\clearpage
+
+% =================================================
+% PAGE 4: ACKNOWLEDGEMENT PAGE
+% =================================================
+
+\thispagestyle{empty}
+\centering
+
+{\Large\textbf{ACKNOWLEDGEMENT}}\\[1.2cm]
+
+\justifying
+I express my sincere gratitude to God Almighty for giving me the strength, guidance, and support to complete this mini project successfully.
+
+I sincerely thank \textbf{Dr. Prince A}, Principal, Rajiv Gandhi Institute of Technology, Kottayam, for providing the environment in which this project could be completed.
+
+I express my sincere gratitude to \textbf{Dr. Vineetha S}, Head of the Department of Computer Applications, for granting permission and providing the necessary support for the successful completion of this project.
+
+I am deeply grateful to my Project Guide and Project Coordinator, \textbf{Dr. Reena Murali}, Professor, Department of Computer Applications, for her valuable guidance, continuous support, constructive suggestions, and encouragement throughout the planning, development, and completion of this project.
+
+I also thank all the faculty members and technical staff of the Department of Computer Applications for their assistance and support.
+
+Finally, I express my sincere thanks to my family and friends for their encouragement and support during the completion of this project.\\[2.5cm]
+
+\noindent
+\hfill \textbf{ABHIJITH MOHAN}
+
+\clearpage
+
+% =================================================
+% PAGE 5: ABSTRACT PAGE
+% =================================================
+
+\pagenumbering{roman}
+\setcounter{page}{4}
+
+\addcontentsline{toc}{chapter}{Abstract}
+\chapter*{ABSTRACT}
+\justifying
+In the present data-intensive sports management environment, real-time tactical intelligence, quantitative athlete analytics, and automated video biomechanics tracking are essential for optimizing performance, managing workload fatigue, and executing matchup-driven strategic decisions. Traditional sports analytics setups rely on fragmented tools—flat scorecards, isolated video media players, manual spreadsheet logs, and qualitative fatigue tracking—leading to information silos, lack of predictive depth, and unmitigated athlete burnout risks.
+
+The \textbf{CricketVision: AI-Powered Cricket Performance Analytics and Biomechanics Platform} is a full-stack web application developed to combine squad roster management, phase-wise statistical breakdowns, 360-degree SVG wagon wheel shot dispersion heatmaps, pitch length distribution plots, stochastic ball-by-ball match simulation, pose-estimation video biomechanics analysis, and AI-assisted strategic recommendations into a single unified platform. The application allows users to register and log in securely using persona presets (Head Coach, Elite Player, Performance Analyst) or custom accounts.
+
+The platform includes an auto-seeding engine that populates an initial dataset of 104 verified international and IPL player profiles into a local MongoDB database. The backend is built using Node.js and Express.js REST APIs with Mongoose ODM, providing sub-35ms query latency across all CRUD routes. The frontend is developed using React 18, Vite, Tailwind CSS, Recharts, and custom SVG mathematical graphics rendering engines.
+
+Key functional modules include a phase-wise performance breakdown (Powerplay, Middle Overs, Death Overs), interactive 360-degree wagon wheel shot dispersion heatmaps, pitch length distribution plots, a stochastic match simulation engine evaluating dynamic win-probability curves based on required run rate differentials and weather/pitch friction factors, a pose-estimation video analyzer measuring elbow flexion angles against International Cricket Council (ICC) 15-degree rules, an AI Coach natural language strategy assistant, and a Team Builder XI balance optimizer. The completed system demonstrates the integration of sports analytics, document processing, computer vision kinematics, dynamic PDF report rendering, and role-gated web interface presentation within a single full-stack web application.
+
+\clearpage
+
+% =================================================
+% PAGES 6-7: TABLE OF CONTENTS
+% =================================================
+
+\tableofcontents
+\clearpage
+
+% =================================================
+% PAGE 8: LIST OF FIGURES
+% =================================================
+
+\listoffigures
+\clearpage
+
+% =================================================
+% MAIN CHAPTERS (PAGES 9 - 38)
 % =================================================
 
 \pagenumbering{arabic}
-
 \setcounter{page}{1}
 
 \input{chapters/chapter1}
@@ -289,69 +352,46 @@ This report documents the complete engineering of CricketVision, presenting a co
 % REFERENCES
 % =================================================
 
-\addcontentsline{toc}{chapter}{References}
-\begin{thebibliography}{9}
-
-\bibitem{perera2018}
-H. Perera et al., ``Sports Analytics in Cricket: A Survey,'' \textit{Journal of Sports Analytics}, vol.~4, no.~4, pp.~265--278, 2018.
-
-\bibitem{moorthy2020}
-S. Moorthy and W. DeSarbo, ``Predictive Modeling in Franchise Cricket,'' \textit{International Journal of Forecasting}, vol.~36, no.~3, pp.~912--925, 2020.
-
-\bibitem{cao2021}
-Z. Cao et al., ``Real-time Multi-Person 2D Pose Estimation using Part Affinity Fields,'' \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol.~43, no.~1, pp.~172--186, 2021.
-
-\bibitem{ferdinands2019}
-R. Ferdinands et al., ``Biomechanical Analysis of Lumbar Loading in Cricket Fast Bowlers,'' \textit{Sports Biomechanics}, vol.~18, no.~2, pp.~139--152, 2019.
+\begin{thebibliography}{99}
 
 \bibitem{react}
-React 18 Documentation. \url{https://react.dev}
+React Documentation, \textit{React -- The library for web and native user interfaces}. Available at: \url{https://react.dev/}
+
+\bibitem{nodejs}
+Node.js Documentation, \textit{Node.js Documentation}. Available at: \url{https://nodejs.org/docs/latest/api/}
 
 \bibitem{express}
-Express.js Web Application Framework. \url{https://expressjs.com}
+Express.js Documentation, \textit{Express Web Framework}. Available at: \url{https://expressjs.com/}
 
 \bibitem{mongodb}
-MongoDB Documentation \& Mongoose ODM. \url{https://mongoosejs.com}
+MongoDB Documentation, \textit{MongoDB & Mongoose ODM Documentation}. Available at: \url{https://mongoosejs.com/}
+
+\bibitem{vite}
+Vite Documentation, \textit{Vite -- Next Generation Frontend Tooling}. Available at: \url{https://vite.dev/}
+
+\bibitem{tailwindcss}
+Tailwind CSS Documentation, \textit{Tailwind CSS Documentation}. Available at: \url{https://tailwindcss.com/docs}
+
+\bibitem{recharts}
+Recharts Documentation, \textit{Recharts Composability Charting Library}. Available at: \url{https://recharts.org/}
+
+\bibitem{perera2018}
+H. Perera et al., ``Sports Analytics in Cricket: A Survey,'' \textit{Journal of Sports Analytics}, vol. 4, no. 3, pp. 195--208, 2018.
+
+\bibitem{moorthy2020}
+S. Moorthy and W. DeSarbo, ``Predictive Modeling in Franchise Cricket,'' \textit{International Journal of Forecasting}, vol. 36, no. 2, pp. 412--426, 2020.
+
+\bibitem{cao2021}
+Z. Cao, G. Hidalgo, T. Simon, S. Wei, and Y. Sheikh, ``Real-time Multi-Person 2D Pose Estimation using Part Affinity Fields,'' \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 43, no. 1, pp. 172--186, 2021.
 
 \end{thebibliography}
+
+\clearpage
 
 % =================================================
 % APPENDIX
 % =================================================
 
-\appendix
-\chapter{Project Appendix}
-\addcontentsline{toc}{chapter}{Appendix}
-
-\section{Source Code Repository}
-\begin{itemize}
-    \item \textbf{GitHub Repository:} \url{https://github.com/Abhijithmohan10/cricketvision}
-    \item \textbf{Primary Language:} JavaScript (Node.js / React 18)
-    \item \textbf{Database:} MongoDB Community Server v6.0+
-\end{itemize}
-
-\section{Key Git Commit History}
-\begin{table}[H]
-\centering
-\caption{Selected Git Commit Log}
-\begin{tabular}{llll}
-\toprule
-\textbf{Hash} & \textbf{Date} & \textbf{Author} & \textbf{Summary} \\
-\midrule
-\texttt{e6f29fa} & 13/08/2026 & Abhijith Mohan & Fix A4 print preview React portal \\
-\texttt{bdf8ee8} & 13/08/2026 & Abhijith Mohan & Fix print layout single page \\
-\texttt{bc2e426} & 11/08/2026 & Abhijith Mohan & Initial commit \\
-\texttt{a1e1aed} & 11/08/2026 & Abhijith Mohan & Initial CricketVision static site build \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Application Verification}
-\begin{itemize}
-    \item \textbf{Backend:} Node.js Express server verified on port 5000
-    \item \textbf{Frontend:} React Vite SPA verified on port 5173
-    \item \textbf{Database:} MongoDB \texttt{players} collection: 104 documents; \texttt{users} collection verified
-    \item \textbf{Build:} Production bundle via \texttt{npm run build} verified successfully
-\end{itemize}
+\IfFileExists{chapters/appendix.tex}{\input{chapters/appendix}}{\IfFileExists{appendix.tex}{\input{appendix}}{}}
 
 \end{document}

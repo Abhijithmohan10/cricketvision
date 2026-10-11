@@ -21,27 +21,39 @@ export default function AICoachModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSend = (textToSend = inputText) => {
+  const handleSend = async (textToSend = inputText) => {
     if (!textToSend.trim()) return;
 
+    // Add user message immediately
     const userMsg = { id: Date.now(), sender: 'user', text: textToSend };
     setMessages((prev) => [...prev, userMsg]);
     setInputText('');
 
-    // Generate intelligent AI tactical response
-    setTimeout(() => {
-      let responseText = "Based on statistical analysis of IPL and T20 International data: Maintain an inverted field with Deep Mid-Wicket and Long-On for power hitters. Deploy seamers with variable pace cutters and wide outside-off yorkers during death overs (overs 16-20).";
+    // Show a temporary "thinking" placeholder
+    const thinkingId = Date.now() + 1;
+    setMessages((prev) => [...prev, { id: thinkingId, sender: 'ai', text: '🔄 Thinking…' }]);
 
-      if (textToSend.toLowerCase().includes('spin') || textToSend.toLowerCase().includes('wrist')) {
-        responseText = "Tactical Blueprint vs Wrist Spin: Encourage batters to utilize sweep shots against flighted deliveries outside off-stump, or step down the pitch early to smother the turn. Ensure non-striker watches release wrist seam orientation closely for googly detection.";
-      } else if (textToSend.toLowerCase().includes('death') || textToSend.toLowerCase().includes('yorker')) {
-        responseText = "Death Overs Execution: Jasprit Bumrah and Rashid Khan yield the lowest boundary percentage (<12%). Target wide yorker length (0.2m outside off tramline) to restrict arm extension for right-handed power hitters.";
-      } else if (textToSend.toLowerCase().includes('workload') || textToSend.toLowerCase().includes('fatigue')) {
-        responseText = "Fatigue & Workload Management: Fast bowlers averaging over 18 overs per week show a 42% increase in hamstring/shoulder strain risk. Recommend resting high-workload pace bowlers every 3rd fixture during tight tournament schedules.";
-      }
+    try {
+      const res = await fetch('/api/ai-coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: textToSend })
+      });
 
-      setMessages((prev) => [...prev, { id: Date.now() + 1, sender: 'ai', text: responseText }]);
-    }, 450);
+      if (!res.ok) throw new Error(`AI coach error ${res.status}`);
+      const data = await res.json();
+      const answer = data.answer || '⚠️ No answer returned.';
+
+      // Replace the placeholder with the real answer
+      setMessages((prev) =>
+        prev.map((m) => (m.id === thinkingId ? { ...m, text: answer } : m))
+      );
+    } catch (e) {
+      console.error('AI coach fetch failed:', e);
+      setMessages((prev) =>
+        prev.map((m) => (m.id === thinkingId ? { ...m, text: `❗️ Error: ${e.message}` } : m))
+      );
+    }
   };
 
   const exportReport = () => {
