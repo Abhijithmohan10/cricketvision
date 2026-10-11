@@ -117,6 +117,11 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate that the uploaded file is a video (MIME type starts with "video/")
+      if (!file.type.startsWith('video/')) {
+        alert('❗️ Please upload a VALID cricket video file (video formats only).');
+        return;
+      }
       const url = URL.createObjectURL(file);
       setCustomVideoUrl(url);
       setCustomVideoName(file.name);
@@ -353,7 +358,7 @@ export default function VideoAnalyzerView({ players = [], onSaveAnalysisReport }
             type="file"
             ref={fileInputRef}
             onChange={handleFileUpload}
-            accept="video/*,audio/*,.mp3,.mp4,.webm,.m4a,.wav"
+            accept="video/*"
             className="hidden"
           />
           <button
