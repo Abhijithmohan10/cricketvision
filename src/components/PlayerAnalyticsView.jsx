@@ -11,7 +11,10 @@ import {
   ChevronRight,
   BarChart3,
   Percent,
-  CheckCircle2
+  CheckCircle2,
+  Gauge,
+  Target,
+  ShieldAlert
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -101,29 +104,30 @@ export default function PlayerAnalyticsView({ players = [], searchQuery = '', on
 
   const isBowler = selectedPlayer?.role?.toLowerCase().includes('bowler') || (selectedPlayer?.role?.toLowerCase().includes('fast') && !selectedPlayer?.role?.toLowerCase().includes('all-rounder'));
   const isAllRounder = selectedPlayer?.role?.toLowerCase().includes('all-rounder');
+  const pressureVal = selectedPlayer?.pressureIndex || selectedPlayer?.pressureProfile?.overall || selectedPlayer?.clutchRating || 90;
 
-  // Prepare role-specific radar chart data
+  // Prepare role-specific radar chart data including Pressure Index
   const radarData = selectedPlayer?.skillRadar ? (
     isAllRounder ? [
       { subject: 'Power Hitting', value: selectedPlayer.skillRadar.powerHitting || 82, fullMark: 100 },
       { subject: 'Spin Mastery', value: selectedPlayer.skillRadar.spinTechnique || 84, fullMark: 100 },
       { subject: 'Pace Mastery', value: selectedPlayer.skillRadar.paceMastery || 88, fullMark: 100 },
       { subject: 'Death Execution', value: selectedPlayer.skillRadar.deathExecution || 86, fullMark: 100 },
-      { subject: 'Clutch Score', value: selectedPlayer.skillRadar.clutchRating || 90, fullMark: 100 },
+      { subject: 'Pressure Index', value: pressureVal, fullMark: 100 },
       { subject: 'Fielding', value: selectedPlayer.skillRadar.fielding || 92, fullMark: 100 }
     ] : isBowler ? [
       { subject: 'Yorker Accuracy', value: selectedPlayer.skillRadar.deathExecution || 88, fullMark: 100 },
       { subject: 'Spin / Drift', value: selectedPlayer.skillRadar.spinTechnique || 85, fullMark: 100 },
       { subject: 'Pace & Seam', value: selectedPlayer.skillRadar.paceMastery || 92, fullMark: 100 },
       { subject: 'Econ Control', value: selectedPlayer.skillRadar.deathExecution || 86, fullMark: 100 },
-      { subject: 'Clutch Wickets', value: selectedPlayer.skillRadar.clutchRating || 90, fullMark: 100 },
+      { subject: 'Pressure Index', value: pressureVal, fullMark: 100 },
       { subject: 'Fielding', value: selectedPlayer.skillRadar.fielding || 84, fullMark: 100 }
     ] : [
       { subject: 'Power Hitting', value: selectedPlayer.skillRadar.powerHitting || 85, fullMark: 100 },
       { subject: 'Spin Mastery', value: selectedPlayer.skillRadar.spinTechnique || 88, fullMark: 100 },
       { subject: 'Pace Mastery', value: selectedPlayer.skillRadar.paceMastery || 90, fullMark: 100 },
       { subject: 'Death Execution', value: selectedPlayer.skillRadar.deathExecution || 86, fullMark: 100 },
-      { subject: 'Clutch Score', value: selectedPlayer.skillRadar.clutchRating || 92, fullMark: 100 },
+      { subject: 'Pressure Index', value: pressureVal, fullMark: 100 },
       { subject: 'Fielding', value: selectedPlayer.skillRadar.fielding || 88, fullMark: 100 }
     ]
   ) : [];
@@ -212,8 +216,11 @@ export default function PlayerAnalyticsView({ players = [], searchQuery = '', on
                     {player.role} • {player.iplTeam}
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-mono-code bg-slate-800 text-amber-400 px-1.5 py-0.5 rounded">
+                <div className="text-right flex flex-col items-end">
+                  <span className="text-[10px] font-mono-code bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold" title="Pressure Index">
+                    PI {player.pressureIndex || player.clutchRating || 88}
+                  </span>
+                  <span className="text-[9px] font-mono-code text-slate-500 mt-0.5">
                     ★ {player.clutchRating}
                   </span>
                 </div>
@@ -257,21 +264,224 @@ export default function PlayerAnalyticsView({ players = [], searchQuery = '', on
                   </div>
                 </div>
 
-                {/* Fitness & Fatigue Meter */}
-                <div className="w-full md:w-auto p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 z-10">
-                  <div className="flex items-center justify-between text-xs space-x-4">
-                    <span className="text-slate-400">Fatigue Index</span>
-                    <span className="font-bold text-emerald-400 font-mono-code">{selectedPlayer.fatigueLevel || 20}% (Low)</span>
+                {/* Right Top Status Cards: Pressure Index & Fitness/Fatigue */}
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto z-10">
+                  {/* Pressure Index Compact Meter */}
+                  <div className="flex-1 md:flex-initial min-w-[150px] p-3.5 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 flex items-center space-x-1">
+                        <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Pressure Index</span>
+                      </span>
+                      <span className={`font-black font-mono-code ${
+                        (selectedPlayer.pressureIndex || 88) >= 92 ? 'text-emerald-400' : 'text-cyan-400'
+                      }`}>
+                        {selectedPlayer.pressureIndex || selectedPlayer.pressureProfile?.overall || 88}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${selectedPlayer.pressureIndex || selectedPlayer.pressureProfile?.overall || 88}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] font-mono-code text-cyan-400 font-bold uppercase tracking-wider text-right">
+                      {selectedPlayer.pressureProfile?.badgeLabel || 'CLUTCH MASTER'}
+                    </p>
                   </div>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div 
-                      className="bg-gradient-to-r from-emerald-500 to-amber-400 h-full rounded-full" 
-                      style={{ width: `${selectedPlayer.fatigueLevel || 20}%` }}
-                    />
+
+                  {/* Fitness & Fatigue Meter */}
+                  <div className="flex-1 md:flex-initial min-w-[150px] p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Fatigue Index</span>
+                      <span className="font-bold text-emerald-400 font-mono-code">{selectedPlayer.fatigueLevel || 20}%</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-emerald-500 to-amber-400 h-full rounded-full" 
+                        style={{ width: `${selectedPlayer.fatigueLevel || 20}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 text-right">Status: <span className="text-emerald-400 font-semibold">{selectedPlayer.injuryStatus || 'Fit'}</span></p>
                   </div>
-                  <p className="text-[10px] text-slate-400">Status: <span className="text-emerald-400 font-semibold">{selectedPlayer.injuryStatus || 'Fit'}</span></p>
                 </div>
+
               </div>
+
+              {/* ─── Dedicated Player Pressure Index (PI) Deep Dive Panel ─── */}
+              {selectedPlayer.pressureProfile && (
+                <div className="glass-panel p-6 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden space-y-5">
+                  <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  {/* Panel Title */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3 z-10 relative">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 text-cyan-400 border border-cyan-500/40">
+                        <Gauge className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                          <h3 className="text-base font-extrabold font-heading text-white">
+                            Player Situational Pressure Index (PI)
+                          </h3>
+                          <span className={`px-2 py-0.5 text-[10px] font-extrabold font-mono-code rounded border ${
+                            selectedPlayer.pressureProfile.tierColor === 'emerald'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                              : selectedPlayer.pressureProfile.tierColor === 'cyan'
+                              ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+                              : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          }`}>
+                            {selectedPlayer.pressureProfile.badgeLabel}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Multi-dimensional stress metrics: target chase escalation, death overs finishing, and collapse recovery.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 self-start sm:self-auto">
+                      <span className="text-xs text-slate-400 font-mono-code">OVERALL PI:</span>
+                      <span className="text-2xl font-black font-heading text-cyan-400">
+                        {selectedPlayer.pressureProfile.overall}
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono-code">/ 100</span>
+                    </div>
+                  </div>
+
+                  {/* Main Sub-Index Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 z-10 relative">
+                    
+                    {/* Dial & AI Insight */}
+                    <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between space-y-4">
+                      <div className="flex items-center space-x-4">
+                        {/* Circular Graphic Gauge */}
+                        <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
+                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path
+                              className="text-slate-800"
+                              strokeWidth="3.5"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <path
+                              className={
+                                selectedPlayer.pressureProfile.tierColor === 'emerald'
+                                  ? 'text-emerald-400'
+                                  : selectedPlayer.pressureProfile.tierColor === 'cyan'
+                                  ? 'text-cyan-400'
+                                  : 'text-amber-400'
+                              }
+                              strokeDasharray={`${selectedPlayer.pressureProfile.overall}, 100`}
+                              strokeWidth="3.5"
+                              strokeLinecap="round"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                          </svg>
+                          <div className="absolute flex flex-col items-center justify-center text-center">
+                            <span className="text-lg font-black font-heading text-white">
+                              {selectedPlayer.pressureProfile.overall}
+                            </span>
+                            <span className="text-[8px] font-mono-code text-slate-400 uppercase">PI SCORE</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[10px] text-slate-400 uppercase font-mono-code">Classification Tier</p>
+                          <p className="text-sm font-bold text-white">{selectedPlayer.pressureProfile.tier}</p>
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            {isBowler ? 'Elite pressure creation & death execution' : 'High-stakes target chase & anchor mastery'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* AI Tactical Assessment */}
+                      <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800/80 text-xs space-y-1">
+                        <p className="font-bold text-cyan-400 flex items-center space-x-1.5 text-[11px]">
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                          <span>AI Situational Assessment</span>
+                        </p>
+                        <p className="text-slate-300 text-[11px] leading-relaxed">
+                          {selectedPlayer.pressureProfile.tacticalSummary}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right 2 Columns: 4 Situational Sub-Indices */}
+                    <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {Object.entries(selectedPlayer.pressureProfile.subIndices).map(([key, item]) => (
+                        <div key={key} className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-white flex items-center space-x-1.5">
+                              {key === 'chasePressure' ? <Target className="w-3.5 h-3.5 text-cyan-400" /> :
+                               key === 'deathOverPressure' ? <Flame className="w-3.5 h-3.5 text-rose-400" /> :
+                               key === 'collapseRecovery' ? <Shield className="w-3.5 h-3.5 text-emerald-400" /> :
+                               <Zap className="w-3.5 h-3.5 text-amber-400" />}
+                              <span>{item.name}</span>
+                            </span>
+                            <span className="font-extrabold font-mono-code text-cyan-400">
+                              {item.value} / 100
+                            </span>
+                          </div>
+
+                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                item.value >= 90 ? 'bg-gradient-to-r from-cyan-500 to-emerald-400' :
+                                item.value >= 80 ? 'bg-gradient-to-r from-cyan-500 to-blue-500' :
+                                'bg-gradient-to-r from-amber-500 to-amber-300'
+                              }`}
+                              style={{ width: `${item.value}%` }}
+                            />
+                          </div>
+
+                          <p className="text-[10px] text-slate-400 leading-tight">
+                            {item.desc}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                  </div>
+
+                  {/* Situational Pressure Performance Stats Ribbon */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80 text-xs z-10 relative">
+                    <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 text-center">
+                      <p className="text-[9px] text-slate-400 font-mono-code uppercase">
+                        {isBowler ? 'Death Econ (Overs 16-20)' : 'Avg (RRR > 9.5)'}
+                      </p>
+                      <p className="text-base font-extrabold font-heading text-cyan-400">
+                        {selectedPlayer.pressureProfile.pressureStats.avgUnderPressure}
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 text-center">
+                      <p className="text-[9px] text-slate-400 font-mono-code uppercase">Boundary % Under Pressure</p>
+                      <p className="text-base font-extrabold font-heading text-amber-400">
+                        {selectedPlayer.pressureProfile.pressureStats.boundaryPctUnderPressure}
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 text-center">
+                      <p className="text-[9px] text-slate-400 font-mono-code uppercase">Dot-Ball Control / Release</p>
+                      <p className="text-base font-extrabold font-heading text-emerald-400">
+                        {selectedPlayer.pressureProfile.pressureStats.dotBallUnderPressure}
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/60 text-center">
+                      <p className="text-[9px] text-slate-400 font-mono-code uppercase">Clutch Match Win Rate</p>
+                      <p className="text-base font-extrabold font-heading text-purple-400">
+                        {selectedPlayer.pressureProfile.pressureStats.winContribution}
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              )}
 
               {/* Middle Grid: Skill Radar + Phase Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

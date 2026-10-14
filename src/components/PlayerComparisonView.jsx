@@ -10,7 +10,10 @@ import {
   Swords, 
   CheckCircle,
   ArrowRight,
-  Target
+  Target,
+  Gauge,
+  Flame,
+  Shield
 } from 'lucide-react';
 import { 
   Radar, 
@@ -50,7 +53,7 @@ export default function PlayerComparisonView({ players = [] }) {
     { subject: 'Pace Mastery', A: p1?.skillRadar?.paceMastery || 88, B: p2?.skillRadar?.paceMastery || 88 },
     { subject: 'Spin Control', A: p1?.skillRadar?.spinTechnique || 86, B: p2?.skillRadar?.spinTechnique || 86 },
     { subject: 'Death Execution', A: p1?.skillRadar?.deathExecution || 90, B: p2?.skillRadar?.deathExecution || 90 },
-    { subject: 'Precision', A: p1?.skillRadar?.bowlingPrecision || 82, B: p2?.skillRadar?.bowlingPrecision || 82 },
+    { subject: 'Pressure Index', A: p1?.pressureIndex || p1?.clutchRating || 90, B: p2?.pressureIndex || p2?.clutchRating || 90 },
     { subject: 'Clutch Factor', A: p1?.clutchRating || 90, B: p2?.clutchRating || 90 },
   ];
 
@@ -66,6 +69,9 @@ export default function PlayerComparisonView({ players = [] }) {
 
   const p1Wkts = p1?.iplStats?.wickets || p1?.wkts || 0;
   const p2Wkts = p2?.iplStats?.wickets || p2?.wkts || 0;
+
+  const p1PI = p1?.pressureIndex || p1?.pressureProfile?.overall || p1?.clutchRating || 88;
+  const p2PI = p2?.pressureIndex || p2?.pressureProfile?.overall || p2?.clutchRating || 88;
 
   const handleApplyPreset = (preset) => {
     setPlayer1Id(preset.p1);
@@ -283,11 +289,11 @@ export default function PlayerComparisonView({ players = [] }) {
             </div>
 
             {/* Metric 5: Video Computer Vision Shot Perfection */}
-            <div className="p-3 rounded-xl bg-slate-900 border border-amber-500/20 space-y-1.5">
+            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
               <div className="flex justify-between text-xs font-bold">
                 <span className="text-cyan-400 font-extrabold">96% Perfection</span>
-                <span className="text-amber-400 font-mono-code text-[11px] uppercase flex items-center gap-1">
-                  <Zap className="w-3 h-3" /> CV Shot Perfection
+                <span className="text-slate-400 font-mono-code text-[11px] uppercase flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-amber-400" /> CV Shot Perfection
                 </span>
                 <span className="text-emerald-400 font-extrabold">94% Perfection</span>
               </div>
@@ -297,9 +303,141 @@ export default function PlayerComparisonView({ players = [] }) {
               </div>
             </div>
 
+            {/* Metric 6: Situational Pressure Index */}
+            <div className="p-3 rounded-xl bg-slate-900 border border-cyan-500/30 space-y-1.5">
+              <div className="flex justify-between text-xs font-bold">
+                <span className={p1PI >= p2PI ? 'text-cyan-400 font-extrabold' : 'text-slate-300'}>
+                  {p1PI} / 100 ({p1?.pressureProfile?.badgeLabel || 'CLUTCH'})
+                </span>
+                <span className="text-cyan-400 font-mono-code text-[11px] uppercase flex items-center gap-1 font-bold">
+                  <Gauge className="w-3.5 h-3.5" /> Pressure Index
+                </span>
+                <span className={p2PI >= p1PI ? 'text-emerald-400 font-extrabold' : 'text-slate-300'}>
+                  {p2PI} / 100 ({p2?.pressureProfile?.badgeLabel || 'CLUTCH'})
+                </span>
+              </div>
+              <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden flex">
+                <div className="bg-gradient-to-r from-cyan-500 to-cyan-400 h-full" style={{ width: `${(p1PI / (p1PI + p2PI || 1)) * 100}%` }}></div>
+                <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full" style={{ width: `${(p2PI / (p1PI + p2PI || 1)) * 100}%` }}></div>
+              </div>
+            </div>
+
           </div>
         </div>
 
+      </div>
+
+      {/* ─── Dedicated Head-to-Head Situational Pressure Breakdown Duel ─── */}
+      <div className="glass-panel p-6 rounded-2xl border border-cyan-500/30 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              <Gauge className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold font-heading text-white">
+                Head-to-Head Situational Pressure Duel
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Stress tolerance and clutch performance breakdown under high-stakes tournament conditions.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-mono-code text-slate-400">PRESSURE ADVANTAGE:</span>
+            <span className={`px-2.5 py-1 text-xs font-extrabold font-mono-code rounded-lg border ${
+              p1PI > p2PI ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' :
+              p2PI > p1PI ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
+              'bg-amber-500/20 text-amber-300 border-amber-500/40'
+            }`}>
+              {p1PI > p2PI ? `${p1?.name} (+${p1PI - p2PI} pts)` :
+               p2PI > p1PI ? `${p2?.name} (+${p2PI - p1PI} pts)` :
+               'Dead Even Pressure Rating'}
+            </span>
+          </div>
+        </div>
+
+        {/* 4 Sub-Index Duel Comparison Bars */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Chase Pressure */}
+          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className={`font-bold ${p1?.pressureProfile?.subIndices?.chasePressure?.value >= (p2?.pressureProfile?.subIndices?.chasePressure?.value || 0) ? 'text-cyan-400' : 'text-slate-400'}`}>
+                {p1?.name}: {p1?.pressureProfile?.subIndices?.chasePressure?.value || 88}
+              </span>
+              <span className="text-[11px] font-mono-code text-slate-300 font-bold uppercase flex items-center gap-1">
+                <Target className="w-3.5 h-3.5 text-cyan-400" /> Target Chase / Defense
+              </span>
+              <span className={`font-bold ${p2?.pressureProfile?.subIndices?.chasePressure?.value >= (p1?.pressureProfile?.subIndices?.chasePressure?.value || 0) ? 'text-emerald-400' : 'text-slate-400'}`}>
+                {p2?.name}: {p2?.pressureProfile?.subIndices?.chasePressure?.value || 88}
+              </span>
+            </div>
+            <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden flex">
+              <div className="bg-cyan-400 h-full" style={{ width: `${((p1?.pressureProfile?.subIndices?.chasePressure?.value || 88) / ((p1?.pressureProfile?.subIndices?.chasePressure?.value || 88) + (p2?.pressureProfile?.subIndices?.chasePressure?.value || 88))) * 100}%` }}></div>
+              <div className="bg-emerald-400 h-full" style={{ width: `${((p2?.pressureProfile?.subIndices?.chasePressure?.value || 88) / ((p1?.pressureProfile?.subIndices?.chasePressure?.value || 88) + (p2?.pressureProfile?.subIndices?.chasePressure?.value || 88))) * 100}%` }}></div>
+            </div>
+          </div>
+
+          {/* Death Overs Execution */}
+          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className={`font-bold ${p1?.pressureProfile?.subIndices?.deathOverPressure?.value >= (p2?.pressureProfile?.subIndices?.deathOverPressure?.value || 0) ? 'text-cyan-400' : 'text-slate-400'}`}>
+                {p1?.name}: {p1?.pressureProfile?.subIndices?.deathOverPressure?.value || 88}
+              </span>
+              <span className="text-[11px] font-mono-code text-slate-300 font-bold uppercase flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 text-rose-400" /> Death Overs (16-20)
+              </span>
+              <span className={`font-bold ${p2?.pressureProfile?.subIndices?.deathOverPressure?.value >= (p1?.pressureProfile?.subIndices?.deathOverPressure?.value || 0) ? 'text-emerald-400' : 'text-slate-400'}`}>
+                {p2?.name}: {p2?.pressureProfile?.subIndices?.deathOverPressure?.value || 88}
+              </span>
+            </div>
+            <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden flex">
+              <div className="bg-cyan-400 h-full" style={{ width: `${((p1?.pressureProfile?.subIndices?.deathOverPressure?.value || 88) / ((p1?.pressureProfile?.subIndices?.deathOverPressure?.value || 88) + (p2?.pressureProfile?.subIndices?.deathOverPressure?.value || 88))) * 100}%` }}></div>
+              <div className="bg-emerald-400 h-full" style={{ width: `${((p2?.pressureProfile?.subIndices?.deathOverPressure?.value || 88) / ((p1?.pressureProfile?.subIndices?.deathOverPressure?.value || 88) + (p2?.pressureProfile?.subIndices?.deathOverPressure?.value || 88))) * 100}%` }}></div>
+            </div>
+          </div>
+
+          {/* Collapse Recovery */}
+          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className={`font-bold ${p1?.pressureProfile?.subIndices?.collapseRecovery?.value >= (p2?.pressureProfile?.subIndices?.collapseRecovery?.value || 0) ? 'text-cyan-400' : 'text-slate-400'}`}>
+                {p1?.name}: {p1?.pressureProfile?.subIndices?.collapseRecovery?.value || 88}
+              </span>
+              <span className="text-[11px] font-mono-code text-slate-300 font-bold uppercase flex items-center gap-1">
+                <Shield className="w-3.5 h-3.5 text-emerald-400" /> Collapse Recovery
+              </span>
+              <span className={`font-bold ${p2?.pressureProfile?.subIndices?.collapseRecovery?.value >= (p1?.pressureProfile?.subIndices?.collapseRecovery?.value || 0) ? 'text-emerald-400' : 'text-slate-400'}`}>
+                {p2?.name}: {p2?.pressureProfile?.subIndices?.collapseRecovery?.value || 88}
+              </span>
+            </div>
+            <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden flex">
+              <div className="bg-cyan-400 h-full" style={{ width: `${((p1?.pressureProfile?.subIndices?.collapseRecovery?.value || 88) / ((p1?.pressureProfile?.subIndices?.collapseRecovery?.value || 88) + (p2?.pressureProfile?.subIndices?.collapseRecovery?.value || 88))) * 100}%` }}></div>
+              <div className="bg-emerald-400 h-full" style={{ width: `${((p2?.pressureProfile?.subIndices?.collapseRecovery?.value || 88) / ((p1?.pressureProfile?.subIndices?.collapseRecovery?.value || 88) + (p2?.pressureProfile?.subIndices?.collapseRecovery?.value || 88))) * 100}%` }}></div>
+            </div>
+          </div>
+
+          {/* Dot-Ball Resilience */}
+          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className={`font-bold ${p1?.pressureProfile?.subIndices?.dotBallResilience?.value >= (p2?.pressureProfile?.subIndices?.dotBallResilience?.value || 0) ? 'text-cyan-400' : 'text-slate-400'}`}>
+                {p1?.name}: {p1?.pressureProfile?.subIndices?.dotBallResilience?.value || 88}
+              </span>
+              <span className="text-[11px] font-mono-code text-slate-300 font-bold uppercase flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5 text-amber-400" /> Dot-Ball Resilience
+              </span>
+              <span className={`font-bold ${p2?.pressureProfile?.subIndices?.dotBallResilience?.value >= (p1?.pressureProfile?.subIndices?.dotBallResilience?.value || 0) ? 'text-emerald-400' : 'text-slate-400'}`}>
+                {p2?.name}: {p2?.pressureProfile?.subIndices?.dotBallResilience?.value || 88}
+              </span>
+            </div>
+            <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden flex">
+              <div className="bg-cyan-400 h-full" style={{ width: `${((p1?.pressureProfile?.subIndices?.dotBallResilience?.value || 88) / ((p1?.pressureProfile?.subIndices?.dotBallResilience?.value || 88) + (p2?.pressureProfile?.subIndices?.dotBallResilience?.value || 88))) * 100}%` }}></div>
+              <div className="bg-emerald-400 h-full" style={{ width: `${((p2?.pressureProfile?.subIndices?.dotBallResilience?.value || 88) / ((p1?.pressureProfile?.subIndices?.dotBallResilience?.value || 88) + (p2?.pressureProfile?.subIndices?.dotBallResilience?.value || 88))) * 100}%` }}></div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* AI Head-to-Head Tactical Advantage Verdict */}
@@ -333,11 +471,11 @@ export default function PlayerComparisonView({ players = [] }) {
 
           <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
             <div className="flex items-center space-x-2 text-amber-400 font-bold text-xs">
-              <Award className="w-4 h-4" />
-              <span>Clutch Match Rating</span>
+              <Gauge className="w-4 h-4" />
+              <span>Pressure & Clutch Mastery</span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Overall Clutch rating rates <strong className="text-white">{p1?.name} ({p1?.clutchRating || 94})</strong> and <strong className="text-white">{p2?.name} ({p2?.clutchRating || 92})</strong> as elite match-winners.
+              Pressure Index rates <strong className="text-cyan-400">{p1?.name} ({p1PI}/100)</strong> vs <strong className="text-emerald-400">{p2?.name} ({p2PI}/100)</strong>. {p1PI >= p2PI ? `${p1?.name} holds psychological edge in high RRR chases.` : `${p2?.name} excels in defending small totals under pressure.`}
             </p>
           </div>
 

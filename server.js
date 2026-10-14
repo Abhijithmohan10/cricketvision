@@ -38,6 +38,8 @@ const playerSchema = new mongoose.Schema({
   fatigueLevel: Number,
   injuryStatus: String,
   clutchRating: Number,
+  pressureIndex: Number,
+  pressureProfile: Object,
   skillRadar: Object,
   internationalStats: Object,
   iplStats: Object,

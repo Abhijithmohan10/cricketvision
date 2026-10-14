@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, TrendingUp, Target, ShieldAlert, Award, ChevronRight, Zap, RefreshCw, BarChart2 } from 'lucide-react';
+import { Sparkles, TrendingUp, Target, ShieldAlert, Award, ChevronRight, Zap, RefreshCw, BarChart2, Gauge } from 'lucide-react';
 import { predictNextMatchPlayerStats } from '../utils/mlEngine';
 
 export default function NextMatchPredictorView({ players = [] }) {
@@ -152,10 +152,32 @@ export default function NextMatchPredictorView({ players = [] }) {
                 <p className="text-lg font-extrabold text-amber-400 font-heading">{prediction.halfCenturyProb}%</p>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 col-span-2">
+              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
                 <p className="text-[10px] text-slate-400">Est. Boundaries (4s & 6s)</p>
                 <p className="text-lg font-extrabold text-emerald-400 font-heading">
-                  ~{prediction.boundaryCount} Boundaries
+                  ~{prediction.boundaryCount}
+                </p>
+              </div>
+
+              {/* Match Pressure Resilience Card */}
+              <div className="p-3 rounded-xl bg-slate-900 border border-cyan-500/30 col-span-2 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 flex items-center gap-1 font-mono-code text-[11px]">
+                    <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>PRESSURE RESILIENCE</span>
+                  </span>
+                  <span className="text-cyan-400 font-extrabold font-mono-code">
+                    PI {prediction.pressureIndex || 88} / 100
+                  </span>
+                </div>
+                <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full" 
+                    style={{ width: `${prediction.pressureIndex || 88}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-300 font-medium text-right">
+                  {prediction.pressureTier || 'High-Pressure Resilient'}
                 </p>
               </div>
             </div>
@@ -215,6 +237,7 @@ export default function NextMatchPredictorView({ players = [] }) {
                     <tr>
                       <th className="py-2.5 px-3">Player</th>
                       <th className="py-2.5 px-3">Role</th>
+                      <th className="py-2.5 px-3">Pressure Index</th>
                       <th className="py-2.5 px-3">Projected Runs Range</th>
                       <th className="py-2.5 px-3">Most Likely</th>
                       <th className="py-2.5 px-3">50+ Score Odds</th>
@@ -234,6 +257,11 @@ export default function NextMatchPredictorView({ players = [] }) {
                           <span>{player.name}</span>
                         </td>
                         <td className="py-2.5 px-3 text-slate-400">{player.role}</td>
+                        <td className="py-2.5 px-3">
+                          <span className="px-2 py-0.5 rounded font-mono-code text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                            PI {prediction.pressureIndex || 88}
+                          </span>
+                        </td>
                         <td className="py-2.5 px-3 font-mono-code text-cyan-400">
                           {prediction.minRuns} – {prediction.maxRuns}
                         </td>

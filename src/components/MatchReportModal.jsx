@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Download, Sparkles, Activity, CheckCircle2, Zap, Award, Target, Loader } from 'lucide-react';
+import { X, Download, Sparkles, Activity, CheckCircle2, Zap, Award, Target, Loader, Gauge } from 'lucide-react';
 import PlayerAvatar from './PlayerAvatar';
 import { getCompletePlayerProfile } from '../data/cricketDatabase';
 
@@ -121,11 +121,18 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
           </div>
 
           {/* Role-Specific Key Metrics Row */}
-          <div className="grid grid-cols-4 gap-3 text-center print:gap-2">
+          <div className="grid grid-cols-5 gap-3 text-center print:gap-2">
             
             <div className="p-2.5 bg-slate-900 border border-slate-800 print:bg-gray-100 print:border-black rounded-xl">
               <p className="text-[10px] text-slate-400 print:text-gray-700 uppercase font-mono-code">Clutch Rating</p>
               <p className="text-base font-bold text-amber-400 print:text-black">★ {fullPlayer.clutchRating}</p>
+            </div>
+
+            <div className="p-2.5 bg-slate-900 border border-cyan-500/40 print:bg-gray-100 print:border-black rounded-xl">
+              <p className="text-[10px] text-cyan-400 print:text-gray-700 uppercase font-mono-code font-bold">Pressure Index</p>
+              <p className="text-base font-black text-cyan-300 print:text-black">
+                {fullPlayer.pressureIndex || fullPlayer.pressureProfile?.overall || 90}
+              </p>
             </div>
 
             {/* Bowler specific vs Batter specific vs All-Rounder cards */}
@@ -213,6 +220,34 @@ export default function MatchReportModal({ player, isOpen, onClose }) {
               </div>
             </div>
           </div>
+
+          {/* Situational Pressure Index (PI) Scouting Section */}
+          {fullPlayer.pressureProfile && (
+            <div className="p-3.5 bg-slate-900/90 border border-cyan-500/30 print:bg-gray-50 print:border-black rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-white print:text-black uppercase font-mono-code flex items-center space-x-2">
+                  <Gauge className="w-3.5 h-3.5 text-cyan-400 print:text-black" />
+                  <span>Situational Pressure Index & High-Stakes Diagnostic</span>
+                </h3>
+                <span className="text-[10px] font-bold font-mono-code text-cyan-400 print:text-black">
+                  PI: {fullPlayer.pressureProfile.overall}/100 ({fullPlayer.pressureProfile.badgeLabel})
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                {Object.entries(fullPlayer.pressureProfile.subIndices).map(([key, item]) => (
+                  <div key={key} className="p-2 bg-slate-950 border border-slate-800 print:bg-white print:border-black rounded-lg">
+                    <p className="text-[9px] text-slate-400 print:text-gray-700 font-mono-code uppercase">{item.name}</p>
+                    <p className="text-sm font-black text-cyan-400 print:text-black mt-0.5">{item.value}/100</p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-[11px] text-slate-300 print:text-gray-800 italic pt-1 border-t border-slate-800/60 print:border-gray-300">
+                <strong>Pressure Assessment:</strong> {fullPlayer.pressureProfile.tacticalSummary}
+              </p>
+            </div>
+          )}
 
           {/* Multidimensional Technical Breakdown */}
           <div className="p-3 bg-slate-900/60 border border-slate-800 print:bg-gray-50 print:border-black rounded-xl space-y-2">

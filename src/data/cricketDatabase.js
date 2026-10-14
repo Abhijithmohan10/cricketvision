@@ -196,6 +196,132 @@ const RAW_PLAYERS_RAW = [
   { name: "Nat Sciver-Brunt", country: "England", role: "Pace All-Rounder", bat: "Right-Hand Bat", bowl: "Right-Arm Medium", team: "MI WPL", num: 39, runs: 332, avg: 66.4, sr: 140.0, wkts: 10, econ: 7.10, bb: "3/21", clutch: 96, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" }
 ];
 
+/**
+ * Calculates a nuanced, situational Player Pressure Index (0-100)
+ * with multi-dimensional breakdown: Chase Pressure, Death Overs, Collapse Recovery, Dot-Ball Resilience
+ */
+export const calculatePressureIndex = (player) => {
+  if (!player) return null;
+
+  const roleLower = (player.role || '').toLowerCase();
+  const isBowler = roleLower.includes('bowler') || 
+                   (roleLower.includes('fast') && !roleLower.includes('all-rounder')) ||
+                   (roleLower.includes('spin') && !roleLower.includes('all-rounder'));
+  const isAllRounder = roleLower.includes('all-rounder');
+  const clutch = Number(player.clutchRating) || 88;
+  const avg = parseFloat(player.iplStats?.avg || player.avg || 32);
+  const sr = parseFloat(player.iplStats?.sr || player.sr || 135);
+  const econ = parseFloat(player.iplStats?.econ || player.econ || 7.8);
+  const deathEcon = parseFloat(player.phaseStats?.deathOvers?.economy || (econ * 1.15).toFixed(2));
+  const deathSr = parseFloat(player.phaseStats?.deathOvers?.strikeRate || (sr * 1.35).toFixed(0));
+
+  // If coach or user provided a manual pressureIndex, respect it as the base score
+  const manualBase = typeof player.pressureIndex === 'number' && player.pressureIndex > 0 ? player.pressureIndex : null;
+
+  let overall = 85;
+  let chasePressure = 85;
+  let deathOverPressure = 85;
+  let collapseRecovery = 85;
+  let dotBallResilience = 85;
+
+  if (isBowler) {
+    // Bowler Pressure Model
+    deathOverPressure = Math.min(99, Math.max(62, Math.round(100 - (deathEcon - 6.0) * 8.5 + (clutch > 92 ? 5 : 0))));
+    chasePressure = Math.min(99, Math.max(60, Math.round(100 - (econ - 6.2) * 9.0)));
+    collapseRecovery = Math.min(99, Math.max(64, Math.round(clutch * 0.95 + 2)));
+    dotBallResilience = Math.min(99, Math.max(60, Math.round(100 - (econ - 5.8) * 7.5)));
+    overall = manualBase !== null ? manualBase : Math.round(clutch * 0.35 + deathOverPressure * 0.30 + chasePressure * 0.20 + dotBallResilience * 0.15);
+  } else if (isAllRounder) {
+    // All-Rounder Dual Model
+    chasePressure = Math.min(99, Math.max(65, Math.round(clutch * 0.5 + (sr > 140 ? 46 : 40))));
+    deathOverPressure = Math.min(99, Math.max(65, Math.round((deathSr / 2.2) * 0.5 + (100 - deathEcon * 6) * 0.5)));
+    collapseRecovery = Math.min(99, Math.max(65, Math.round(avg * 1.2 + clutch * 0.55)));
+    dotBallResilience = Math.min(99, Math.max(65, Math.round(clutch * 0.6 + 35)));
+    overall = manualBase !== null ? manualBase : Math.round(clutch * 0.35 + chasePressure * 0.25 + deathOverPressure * 0.25 + collapseRecovery * 0.15);
+  } else {
+    // Batter Model
+    chasePressure = Math.min(99, Math.max(62, Math.round(clutch * 0.45 + (avg > 40 ? 52 : avg * 1.2))));
+    deathOverPressure = Math.min(99, Math.max(60, Math.round((deathSr / 2.1))));
+    collapseRecovery = Math.min(99, Math.max(60, Math.round(avg * 1.4 + clutch * 0.45)));
+    dotBallResilience = Math.min(99, Math.max(60, Math.round((sr / 1.7) * 0.6 + clutch * 0.4)));
+    overall = manualBase !== null ? manualBase : Math.round(clutch * 0.40 + deathOverPressure * 0.25 + chasePressure * 0.20 + collapseRecovery * 0.15);
+  }
+
+  // Ensure bounds [55, 99]
+  overall = Math.min(99, Math.max(55, overall));
+  chasePressure = Math.min(99, Math.max(55, chasePressure));
+  deathOverPressure = Math.min(99, Math.max(55, deathOverPressure));
+  collapseRecovery = Math.min(99, Math.max(55, collapseRecovery));
+  dotBallResilience = Math.min(99, Math.max(55, dotBallResilience));
+
+  // Determine Tier and Description
+  let tier = "Dependable Performer";
+  let tierColor = "amber";
+  let badgeLabel = "STABLE UNDER PRESSURE";
+  if (overall >= 93) {
+    tier = isBowler ? "Steely Death Specialist (Elite Pressure Creator)" : "Ice-Cold Finisher (Elite Pressure Absorber)";
+    tierColor = "emerald";
+    badgeLabel = "ICE IN VEINS";
+  } else if (overall >= 85) {
+    tier = "High-Pressure Resilient";
+    tierColor = "cyan";
+    badgeLabel = "CLUTCH MASTER";
+  } else if (overall < 75) {
+    tier = "Pressure Sensitive";
+    tierColor = "rose";
+    badgeLabel = "VULNERABLE";
+  }
+
+  // Situational Stats
+  const avgUnderPressure = isBowler
+    ? `${(deathEcon * 0.98).toFixed(1)} RPO`
+    : `${(avg * 1.12).toFixed(1)}`;
+  const boundaryPctUnderPressure = isBowler
+    ? `${(14.2 - (overall - 80) * 0.2).toFixed(1)}%`
+    : `${(18.5 + (overall - 80) * 0.25).toFixed(1)}%`;
+  const dotBallUnderPressure = isBowler
+    ? `${(52.0 + (overall - 80) * 0.35).toFixed(1)}%`
+    : `${(12.5 - (overall - 80) * 0.15).toFixed(1)}%`;
+  const winContribution = `${Math.min(98, Math.max(65, Math.round(overall * 0.96)))}%`;
+
+  return {
+    overall,
+    tier,
+    tierColor,
+    badgeLabel,
+    subIndices: {
+      chasePressure: { 
+        name: isBowler ? 'Defending Under Pressure' : 'Steep Target Chasing', 
+        value: chasePressure, 
+        desc: isBowler ? 'Defending sub-10 runs/over in 2nd innings' : 'Scoring efficiency when RRR > 9.5 RPO' 
+      },
+      deathOverPressure: { 
+        name: 'Death Overs (16-20)', 
+        value: deathOverPressure, 
+        desc: isBowler ? 'Wide-yorker and slower-dipper precision' : 'Boundary acceleration under scoreboard pressure' 
+      },
+      collapseRecovery: { 
+        name: isBowler ? 'Partnership Breaker' : 'Collapse Anchor', 
+        value: collapseRecovery, 
+        desc: isBowler ? 'Clutch wicket when opponents are cruising' : 'Rebuilding innings after 20/3 collapse' 
+      },
+      dotBallResilience: { 
+        name: isBowler ? 'Dot-Ball Strangulation' : 'Strike Rotation', 
+        value: dotBallResilience, 
+        desc: isBowler ? 'Dot-ball pressure generation rate' : 'Absorbing dots and releasing pressure' 
+      }
+    },
+    pressureStats: {
+      avgUnderPressure,
+      boundaryPctUnderPressure,
+      dotBallUnderPressure,
+      winContribution
+    },
+    tacticalSummary: isBowler
+      ? `${player.name} operates with a ${overall}/100 Pressure Index. Death economy is throttled to ${avgUnderPressure} with a ${dotBallUnderPressure} dot-ball rate in clutch situations.`
+      : `${player.name} commands an exceptional ${overall}/100 Pressure Index. Averages ${avgUnderPressure} in high-pressure chases with a ${winContribution} match-winning contribution rate.`
+  };
+};
 
 export const INITIAL_PLAYER_DATABASE = RAW_PLAYERS_RAW.map(p => {
   const id = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -209,7 +335,7 @@ export const INITIAL_PLAYER_DATABASE = RAW_PLAYERS_RAW.map(p => {
     const iplWkts = override.iplStats.wickets;
     const iplRuns = override.iplStats.runs;
 
-    return {
+    const basePlayer = {
       id,
       name: p.name,
       country: p.country,
@@ -248,6 +374,11 @@ export const INITIAL_PLAYER_DATABASE = RAW_PLAYERS_RAW.map(p => {
         ? [{ wickets: 2, runs: 24, overs: 4 }, { wickets: 3, runs: 18, overs: 4 }, { wickets: 1, runs: 30, overs: 4 }]
         : [Math.round((p.avg || 30) * 1.2), Math.round((p.avg || 30) * 0.8), Math.round((p.avg || 30) * 1.5), 14, 45]
     };
+    const pProfile = calculatePressureIndex(basePlayer);
+    basePlayer.pressureIndex = pProfile.overall;
+    basePlayer.pressureProfile = pProfile;
+    basePlayer.skillRadar.pressureIndex = pProfile.overall;
+    return basePlayer;
   }
 
   // Realistic matches calculation for all other database players
@@ -267,7 +398,7 @@ export const INITIAL_PLAYER_DATABASE = RAW_PLAYERS_RAW.map(p => {
   const t20iRuns = isBowler ? Math.round((p.runs || 50) * 0.6) : Math.round(p.runs * 0.75);
   const testRuns = isBowler ? Math.round((p.runs || 50) * 1.1) : Math.round(p.runs * 1.3);
 
-  return {
+  const basePlayer = {
     id,
     name: p.name,
     country: p.country,
@@ -347,10 +478,16 @@ export const INITIAL_PLAYER_DATABASE = RAW_PLAYERS_RAW.map(p => {
       ? [{ wickets: 2, runs: 24, overs: 4 }, { wickets: 3, runs: 18, overs: 4 }, { wickets: 1, runs: 30, overs: 4 }]
       : [Math.round((p.avg || 30) * 1.2), Math.round((p.avg || 30) * 0.8), Math.round((p.avg || 30) * 1.5), 14, 45]
   };
+
+  const pProfile = calculatePressureIndex(basePlayer);
+  basePlayer.pressureIndex = pProfile.overall;
+  basePlayer.pressureProfile = pProfile;
+  basePlayer.skillRadar.pressureIndex = pProfile.overall;
+  return basePlayer;
 });
 
 // Helper functions to manage Database and LocalStorage persistence
-const LOCAL_STORAGE_KEY = "cricketvision_player_db_v5";
+const LOCAL_STORAGE_KEY = "cricketvision_player_db_v6";
 
 export const getStoredPlayerDatabase = () => {
   try {
@@ -363,12 +500,17 @@ export const getStoredPlayerDatabase = () => {
         const kohli = parsed.find(p => p.id === 'virat-kohli');
 
         if (bumrah && bumrah.iplStats?.matches >= 100 && kohli && kohli.iplStats?.runs >= 7000) {
-          return parsed.map(p => ({
-            ...p,
-            avatar: REAL_PLAYER_PHOTOS[p.id] || p.avatar || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80"
-          }));
+          return parsed.map(p => {
+            const pProfile = calculatePressureIndex(p);
+            return {
+              ...p,
+              pressureIndex: typeof p.pressureIndex === 'number' && p.pressureIndex > 0 ? p.pressureIndex : pProfile.overall,
+              pressureProfile: p.pressureProfile || pProfile,
+              avatar: REAL_PLAYER_PHOTOS[p.id] || p.avatar || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80"
+            };
+          });
         } else {
-          console.warn("Detected outdated or corrupt player database cache. Purging and rebuilding v5 database...");
+          console.warn("Detected outdated or corrupt player database cache. Purging and rebuilding v6 database...");
           localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
       }
@@ -383,9 +525,10 @@ export const getStoredPlayerDatabase = () => {
     localStorage.removeItem("cricketvision_player_db_v2");
     localStorage.removeItem("cricketvision_player_db_v3");
     localStorage.removeItem("cricketvision_player_db_v4");
+    localStorage.removeItem("cricketvision_player_db_v5");
   } catch (e) {}
 
-  // Save fresh v5 database
+  // Save fresh v6 database
   const freshDb = INITIAL_PLAYER_DATABASE.map(p => ({
     ...p,
     avatar: REAL_PLAYER_PHOTOS[p.id] || p.avatar || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80"
@@ -449,6 +592,18 @@ export const getCompletePlayerProfile = (player) => {
   const bowlingPrecision = Math.min(99, Math.max(60, Math.round(100 - (econ || 7.5) * 4.5 + (wickets > 50 ? 15 : 5))));
   const seamOrSpinControl = Math.min(99, Math.max(65, Math.round((player.clutchRating || 90) * 0.96)));
 
+  // Nuanced Player Pressure Index profile
+  const pressureProfile = calculatePressureIndex({
+    ...player,
+    role: player.role,
+    clutchRating: player.clutchRating || 90,
+    iplStats: { ...iplStats, runs, wickets, avg, sr, econ },
+    pressureIndex: player.pressureIndex
+  });
+  const pressureIndex = typeof player.pressureIndex === 'number' && player.pressureIndex > 0 
+    ? player.pressureIndex 
+    : pressureProfile.overall;
+
   const skillRadar = {
     powerHitting,
     spinTechnique,
@@ -457,7 +612,8 @@ export const getCompletePlayerProfile = (player) => {
     bowlingPrecision,
     seamOrSpinControl,
     fielding: player.skillRadar?.fielding || Math.min(98, Math.max(78, Math.floor(Math.random() * 15) + 82)),
-    clutchRating: player.clutchRating || 90
+    clutchRating: player.clutchRating || 90,
+    pressureIndex
   };
 
   // Phase Stats Normalized
@@ -487,17 +643,20 @@ export const getCompletePlayerProfile = (player) => {
   if (isBowler) {
     tacticalRecommendations = [
       `Powerplay Line & Length: Target off-stump channel with seam movement/flight. Projected economy: ${phaseStats.powerplay.economy} RPO.`,
-      `Death Overs Yorker Execution: Deploy wide-yorkers and slower dip balls. Projected death economy: ${phaseStats.deathOvers.economy} RPO with ${phaseStats.deathOvers.yorkerPct} target precision.`
+      `Death Overs Yorker Execution: Deploy wide-yorkers and slower dip balls. Projected death economy: ${phaseStats.deathOvers.economy} RPO with ${phaseStats.deathOvers.yorkerPct} target precision.`,
+      `Pressure Index (${pressureIndex}/100): ${pressureProfile.tacticalSummary}`
     ];
   } else if (isAllRounder) {
     tacticalRecommendations = [
       `Batting Matchup: Exploit middle-overs spin rotation. Target strike rate: ${phaseStats.middleOvers.strikeRate}.`,
-      `Bowling Spell: Bowl tight middle overs (projected econ: ${phaseStats.middleOvers.economy}) with high dot-ball percentage.`
+      `Bowling Spell: Bowl tight middle overs (projected econ: ${phaseStats.middleOvers.economy}) with high dot-ball percentage.`,
+      `Pressure Index (${pressureIndex}/100): ${pressureProfile.tacticalSummary}`
     ];
   } else {
     tacticalRecommendations = [
       `Powerplay Strategy: Attack length overs 1-6 with wrist rotation. Projected Strike Rate: ${phaseStats.powerplay.strikeRate}.`,
-      `Death Overs Boundary Execution: Boundary probability rated at ${phaseStats.deathOvers.boundaryPct} with aggressive downswing arc.`
+      `Death Overs Boundary Execution: Boundary probability rated at ${phaseStats.deathOvers.boundaryPct} with aggressive downswing arc.`,
+      `Pressure Index (${pressureIndex}/100): ${pressureProfile.tacticalSummary}`
     ];
   }
 
@@ -507,6 +666,8 @@ export const getCompletePlayerProfile = (player) => {
     isAllRounder,
     isWicketkeeper,
     isSpin,
+    pressureIndex,
+    pressureProfile,
     iplStats: {
       ...iplStats,
       runs,

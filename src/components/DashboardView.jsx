@@ -154,7 +154,7 @@ export default function DashboardView({ players = [], setActiveTab, onOpenAICoac
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-center text-xs bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                <div className="grid grid-cols-4 gap-1.5 text-center text-xs bg-slate-900/80 p-2 rounded-lg border border-slate-800">
                   <div>
                     <p className="text-[9px] text-slate-400">Matches</p>
                     <p className="font-bold text-white">{player.iplStats?.matches}</p>
@@ -164,8 +164,12 @@ export default function DashboardView({ players = [], setActiveTab, onOpenAICoac
                     <p className="font-bold text-cyan-400">{player.iplStats?.runs || player.iplStats?.wickets}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] text-slate-400">Clutch Rating</p>
+                    <p className="text-[9px] text-slate-400">Clutch</p>
                     <p className="font-bold text-amber-400">★ {player.clutchRating}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-slate-400">Pressure Index</p>
+                    <p className="font-bold text-emerald-400 font-mono-code">{player.pressureIndex || 88}</p>
                   </div>
                 </div>
               </div>

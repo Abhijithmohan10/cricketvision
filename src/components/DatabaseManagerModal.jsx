@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Database, Plus, RefreshCw, Download, Sparkles, Loader2, Check, Save, Lock, ShieldAlert } from 'lucide-react';
-import { REAL_PLAYER_PHOTOS } from '../data/cricketDatabase';
+import { X, Database, Plus, RefreshCw, Download, Sparkles, Loader2, Check, Save, Lock, ShieldAlert, Gauge } from 'lucide-react';
+import { REAL_PLAYER_PHOTOS, calculatePressureIndex } from '../data/cricketDatabase';
 import { useAuth } from '../context/AuthContext';
 
 export default function DatabaseManagerModal({ isOpen, onClose, players = [], onSavePlayers, onResetDefault }) {
@@ -23,6 +23,7 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
     iplAvg: 38.5,
     iplSr: 142.0,
     clutchRating: 85,
+    pressureIndex: 86,
     avatar: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=400&q=80',
     testRuns: 650,
     testWkts: 0,
@@ -130,6 +131,14 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
       const photoId = pName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const avatarUrl = REAL_PLAYER_PHOTOS[photoId] || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=400&q=80";
 
+      const clutch = Math.floor(Math.random() * 12) + 85;
+      const calculatedPI = calculatePressureIndex({
+        role,
+        clutchRating: clutch,
+        skillRadar: { clutchRating: clutch },
+        iplStats: { runs, wickets: wkts, avg, sr, econ }
+      });
+
       setNewPlayer({
         name: pName,
         country,
@@ -145,7 +154,8 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
         econ,
         bb,
         hs,
-        clutchRating: Math.floor(Math.random() * 12) + 85,
+        clutchRating: clutch,
+        pressureIndex: calculatedPI.overall || 88,
         avatar: avatarUrl,
         testRuns: Math.round(runs * 0.95),
         testWkts: Math.round(wkts * 1.1),
@@ -168,6 +178,9 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
     if (!newPlayer.name.trim()) return;
 
     const id = newPlayer.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const clutch = parseInt(newPlayer.clutchRating) || 88;
+    const specifiedPI = parseInt(newPlayer.pressureIndex);
+
     const createdPlayer = {
       id,
       name: newPlayer.name,
@@ -180,13 +193,15 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
       avatar: newPlayer.avatar,
       fatigueLevel: 15,
       injuryStatus: "Fit",
-      clutchRating: parseInt(newPlayer.clutchRating) || 88,
+      clutchRating: clutch,
+      pressureIndex: !isNaN(specifiedPI) ? specifiedPI : 88,
       skillRadar: {
         powerHitting: Math.min(99, Math.round((parseFloat(newPlayer.iplSr) || 135) * 0.55)),
         spinTechnique: Math.min(99, Math.round((parseFloat(newPlayer.iplAvg) || 30) * 1.8)),
         paceMastery: Math.min(99, Math.round((parseFloat(newPlayer.iplAvg) || 30) * 1.9)),
-        deathExecution: Math.min(99, Math.round((parseInt(newPlayer.clutchRating) || 88) * 0.95)),
-        clutchRating: parseInt(newPlayer.clutchRating) || 88,
+        deathExecution: Math.min(99, Math.round(clutch * 0.95)),
+        clutchRating: clutch,
+        pressureIndex: !isNaN(specifiedPI) ? specifiedPI : 88,
         fielding: 88
       },
       internationalStats: {
@@ -218,6 +233,15 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
       },
       recentForm: [45, 62, 18, 89, 34]
     };
+
+    // Calculate algorithmic profile and apply coach override if provided
+    const computedProfile = calculatePressureIndex(createdPlayer);
+    if (!isNaN(specifiedPI)) {
+      computedProfile.overall = Math.min(99, Math.max(50, specifiedPI));
+    }
+    createdPlayer.pressureIndex = computedProfile.overall;
+    createdPlayer.pressureProfile = computedProfile;
+    createdPlayer.skillRadar.pressureIndex = computedProfile.overall;
 
     onSavePlayers([...players, createdPlayer]);
     setActiveTab('list');
@@ -306,9 +330,15 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
                   </div>
                 </div>
 
-                <div className="text-right font-mono-code text-[11px]">
-                  <p className="text-slate-300">IPL Runs: <strong className="text-cyan-400">{p.iplStats?.runs || 0}</strong> | Wkts: <strong className="text-emerald-400">{p.iplStats?.wickets || 0}</strong></p>
-                  <p className="text-slate-400">SR: {p.iplStats?.sr || '0'} • Econ: {p.iplStats?.econ || '0'}</p>
+                <div className="flex items-center space-x-3">
+                  <div className="px-2 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold flex items-center space-x-1">
+                    <Gauge className="w-3 h-3 text-cyan-400" />
+                    <span>PI: {p.pressureIndex || 88}</span>
+                  </div>
+                  <div className="text-right font-mono-code text-[11px]">
+                    <p className="text-slate-300">IPL Runs: <strong className="text-cyan-400">{p.iplStats?.runs || 0}</strong> | Wkts: <strong className="text-emerald-400">{p.iplStats?.wickets || 0}</strong></p>
+                    <p className="text-slate-400">SR: {p.iplStats?.sr || '0'} • Econ: {p.iplStats?.econ || '0'}</p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -496,6 +526,58 @@ export default function DatabaseManagerModal({ isOpen, onClose, players = [], on
                   onChange={(e) => setNewPlayer({ ...newPlayer, hs: e.target.value, bb: e.target.value })}
                   className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-medium mb-1">Clutch Rating (50-99)</label>
+                <input
+                  type="number"
+                  min="50"
+                  max="99"
+                  value={newPlayer.clutchRating}
+                  onChange={(e) => setNewPlayer({ ...newPlayer, clutchRating: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-100 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-300 font-medium">Pressure Index (PI 50-99)</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const autoProfile = calculatePressureIndex({
+                        role: newPlayer.role,
+                        clutchRating: parseInt(newPlayer.clutchRating) || 85,
+                        skillRadar: { clutchRating: parseInt(newPlayer.clutchRating) || 85 },
+                        iplStats: {
+                          runs: parseInt(newPlayer.iplRuns) || 0,
+                          wickets: parseInt(newPlayer.iplWickets) || 0,
+                          avg: parseFloat(newPlayer.iplAvg) || 30,
+                          sr: parseFloat(newPlayer.iplSr) || 135,
+                          econ: parseFloat(newPlayer.econ) || 7.8
+                        }
+                      });
+                      setNewPlayer({ ...newPlayer, pressureIndex: autoProfile.overall });
+                    }}
+                    className="text-[10px] text-cyan-400 hover:underline flex items-center space-x-1"
+                  >
+                    <span>Auto-Calc PI</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="50"
+                    max="99"
+                    value={newPlayer.pressureIndex}
+                    onChange={(e) => setNewPlayer({ ...newPlayer, pressureIndex: e.target.value })}
+                    className="w-full bg-slate-900 border border-cyan-500/40 rounded-lg px-3 py-2 text-cyan-300 font-bold focus:outline-none focus:border-cyan-400 font-mono-code"
+                  />
+                  <div className="absolute right-2.5 top-2.5 text-[10px] text-cyan-400/80 font-mono-code pointer-events-none">
+                    HYBRID
+                  </div>
+                </div>
               </div>
             </div>
 

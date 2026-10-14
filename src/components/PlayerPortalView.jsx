@@ -21,7 +21,9 @@ import {
   User, 
   ArrowRight,
   Upload,
-  Play
+  Play,
+  Gauge,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import PitchAndWagonWheel from './PitchAndWagonWheel';
@@ -245,7 +247,7 @@ export default function PlayerPortalView({ players = [] }) {
         </div>
 
         {/* Right: Key Personal Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto z-10">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 w-full lg:w-auto z-10">
           <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
             <p className="text-[10px] text-slate-400 uppercase font-mono-code">IPL Runs</p>
             <p className="text-xl font-black font-heading text-cyan-400">{player.iplStats?.runs || player.iplRuns || 0}</p>
@@ -256,6 +258,12 @@ export default function PlayerPortalView({ players = [] }) {
             <p className="text-[10px] text-slate-400 uppercase font-mono-code">IPL Avg / SR</p>
             <p className="text-xl font-black font-heading text-emerald-400">{player.iplStats?.avg || player.iplAvg || '38.5'}</p>
             <p className="text-[9px] text-emerald-400/80">SR: {player.iplStats?.sr || player.iplSr || '135.0'}</p>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-slate-900/90 border border-cyan-500/30 text-center">
+            <p className="text-[10px] text-cyan-400 uppercase font-mono-code font-bold">Pressure Index</p>
+            <p className="text-xl font-black font-heading text-cyan-300">{player.pressureIndex || player.pressureProfile?.overall || player.clutchRating || 92} / 100</p>
+            <p className="text-[9px] text-cyan-400/90 font-mono-code font-bold">{player.pressureProfile?.badgeLabel || 'ICE IN VEINS'}</p>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-center">
@@ -329,6 +337,87 @@ export default function PlayerPortalView({ players = [] }) {
       {/* TAB CONTENT 1: OVERVIEW & STATS */}
       {portalTab === 'overview' && (
         <div className="space-y-6">
+
+          {/* Player Personal Pressure Index & Mental Toughness Card */}
+          {player.pressureProfile && (
+            <div className="glass-panel p-6 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                    <Gauge className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-base font-extrabold font-heading text-white">
+                        My Situational Pressure Index & Mental Resilience
+                      </h2>
+                      <span className="px-2 py-0.5 text-[10px] font-bold font-mono-code bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded">
+                        {player.pressureProfile.badgeLabel}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Personalized pressure diagnostic tracking your execution under escalating scoreboard demand.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2 self-start sm:self-auto">
+                  <span className="text-xs text-slate-400 font-mono-code">PRESSURE SCORE:</span>
+                  <span className="text-2xl font-black font-heading text-cyan-400">
+                    {player.pressureProfile.overall}
+                  </span>
+                  <span className="text-xs text-slate-500 font-mono-code">/ 100</span>
+                </div>
+              </div>
+
+              {/* Sub-Indices Breakdown */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {Object.entries(player.pressureProfile.subIndices).map(([key, item]) => (
+                  <div key={key} className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white flex items-center space-x-1.5">
+                        {key === 'chasePressure' ? <Target className="w-3.5 h-3.5 text-cyan-400" /> :
+                         key === 'deathOverPressure' ? <Flame className="w-3.5 h-3.5 text-rose-400" /> :
+                         key === 'collapseRecovery' ? <Shield className="w-3.5 h-3.5 text-emerald-400" /> :
+                         <Zap className="w-3.5 h-3.5 text-amber-400" />}
+                        <span>{item.name}</span>
+                      </span>
+                      <span className="font-extrabold font-mono-code text-cyan-400">{item.value} / 100</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          item.value >= 90 ? 'bg-gradient-to-r from-cyan-500 to-emerald-400' :
+                          item.value >= 80 ? 'bg-gradient-to-r from-cyan-500 to-blue-500' :
+                          'bg-gradient-to-r from-amber-500 to-amber-300'
+                        }`}
+                        style={{ width: `${item.value}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* AI High-Pressure Tactical Drill & Feedback */}
+              <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+                <div className="space-y-1">
+                  <span className="font-bold text-cyan-400 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Personal Tactical Pressure Profile:</span>
+                  </span>
+                  <p className="text-slate-300 text-xs leading-relaxed">
+                    {player.pressureProfile.tacticalSummary}
+                  </p>
+                </div>
+                <div className="shrink-0 flex items-center space-x-2">
+                  <span className="px-2.5 py-1 text-[10px] font-mono-code font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
+                    Win Contribution: {player.pressureProfile.pressureStats.winContribution}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Recent Form Sparklines & Coach Notes Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -40,6 +40,7 @@ export default function TeamBuilderView({ players = [] }) {
 
   const paceCount = playingXI.filter(p => p.bowlingStyle?.includes("Fast") || p.bowlingStyle?.includes("Medium")).length;
   const spinCount = playingXI.filter(p => p.bowlingStyle?.includes("Spin") || p.bowlingStyle?.includes("Break")).length;
+  const avgPressureIndex = playingXI.length ? Math.round(playingXI.reduce((acc, p) => acc + (p.pressureIndex || 85), 0) / playingXI.length) : 85;
 
   // Calculate Synergy Score out of 100
   let synergyScore = 60;
@@ -78,7 +79,7 @@ export default function TeamBuilderView({ players = [] }) {
               />
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Select 11 players, balance batting depth and bowling variations, and monitor player fatigue index.
+              Select 11 players, balance batting depth and bowling variations, and monitor player fatigue and situational pressure resilience.
             </p>
           </div>
 
@@ -95,7 +96,7 @@ export default function TeamBuilderView({ players = [] }) {
         </div>
 
         {/* Roles Distribution Badges */}
-        <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80 text-xs">
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
           <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800">
             🏏 Batters: <strong className="text-cyan-400">{battersCount}</strong>
           </span>
@@ -107,6 +108,10 @@ export default function TeamBuilderView({ players = [] }) {
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800">
             ⭐ All-Rounders: <strong className="text-pink-400">{allroundersCount}</strong>
+          </span>
+          <span className="px-2.5 py-1 rounded-lg bg-cyan-950/50 text-cyan-300 border border-cyan-500/40 flex items-center space-x-1">
+            <span>🎯 Avg Squad PI:</span>
+            <strong className="text-cyan-400 font-mono-code">{avgPressureIndex}/100</strong>
           </span>
         </div>
 
@@ -146,8 +151,13 @@ export default function TeamBuilderView({ players = [] }) {
                   </div>
                 </div>
 
-                {/* Fatigue Badge & Remove Action */}
-                <div className="flex items-center space-x-4">
+                {/* Pressure & Fatigue Badges & Remove Action */}
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-[10px] text-slate-400">Pressure Index</p>
+                    <p className="text-xs font-bold text-cyan-400 font-mono-code">{player.pressureIndex || 88}/100</p>
+                  </div>
+
                   <div className="text-right hidden sm:block">
                     <p className="text-[10px] text-slate-400">Fatigue Index</p>
                     <p className="text-xs font-bold text-emerald-400 font-mono-code">{player.fatigueLevel || 20}%</p>
@@ -189,7 +199,9 @@ export default function TeamBuilderView({ players = [] }) {
                   <PlayerAvatar player={player} className="w-9 h-9" />
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-white truncate">{player.name}</p>
-                    <p className="text-[10px] text-cyan-400 font-mono-code truncate">{player.role}</p>
+                    <p className="text-[10px] text-cyan-400 font-mono-code truncate">
+                      {player.role} • <span className="text-slate-400">PI:</span> <span className="text-emerald-400 font-bold">{player.pressureIndex || 88}</span>
+                    </p>
                   </div>
                 </div>
 

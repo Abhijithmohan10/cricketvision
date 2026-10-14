@@ -12,9 +12,9 @@ export const predictMatchOutcome = ({
   targetScore = 180,
   oversLeft = 20
 }) => {
-  // Base strength calculations based on team attributes
-  let teamAScore = teamA.players.reduce((sum, p) => sum + (p.clutchRating || 80) + (p.skillRadar?.paceMastery || 80), 0) / (teamA.players.length || 1);
-  let teamBScore = teamB.players.reduce((sum, p) => sum + (p.clutchRating || 80) + (p.skillRadar?.paceMastery || 80), 0) / (teamB.players.length || 1);
+  // Base strength calculations based on team attributes and situational pressure resilience
+  let teamAScore = teamA.players.reduce((sum, p) => sum + (p.pressureIndex || p.pressureProfile?.overall || p.clutchRating || 80) + (p.skillRadar?.paceMastery || 80), 0) / (teamA.players.length || 1);
+  let teamBScore = teamB.players.reduce((sum, p) => sum + (p.pressureIndex || p.pressureProfile?.overall || p.clutchRating || 80) + (p.skillRadar?.paceMastery || 80), 0) / (teamB.players.length || 1);
 
   // Pitch adjustments
   if (pitchType === "Green") {
@@ -190,12 +190,14 @@ export const predictNextMatchPlayerStats = (player, opposition = "Australia XI",
     projectedWickets: projectedWkts,
     projectedEconomy: projectedEcon,
     clutchIndex: player.clutchRating || 85,
+    pressureIndex: player.pressureIndex || player.pressureProfile?.overall || player.clutchRating || 88,
+    pressureTier: player.pressureProfile?.tier || 'High-Pressure Resilient',
     vulnerability: pitchType === "Green" 
       ? "Early 1-12 balls against high-seam short pitch bowling" 
       : pitchType === "Dusty" 
       ? "Flighted wrist-spin turning away from off-stump" 
       : "Low vulnerability on flat surface",
-    aiTacticalSummary: `${player.name} is projected to score ${minRuns}-${maxRuns} runs (Most likely: ${likelyRuns} runs at ${Math.round(iplSr * 1.05)} SR) against ${opposition} on ${pitchType} pitch at ${venue}.`
+    aiTacticalSummary: `${player.name} is projected to score ${minRuns}-${maxRuns} runs (Most likely: ${likelyRuns} runs at ${Math.round(iplSr * 1.05)} SR) against ${opposition} on ${pitchType} pitch at ${venue}. Pressure Index: ${player.pressureIndex || player.pressureProfile?.overall || 88}/100.`
   };
 };
 
